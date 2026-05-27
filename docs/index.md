@@ -6,7 +6,8 @@ hero:
   text: AI assistant for Frappe.
   tagline: An MCP server, OAuth, tools, and an extensible plugin system — open source under AGPL-3.0.
   image:
-    src: /FAC_mark.svg
+    light: /fac_white_bkgrnd.svg
+    dark: /FAC_black_bkgrnd.svg
     alt: Frappe Assistant Core
   actions:
     - theme: brand
