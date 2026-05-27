@@ -1,15 +1,32 @@
 # Installation
 
-This page walks through installing Frappe Assistant Core onto an existing Frappe / ERPNext bench.
+FAC runs on top of Frappe / ERPNext. Two install paths are supported.
 
-## Prerequisites
+## Option 1 — Frappe Cloud (one-click, free)
+
+If your site is hosted on [Frappe Cloud](https://frappecloud.com), FAC is published in the marketplace and installs in a single click — free of cost.
+
+1. Open your site in the **Frappe Cloud dashboard**
+2. Go to the **Apps** tab
+3. Find **Frappe Assistant Core** and click **Install**
+4. Frappe Cloud handles the install and migration for you
+
+Marketplace listing: <https://cloud.frappe.io/marketplace/apps/frappe_assistant_core>
+
+Once the install completes, jump to [Enable the assistant](#enable-the-assistant) below.
+
+## Option 2 — Self-hosted (bench)
+
+For self-hosted Frappe benches.
+
+### Prerequisites
 
 - **Frappe / ERPNext** v15 or v16
 - **Python** 3.10+ (3.12+ recommended)
 - **MariaDB** or **MySQL**
 - **Administrator** access to the bench and a site
 
-## Install the app
+### Install the app
 
 From your bench directory:
 
@@ -27,6 +44,14 @@ bench --site yoursite migrate
 bench restart
 ```
 
+### Verify
+
+```bash
+bench --site yoursite list-apps | grep frappe_assistant_core
+```
+
+You should see `frappe_assistant_core` listed.
+
 ## Enable the assistant
 
 1. In Desk, go to **Setup → Integrations → Assistant Core Settings**
@@ -41,16 +66,7 @@ bench restart
 4. Check **Assistant Enabled** on the user record
 5. Save
 
-## Verify
-
-```bash
-bench --site yoursite list-apps | grep frappe_assistant_core
-```
-
-You should see `frappe_assistant_core` listed.
-
 ## Next steps
 
 - [Quick Start](./quick-start) — connect Claude Desktop in 5 minutes
 - [OAuth Setup Guide](./oauth/setup-guide) — configure OAuth for external MCP clients
-- [Introduction](./introduction) — full walkthrough including OCR, troubleshooting, and capabilities

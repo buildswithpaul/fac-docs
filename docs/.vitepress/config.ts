@@ -35,6 +35,9 @@ export default defineConfig({
 				items: [
 					{ text: 'Changelog', link: '/reference/changelog' },
 					{ text: 'GitHub', link: 'https://github.com/buildswithpaul/Frappe_Assistant_Core' },
+					{ text: 'Report an issue', link: 'https://github.com/buildswithpaul/Frappe_Assistant_Core/issues' },
+					{ text: 'Frappe Cloud Marketplace', link: 'https://cloud.frappe.io/marketplace/apps/frappe_assistant_core' },
+					{ text: 'Sponsor FAC', link: 'https://github.com/sponsors/buildswithpaul' },
 				],
 			},
 		],
