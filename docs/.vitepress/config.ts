@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-	title: 'Frappe Assistant Core',
-	description: 'Open-source AI assistant for Frappe — MCP tools, OAuth, and an extensible plugin system.',
+	title: 'FAC',
+	titleTemplate: ':title — FAC Docs',
+	description: 'Open-source AI assistant for ERP — MCP tools, OAuth, and an extensible plugin system.',
 	lang: 'en-US',
 	cleanUrls: true,
 	lastUpdated: true,
@@ -16,15 +17,15 @@ export default defineConfig({
 	head: [
 		['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
 		['meta', { name: 'theme-color', content: '#0981E3' }],
-		['meta', { property: 'og:title', content: 'Frappe Assistant Core Docs' }],
-		['meta', { property: 'og:description', content: 'Open-source AI assistant for Frappe.' }],
+		['meta', { property: 'og:title', content: 'FAC Docs' }],
+		['meta', { property: 'og:description', content: 'Open-source AI assistant for ERP.' }],
 		['meta', { property: 'og:type', content: 'website' }],
 		['meta', { property: 'og:url', content: 'https://docs.assistantcore.cloud' }],
 	],
 
 	themeConfig: {
 		logo: '/FAC_mark.svg',
-		siteTitle: 'Frappe Assistant Core',
+		siteTitle: 'FAC',
 
 		nav: [
 			{ text: 'Guide', link: '/getting-started/installation' },
