@@ -30,20 +30,20 @@ graph TB
         end
 
         subgraph "Plugin System"
-            subgraph "Core Plugin - Always Enabled"
-                CoreTools["Document Tools (CRUD)<br/>Search Tools (Global, DocType, Link)<br/>Metadata Tools (DocType Info)<br/>Report Tools (Execute, List, Requirements)<br/>Workflow Tools (Actions, Status)"]
+            subgraph "Core Plugin - Always Enabled (17 tools)"
+                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search tools (documents, doctype, link, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)"]
             end
 
-            subgraph "Data Science Plugin - Optional"
-                DataScienceTools["run_python_code<br/>analyze_business_data<br/>query_and_analyze<br/>extract_file_content (PDF, OCR, CSV, Excel)"]
+            subgraph "Data Science Plugin - Optional (4 tools)"
+                DataScienceTools["run_python_code<br/>analyze_business_data<br/>run_database_query<br/>extract_file_content"]
             end
 
-            subgraph "Visualization Plugin - Optional"
+            subgraph "Visualization Plugin - Optional (3 tools)"
                 VisualizationTools["create_dashboard<br/>create_dashboard_chart<br/>list_user_dashboards"]
             end
 
-            subgraph "Custom Tools Plugin - Optional"
-                CustomTools["User-defined custom tools"]
+            subgraph "Custom Tools Plugin - Always Enabled"
+                CustomTools["Discovers tools registered by other apps<br/>via the 'assistant_tools' hook"]
             end
         end
 
@@ -136,7 +136,7 @@ mcp/
 ```
 
 **Transport:** StreamableHTTP (HTTP POST requests)
-**Protocol:** MCP 2025-03-26 with JSON-RPC 2.0
+**Protocol:** MCP 2025-06-18 with JSON-RPC 2.0
 **Endpoint:** `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`
 **Authentication:** OAuth 2.0 Bearer tokens
 
@@ -591,10 +591,11 @@ Layer 6: Audit Trail & Monitoring
 
 **1. Role-Based Access Control**
 
-- **System Manager**: Full access to all 21 tools including dangerous operations
-- **Assistant Admin**: 16 tools excluding code execution and direct database queries
-- **Assistant User**: 14 basic tools for standard business operations
-- **Default**: 14 basic tools for any other Frappe user roles
+FAC ships 24 built-in tools across 4 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
+
+- **System Manager**: All tools, including privileged ones like `run_python_code` and `run_database_query`
+- **Assistant Admin**: Read/write tools across all enabled plugins; privileged tools by configuration
+- **Assistant User**: Read-only and standard write tools by default; configurable per tool
 
 **2. DocType Access Matrix**
 

@@ -58,12 +58,12 @@ Once published, prompts are available via MCP:
 
 ```bash
 # List available prompts
-curl -X POST https://your-site.com/api/method/frappe_assistant_core.api.mcp_endpoint.handle_mcp \
+curl -X POST https://your-site.com/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "prompts/list", "id": 1}'
 
 # Get a specific prompt with arguments
-curl -X POST https://your-site.com/api/method/frappe_assistant_core.api.mcp_endpoint.handle_mcp \
+curl -X POST https://your-site.com/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -97,7 +97,7 @@ curl -X POST https://your-site.com/api/method/frappe_assistant_core.api.mcp_endp
 |-------|-------------|
 | **Description** | Brief explanation shown in MCP prompt lists |
 | **Category** | Link to a Prompt Category for organization |
-| **Status** | Draft (hidden) or Published (visible to users) |
+| **Status** | `Draft`, `Published`, `Deprecated`, or `Archived` |
 | **Visibility** | Private, Shared, or Public access |
 | **Rendering Engine** | Jinja2, Format String, or Raw |
 
@@ -649,7 +649,7 @@ This will:
 ## Support
 
 For issues or feature requests:
-- GitHub: [frappe_assistant_core issues](https://github.com/your-repo/frappe_assistant_core/issues)
+- GitHub: [frappe_assistant_core issues](https://github.com/buildswithpaul/Frappe_Assistant_Core/issues)
 - Frappe Forum: Tag with `frappe-assistant-core`
 
 </div>

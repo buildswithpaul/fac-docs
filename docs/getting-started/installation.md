@@ -5,7 +5,7 @@ This page walks through installing Frappe Assistant Core onto an existing Frappe
 ## Prerequisites
 
 - **Frappe / ERPNext** v15 or v16
-- **Python** 3.11+
+- **Python** 3.10+ (3.12+ recommended)
 - **MariaDB** or **MySQL**
 - **Administrator** access to the bench and a site
 
@@ -29,17 +29,16 @@ bench restart
 
 ## Enable the assistant
 
-```bash
-bench --site yoursite set-config assistant_enabled 1
-bench restart
-```
+1. In Desk, go to **Setup → Integrations → Assistant Core Settings**
+2. Make sure **Server Enabled** is checked
+3. Save
 
 ## Grant a user access
 
 1. Go to **Desk → Users**
 2. Open your user
 3. Add the **Assistant User** or **Assistant Admin** role
-4. Check **Assistant Enabled**
+4. Check **Assistant Enabled** on the user record
 5. Save
 
 ## Verify

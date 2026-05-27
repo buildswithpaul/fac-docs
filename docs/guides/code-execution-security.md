@@ -6,14 +6,24 @@ This guide explains the security measures in place for the `run_python_code` too
 
 The `run_python_code` tool provides a powerful capability for AI agents to perform data analysis, calculations, and report generation. However, this power comes with significant security risks. This guide documents the safeguards implemented to prevent system crashes and security breaches.
 
+## Subprocess isolation
+
+Since v2.4.0, every `run_python_code` call runs in a **disposable Python subprocess**, not in the Frappe worker process. This is the most important boundary in the sandbox:
+
+- Resource limits (`RLIMIT_CPU`, `RLIMIT_AS`, `SIGALRM`) are installed in the child process, so a runaway tenant job can never exhaust the worker
+- A segfault or unhandled OOM in user code kills the child only — the parent Frappe worker keeps serving other requests
+- The child inherits a minimal environment; nothing in the user's code can mutate the parent process's `frappe.local` or other singletons
+
+The sections below describe the limits installed *inside* the subprocess.
+
 ## Resource Limits
 
 ### Execution Timeout
 
-**Purpose:** Prevents infinite loops and runaway code from blocking server resources indefinitely.
+**Purpose:** Prevents infinite loops and runaway code from blocking the subprocess indefinitely.
 
 **How it works:**
-- Uses Unix signals (`SIGALRM`) to enforce a wall-clock timeout
+- Inside the subprocess, Unix signals (`SIGALRM`) enforce a wall-clock timeout
 - Code execution is terminated after the specified number of seconds
 - Default: 30 seconds, Maximum: 300 seconds (5 minutes)
 

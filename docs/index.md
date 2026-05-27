@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /getting-started/introduction
+      link: /getting-started/installation
     - theme: alt
       text: View on GitHub
       link: https://github.com/buildswithpaul/Frappe_Assistant_Core
@@ -22,7 +22,7 @@ features:
     title: MCP-native
     details: Expose your Frappe data and operations to any MCP-compatible client — Claude Desktop, ChatGPT, IDEs, MCP Inspector — over OAuth-secured StreamableHTTP.
   - icon: 🛠
-    title: 21 built-in tools
+    title: 24 built-in tools
     details: Document CRUD, search, reports, dashboards, workflow actions, and code execution — ready to use out of the box.
   - icon: 🔐
     title: OAuth 2.0 out of the box

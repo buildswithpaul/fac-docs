@@ -28,32 +28,26 @@ Each plugin has an individual configuration record:
 
 | Plugin | Status | Description | Tools |
 |--------|--------|-------------|-------|
-| **Core** | Always Enabled | Essential Frappe operations (CRUD, search, metadata) | 19 tools |
-| **Data Science** | Optional | Advanced analytics, Python execution, file processing | 4 tools |
-| **Visualization** | Optional | Dashboard and chart creation, KPIs | 3 tools |
-| **WebSocket** | Optional | Real-time communication (under development) | - |
-| **Batch Processing** | Optional | Background bulk operations (under development) | - |
+| **Core** | Always Enabled | Document CRUD, search, metadata, reports, workflow | 17 |
+| **Data Science** | Optional | Python execution, SQL, statistical analysis, file extraction | 4 |
+| **Visualization** | Optional | Dashboards and charts | 3 |
+| **Custom Tools** | Always Enabled | Discovers tools registered by other apps via the `assistant_tools` hook | — |
 
 ### 3. Plugin Architecture
 
 ```
 plugins/
-├── core/                  # Always enabled
-│   ├── plugin.py          # Plugin definition
-│   └── tools/             # Core tools
-│       ├── document_create.py
-│       ├── document_get.py
-│       └── ...
-├── data_science/          # Optional
+├── core/                  # Always enabled — 17 tools
 │   ├── plugin.py
-│   └── tools/
-│       ├── analyze_frappe_data.py
-│       └── execute_python_code.py
-├── visualization/         # Optional
+│   └── tools/             # create_document.py, get_document.py, run_workflow.py, ...
+├── data_science/          # Optional — 4 tools
 │   ├── plugin.py
-│   └── tools/
-│       ├── create_dashboard.py
-│       └── create_chart.py
+│   └── tools/             # run_python_code.py, run_database_query.py, ...
+├── visualization/         # Optional — 3 tools
+│   ├── plugin.py
+│   └── tools/             # create_dashboard.py, create_dashboard_chart.py, list_user_dashboards.py
+├── custom_tools/          # Always enabled — discovers external app tools via hooks
+│   └── plugin.py
 └── base_plugin.py         # Base class
 ```
 
@@ -292,11 +286,9 @@ plugins = get_all_plugins()
 # Enable only core and visualization
 from frappe_assistant_core.api.admin_api import toggle_plugin
 
-toggle_plugin("core", True)        # Always enabled anyway
+toggle_plugin("core", True)         # Always enabled anyway
 toggle_plugin("visualization", True)
-toggle_plugin("data_science", False)
-toggle_plugin("websocket", False)
-toggle_plugin("batch_processing", False)
+toggle_plugin("data_science", False) # Skip Python execution
 ```
 
 #### Scenario 2: Development Setup with All Features

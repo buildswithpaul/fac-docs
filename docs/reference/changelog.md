@@ -1,381 +1,171 @@
 # Changelog
 
-All notable changes to Frappe Assistant Core will be documented in this file.
-
-## [2.2.0] - 2025-10-13 - StreamableHTTP Transport Migration
-
-### 🎯 Major Release - Transport Layer Overhaul
-
-This release migrates Frappe Assistant Core from STDIO bridge to StreamableHTTP transport with OAuth 2.0 authentication, enabling web-based MCP clients and improving security, compatibility, and deployment flexibility.
-
-#### Transport Layer Migration
-- **Migrated** from STDIO subprocess bridge to HTTP-based StreamableHTTP transport
-- **Replaced** API key authentication with industry-standard OAuth 2.0
-- **Enabled** web-based client support (Claude Web, browser-based tools)
-- **Improved** cross-platform compatibility and deployment options
-- **Eliminated** subprocess management complexity
-
-#### OAuth 2.0 Security Implementation
-- **OAuth 2.0 Dynamic Client Registration** (RFC 7591) for automatic client setup
-- **Authorization Server Metadata** (RFC 8414) for endpoint discovery
-- **Protected Resource Metadata** (RFC 9728) for resource information
-- **PKCE Support** (RFC 7636) for secure authorization code flow
-- **Automatic token refresh** with refresh_token grant type
-- **CORS handling** for public clients (browser-based)
-- **Discovery endpoints** at /.well-known/openid-configuration
-
-#### Custom FAC MCP Server
-- **Built custom MCP server** optimized for Frappe's data types and architecture
-- **Fixed JSON serialization** for datetime, Decimal, and other non-JSON Frappe types
-- **Removed Pydantic dependency** for lighter footprint and better Frappe integration
-- **Enhanced error handling** with full tracebacks for debugging
-- **Deep Frappe integration** with session, permissions, and ORM
-- **Tool adapter pattern** for seamless BaseTool compatibility
-
-#### Documentation Improvements
-- **Converted all diagrams** from ASCII to Mermaid format for GitHub rendering
-- **Rewrote Getting Started** with LLM-specific instructions (Claude Desktop, ChatGPT, Claude Web)
-- **Added comprehensive OAuth setup guide** with troubleshooting
-- **Added MCP StreamableHTTP integration guide** with technical details
-- **Simplified onboarding** to zero manual steps after installation
-
-#### API & Endpoints
-- **MCP Endpoint**: `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`
-- **OAuth Endpoints**: authorize, token, register, introspect, revoke
-- **Discovery Endpoints**: /.well-known/openid-configuration, oauth-authorization-server, oauth-protected-resource
-- **HEAD method support** for connectivity checks (Claude Web compatibility)
-- **Bearer token validation** middleware for all MCP requests
-
-#### Configuration & UX
-- **Simplified configuration** via site_config.json for CORS
-- **Frappe v15/v16 compatibility** with dual CORS mechanism
-- **Default-enabled assistant access** for new users
-- **FAC Admin page** displaying MCP endpoint URL
-- **Automatic custom field setup** during installation
-- **Proper uninstall cleanup** removing custom fields
-
-### 🐛 Bug Fixes
-
-#### Authentication & CORS
-- **Fixed CORS headers** for OPTIONS preflight requests
-- **Added MCP-Protocol-Version** to CORS allowed headers
-- **Fixed 401 responses** with proper WWW-Authenticate headers per RFC 9728
-- **Fixed HTTP 417 errors** with proper HTTP method registration
-
-#### Plugin Management
-- **Fixed plugin toggle** to use plugin IDs instead of display names
-- **Fixed state persistence** after page refresh
-- **Added plugin_id fields** to API responses for correct identification
-
-#### Migration System
-- **Fixed missing patch files** causing ModuleNotFoundError
-- **Added idempotent patches** for safe fresh installs and upgrades
-- **Added assistant_enabled default** update patch
-- **Added page rename patch** (assistant-admin → fac-admin)
-
-### ✨ New Features
-
-#### Security
-- **OAuth 2.0 authorization** with PKCE for all flows
-- **Bearer token authentication** for API access
-- **Token expiration** and automatic refresh
-- **Dynamic client registration** with origin validation
-- **Public and confidential** client support
-- **Token revocation** and introspection endpoints
-
-#### Developer Experience
-- **MCP Inspector integration** with Quick OAuth Flow
-- **Custom Python client examples** in documentation
-- **Comprehensive debugging** with OAuth error logging
-- **Connection pooling** support for HTTP clients
-- **Auto-discovery** via well-known endpoints
-
-#### Admin Features
-- **FAC Admin page** with endpoint URL display
-- **Plugin enable/disable** functionality
-- **Tool registry display** with categories
-- **Real-time monitoring** and health checks
-
-### 🔧 Architecture Changes
-
-| Feature | Before (STDIO) | After (StreamableHTTP) |
-|---------|---------------|----------------------|
-| **Transport** | stdin/stdout subprocess | HTTP POST requests |
-| **Authentication** | API Key in environment | OAuth 2.0 Bearer tokens |
-| **Client Support** | Subprocess-capable only | Any HTTP-capable client |
-| **Security** | Basic API key | Industry-standard OAuth |
-| **Discovery** | Manual configuration | Auto-discovery via .well-known |
-| **Token Management** | No refresh | Automatic token refresh |
-| **Web Compatibility** | ❌ No | ✅ Yes |
-| **Deployment** | Complex subprocess setup | Simple HTTP endpoint |
-
-### 🚨 Breaking Changes
-
-#### Migration Required
-- **STDIO bridge no longer supported** - must migrate to StreamableHTTP
-- **API key authentication removed** - must use OAuth 2.0
-- **Client configuration changes** - update MCP client configs
-
-#### Migration Steps
-
-1. **Update Application**
-   ```bash
-   cd apps/frappe_assistant_core
-   git pull
-   bench migrate
-   ```
-
-2. **Configure OAuth**
-   - Go to Assistant Core Settings
-   - Enable Dynamic Client Registration
-   - Configure Allowed Public Client Origins (if needed)
-
-3. **Update MCP Clients**
-   - **Claude Desktop**: Update config to StreamableHTTP with OAuth discovery
-   - **MCP Inspector**: Use OAuth authentication flow
-   - **Custom Clients**: Implement OAuth 2.0 with PKCE
-
-4. **Test Integration**
-   - Visit FAC Admin page
-   - Copy MCP endpoint URL
-   - Authenticate with OAuth flow
-
-### 📊 Benefits of Migration
-
-- ✅ **Better Security**: OAuth 2.0 with PKCE vs simple API keys
-- ✅ **Web Client Support**: Claude Web, browser-based tools now work
-- ✅ **Simpler Deployment**: HTTP endpoint vs subprocess management
-- ✅ **Better Error Handling**: HTTP status codes vs stdout parsing
-- ✅ **Auto-Discovery**: Clients discover endpoints automatically
-- ✅ **Token Refresh**: Long-lived sessions with automatic renewal
-- ✅ **Cross-Platform**: Works anywhere HTTP works
-
-### 📝 Documentation Updates
-
-#### New Guides
-- [MCP_STREAMABLEHTTP_GUIDE.md](../architecture/MCP_STREAMABLEHTTP_GUIDE.md) - Complete technical integration guide
-- [oauth_setup_guide.md](../getting-started/oauth/oauth_setup_guide.md) - OAuth configuration guide
-- [OAUTH_CORS_CONFIGURATION.md](../getting-started/oauth/OAUTH_CORS_CONFIGURATION.md) - CORS setup guide
-
-#### Updated Documentation
-- [README.md](../../README.md) - Simplified getting started with LLM-specific steps
-- All architecture diagrams converted to Mermaid format
-- Updated version references from v2.0.0 to v2.2.0
-
-## [2.1.0] - 2025-08-29 - Major Performance & Feature Release
-
-### 🌟 Major Enhancements
-
-#### 📄 Enhanced File Processing & Data Science Plugin
-- **New Tool**: `extract_file_content` - Comprehensive file support (PDF, images/OCR, spreadsheets, documents)
-- **LLM-Optimized**: Content extraction optimized for AI analysis
-- **Batch Processing**: Efficient multi-file handling capabilities
-- **Smart Formatting**: Structure preservation for better AI understanding
-
-#### ⚙️ Revamped Admin Interface
-- **Modern UI/UX**: Complete redesign with intuitive controls
-- **Real-time Monitoring**: Live plugin status and health indicators
-- **Bulk Operations**: Multi-select plugin management
-- **Enhanced Configuration**: Visual configuration management with validation
+A summary of public releases of Frappe Assistant Core. For granular release notes, see [`change_log/v2/`](https://github.com/buildswithpaul/Frappe_Assistant_Core/tree/main/frappe_assistant_core/change_log/v2) in the repository.
 
-#### 📊 Improved Reporting Tools
-- **Smart Discovery**: Intelligent report finding and filtering
-- **Requirements Analysis**: Automatic parameter detection
-- **Template System**: Pre-configured report templates
-- **Batch Generation**: Execute multiple reports simultaneously
+## 3.0.0-beta — current
 
-#### ⚡ Concurrency & Performance Improvements
-- **Thread Pool Architecture**: Multi-threaded request processing (+300% throughput)
-- **Optimized Timeouts**: Reduced from 30s to 5s (Claude-compatible)
-- **Memory Efficiency**: 15% reduction in memory footprint
-- **Faster Plugin Loading**: 40% improvement in discovery time
+Internal-track release. Prepares the codebase for the next major version.
 
-### 🔧 Technical Improvements
+## 2.4.3
 
-#### Bridge Architecture Enhancements
-- **Concurrent Processing**: Thread pool in `frappe_assistant_stdio_bridge.py`
-- **Timeout Optimization**: Aligned with Claude's 6-second limits
-- **Error Handling**: Explicit timeout error handling
-- **Local Development**: Default server URL changed to `http://localhost:8000`
+**Security**
+- SSTI hardening in prompt templates — `preview_template` and stored `Prompt Template` content now render through `jinja2.sandbox.SandboxedEnvironment`, blocking `__class__` / `__mro__` / `__subclasses__` attribute walks
+- `Prompt Category` read restricted to the `Assistant User` role
 
-#### Configuration & Manifest Updates
-- **Version 2.1.0**: Updated manifest metadata
-- **Enhanced Validation**: Boolean controls and field validation
-- **Tool Descriptions**: Improved guidance for best practices
-- **Python Requirements**: Explicit runtime version specifications
+**Fixes**
+- `update_document` supports `allow_on_submit` fields on submitted docs (#179)
+- `update_document` accepts date strings in child rows (#168)
+- `create_document` warns on silent field overrides triggered by controller `validate()` (#181)
+- OCR: `tesseract` reinstated as a backend option alongside PaddleOCR and Ollama
+- `chardet` constraint loosened for Frappe 15.107+ (#176)
+
+**Improvements**
+- Removed dead wildcard `doc_events` that fired on every save across the bench
+
+## 2.4.2
 
-### 🐛 Bug Fixes & Stability
-- **Fixed**: Thread safety in concurrent operations
-- **Fixed**: Memory leaks in long-running processes
-- **Fixed**: Admin interface loading on slower connections
-- **Enhanced**: Error recovery and connection stability
-- **Improved**: Resource cleanup and garbage collection
+**Fixes**
+- `update_document` now properly handles child tables (#168) with auto-detected patch vs replace mode
+- `update_document` rejects direct child-doctype calls and returns a clear retry suggestion
+- `create_document` no longer reports false-positive missing fields (#165) populated by controller `set_missing_values()`
+- `create_document` fixed `UnboundLocalError` in the `MandatoryError` handler
+- Audit log no longer redacts legitimate token-count metrics
+- `chatgpt_fetch` signature aligned with `filter_sensitive_fields` — restored from a crash on every call
+- `update_tool_role_access` accepts JSON-string roles from the admin UI
+- HRMS Skill schema mismatch on `bench migrate` is now safely no-op across HRMS schemas
+
+**Improvements**
+- Conventional-commit linting and pip-audit are available as local pre-commit hooks
+
+## 2.4.1
+
+**Fixes**
+- HRMS Skill link corruption (#153) — removed the v2.4.0 rename migration that incorrectly renamed HRMS's own `Skill` DocType to `FAC Skill`. A repair patch heals affected sites automatically on upgrade.
+
+## 2.4.0
+
+**New — Skills & Agent Orchestration**
+- **FAC Skills subsystem** — new `FAC Skill` DocType lets administrators author and publish reusable LLM skills (markdown + frontmatter). Admin page now has Skills and Prompts tabs. External Frappe apps can register their own skills via a new hook API.
+- **Tool response image support** — tool results can include image data alongside text
+- **`get_pending_approvals` tool** — agents can discover workflow actions waiting on the current user
+
+**Improvements**
+- **Sandbox isolation for `run_python_code`** — user code runs in a disposable subprocess so RLIMIT and SIGALRM only affect the child process, never the Frappe worker
+- **Leaner sandbox** — matplotlib / seaborn / plotly / scipy removed from pre-loaded libraries (they consumed 200–400 MB and never returned plots). `max_recursion_depth` default raised from 100 to 500.
+- Audit log accuracy fixes and richer captured payload
+- Signal-based timeouts skip cleanly when running inside a worker thread
+
+**Security**
+- Fixed (#132) SQL injection in the removed `create_visualization` tool — tool deleted
+- Fixed (#133) unprotected whitelist decorators on duplicate config endpoints
+- Fixed (#134) `extract_file_content` now enforces parent-document permission check
+- Fixed (#140) usage statistics restricted to assistant admins
 
-### 📈 Performance Metrics
-- **+300% throughput** with thread pool architecture
-- **+83% faster response times** with optimized timeouts
-- **-15% memory footprint** with efficiency improvements
-- **+40% faster** plugin loading and discovery
-
-## [2.0.0] - 2025-07-22 - Major Architecture Evolution
-
-**License Change: MIT → AGPL-3.0** | **Breaking Changes: Yes**
-
-This major release transforms Frappe Assistant Core into a fully extensible, plugin-based platform with enhanced visualization capabilities and stronger open source protection through AGPL-3.0 licensing.
-
-### 🌟 Release Highlights
-
-- **🏗️ Plugin-Based Architecture**: Custom tool development with auto-discovery and runtime management
-- **📊 Enhanced Visualization System**: Rebuilt chart engine with advanced dashboard support
-- **🔒 Stronger Open Source Protection**: AGPL-3.0 license ensures modifications remain open source
-- **🐛 Major Bug Fixes**: Tool reliability improvements and data processing enhancements
-- **⚡ Performance Improvements**: 30% faster tool execution, 25% reduced memory footprint
-
-### 🚀 New Features
-
-#### 🏗️ Plugin-Based Architecture
-
-- **Custom Tool Development**: Create your own tools using the new plugin system
-- **Auto-Discovery**: Zero-configuration plugin loading and registration
-- **Runtime Management**: Enable/disable plugins through web interface
-- **Extensible Framework**: Clean APIs for third-party developers
-
-#### 📊 Enhanced Visualization System
-
-- **Rebuilt Chart Engine**: Complete overhaul of chart creation system
-- **Advanced Dashboard Support**: Improved dashboard creation and management
-- **Multiple Chart Types**: Bar, Line, Pie, Scatter, Heatmap, Gauge, and more
-- **Better Data Handling**: Improved data processing and validation
-- **KPI Cards**: Professional metric tracking with trend indicators
-
-#### 🔒 Stronger Open Source Protection
-
-- **AGPL-3.0 License**: Ensures modifications remain open source
-- **Complete Compliance**: All 125+ files properly licensed with headers
-- **Network Service Requirements**: Source disclosure for SaaS usage
-- **Community Growth**: Prevents proprietary forks while encouraging contributions
-
-### 🚨 Breaking Changes & Migration
-
-#### License Impact
-
-⚠️ **Critical**: Review AGPL-3.0 compliance requirements
-
-- All derivative works must be AGPL-3.0 licensed
-- SaaS deployments must provide source code access to users
-- Commercial use requires AGPL compliance or dual licensing
-
-#### API Changes
-
-⚠️ **Development Impact**: Some APIs have been refactored
-
-- **Plugin Registration**: New plugin-based system
-- **Tool Configuration**: Updated configuration format
-- **Hook System**: Enhanced with external app support
-
-#### Migration Steps
-
-##### For End Users
-
-1. **License Review**: Understand AGPL-3.0 implications
-2. **Update Deployment**: Test in staging environment first
-3. **Verify Functionality**: Ensure all tools work as expected
-
-##### For Developers
-
-1. **License Headers**: Add AGPL-3.0 headers to custom code
-2. **Plugin Migration**: Convert custom tools to plugin architecture
-3. **API Updates**: Update to new plugin registration system
-
-##### For SaaS Providers
-
-1. **Compliance Review**: Ensure AGPL-3.0 compliance
-2. **Source Availability**: Implement source code provision mechanism
-3. **User Notification**: Inform users of their source code rights
-
-### 📊 Performance Improvements
-
-#### System Optimization
-
-- **30% faster tool execution** through optimized plugin loading
-- **25% reduced memory footprint** with better resource management
-- **Enhanced error recovery** with graceful failure handling
-- **50% faster repeated operations** with improved caching system
-
-#### Scalability Enhancements
-
-- **Plugin lazy loading** reduces startup time
-- **Concurrent tool execution** support
-- **Better database query optimization**
-- **Enhanced connection pooling**
-
-## [1.2.0] - Modern Architecture Features
-
-### 🏗️ Architecture Improvements
-
-- **📦 Modular Handlers**: Separated API concerns into focused modules
-- **🔧 Centralized Constants**: All configuration and strings in dedicated module
-- **📝 Professional Logging**: Structured logging with proper levels and formatting
-- **📋 Modern Packaging**: pyproject.toml with development and analysis dependency groups
-- **🐛 Error Handling**: Robust error management with centralized error codes
-- **🔍 Tool Execution Engine**: Dedicated tool validation and execution system
-
-## [1.1.0] - Enhanced Features
-
-### New Capabilities
-
-- **🧪 Data Science Plugin**: Python execution and statistical analysis
-- **📊 Visualization Plugin**: Chart and dashboard creation
-- **⚡ Batch Processing Plugin**: Bulk operations with progress tracking
-- **🔄 Modern MCP Protocol**: JSON-RPC 2.0 with modular handler architecture
-- **🌐 SSE Bridge Integration**: Real-time streaming communication with Claude API
-
-## [1.0.0] - Initial Release
-
-### Core Features
-
-- **📄 Document Operations**: Complete CRUD operations for Frappe documents
-- **📈 Advanced Reporting**: Execute Frappe reports with debugging support
-- **🔍 Advanced Analytics**: Statistical analysis and business intelligence
-- **📄 File Processing**: PDF, image OCR, and spreadsheet content extraction
-- **🔎 Global Search**: Search across all accessible documents and data
-- **🗂️ Metadata Access**: Query DocType schemas and permissions
-- **📋 Audit Logging**: Comprehensive operation tracking
-- **⚙️ Admin Interface**: Web-based management interface
-- **🔧 Tool Registry**: Auto-discovery tool system
-
-### Security & Permissions
-
-- **🛡️ Enterprise Security**: Built-in permissions and audit logging
-- **🔐 Secure Authentication**: API key and session validation
-- **🔒 Permission Integration**: Respects Frappe's permission system
-- **📋 Audit Trail**: Complete operation tracking with user context
-
-### Integration Features
-
-- **🔌 Plug & Play AI Integration**: Seamless Claude and AI assistant connectivity
-- **🚀 Production Ready**: Rate limiting and robust error handling
-- **📝 Professional Logging**: Structured logging for debugging and monitoring
-- **🤝 Community Driven**: Open source with active development
-
----
-
-## Roadmap
-
-### Planned Features (v2.1.0)
-
-- **Websocket Integration**: Enhanced real-time communication
-- **Batch Processing Support**: Advanced bulk operation capabilities
-- **Advanced Analytics**: Machine learning integrations
-- **Real-time Collaboration**: WebSocket-based features
-
-### Long-term Vision (v3.0.0)
-
-- **Multi-tenant Architecture**: Enhanced scalability
-- **Advanced Security**: Enhanced authentication options
-- **International Support**: Multi-language capabilities
-- **Cloud Integration**: Native cloud service integration
-
----
-
-*For detailed technical changes, see individual commit messages and pull requests.*
+**Community**
+- GitHub Sponsors enabled
+- Professional services available via Promantia
+
+## 2.3.4
+
+**Fixes**
+- OAuth auth isolation — fixed a critical bug where OAuth token requests permanently monkey-patched `frappe.get_request_header`, causing all subsequent API key authentication on the same Gunicorn worker to fail with 403
+
+## 2.3.3
+
+**Fixes**
+- PaddleOCR dependencies made optional — install with `pip install frappe-assistant-core[ocr]`. Without the extra, users get a clear message guiding them to install or switch to Ollama vision.
+
+**Improvements**
+- CI now tests on Frappe v15 (Python 3.12) and v16 (Python 3.14)
+- Automated releases via semantic-release
+- Conventional-commit enforcement via commitlint
+
+## 2.3.2
+
+**New — OCR & Document Extraction**
+- PaddleOCR integration for image and scanned-PDF extraction with multi-language support
+- Ollama-based vision model support as an alternative OCR backend (e.g. `deepseek-ocr`)
+- Configurable OCR backend, language, timeout, and memory limits in Assistant Core Settings
+
+**Improvements**
+- Audit log retention policy (default 180 days)
+- Better report-tool feedback with actionable guidance on misuse
+- OAuth localhost support — native apps can register HTTP localhost redirect URIs without errors
+- MCP 2025-06-18 spec
+- Code execution limits (timeout, memory, CPU) configurable
+- Settings defaults correctly applied on fresh installs and upgrades
+
+**Security**
+- Fixed unauthorized access to protected API endpoints
+- Fixed sensitive credential values appearing in server logs
+- Removed unused API endpoints
+
+## 2.3.1
+
+**Database-Backed Plugin & Tool Management**
+- `FAC Plugin Configuration` DocType — atomic plugin enable/disable with audit trail
+- `FAC Tool Configuration` DocType — per-tool enable/disable, category assignment, and role-based access
+- Automatic tool category detection via AST parsing
+- Frappe v16 compatibility alongside v15
+- Database locks replace file-based plugin state management
+
+## 2.3.0
+
+**MCP Prompt Templates**
+- Prompt Templates system — reusable, parameterized prompts that users can customize and execute via AI clients
+- MCP prompts protocol support (`prompts/list`, `prompts/get`)
+- Template rendering with Jinja2, Format String, and Raw engines
+- Access control: Private, Shared, or Public visibility with role-based sharing
+- 7 built-in templates (Sales, Manufacturing, HR, CRM, Procurement, Documentation, Data Quality)
+- Dark theme for FAC Admin and Assistant Core Settings
+- OAuth timezone fix — tokens no longer expire prematurely in non-UTC timezones
+
+## 2.2.2
+
+**OAuth Enhancements**
+- OAuth client registration returns complete RFC 7591 metadata
+- Repository migrated to `buildswithpaul/Frappe_Assistant_Core`
+- Claude Desktop UI setup documented
+- ChatGPT integration documented
+
+## 2.2.1
+
+**Multi-Tool Orchestration & Report Polling**
+- Multi-tool orchestration for `run_python_code` — call `tools.get_documents()` / `tools.generate_report()` inside the Python sandbox for 80–95% token savings
+- Prepared-report polling with exponential backoff
+- Dual authentication — OAuth Bearer tokens and API key/secret for STDIO clients
+- Plugin state fix — custom tools now properly respect disabled plugin state
+- `frappe._dict` → plain dict conversion for pandas DataFrame compatibility
+
+## 2.2.0
+
+**StreamableHTTP Transport & OAuth 2.0**
+- Migrated from STDIO bridge to StreamableHTTP transport
+- OAuth 2.0 authentication with Dynamic Client Registration (RFC 7591), PKCE, and automatic token refresh
+- Custom MCP server optimized for Frappe — handles datetime, Decimal, and `frappe._dict` serialization natively
+- OAuth discovery endpoints — `/.well-known/openid-configuration`, Protected Resource Metadata (RFC 9728)
+- Frappe v15/v16 compatibility with automatic version detection for OAuth settings
+- FAC Admin page with MCP endpoint URL display and plugin management
+
+If you are still on the legacy STDIO bridge, see [Migration from STDIO](../getting-started/migration).
+
+## 2.0.1
+
+**Bug Fixes & Improvements**
+- Document creation overhauled — proper child-table handling, required-field validation; success rate improved from ~60% to ~95%
+- Dashboard chart system rebuilt — fixed field mapping, filter format conversion, and smart field auto-detection (reliability ~40% → ~98%)
+- Custom tool discovery fixed for external Frappe apps through the hooks system
+- Validation framework added with pre-creation checks and `validate_only` mode
+- Better error messages with specific guidance and recovery suggestions
+
+## 2.0.0
+
+**Architecture Overhaul**
+- Plugin-based architecture with auto-discovery — tools organized into Core, Data Science, Visualization, and Custom Tools
+- 21 comprehensive tools across document operations, search, metadata, reports, workflows, analytics, and visualization
+- Plugin Manager with runtime enable/disable through the web interface
+- `BaseTool` framework for standardized tool development
+- Multi-layer security framework with role-based access control, document-level permissions, and field-level data protection
+- Comprehensive audit trail for all tool operations
+- License change: **MIT → AGPL-3.0** (forever free for open-source and personal use; see [COMMERCIAL.md](https://github.com/buildswithpaul/Frappe_Assistant_Core/blob/main/COMMERCIAL.md) for commercial licensing)
+- Modern Python packaging with `pyproject.toml`

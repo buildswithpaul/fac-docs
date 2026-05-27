@@ -127,7 +127,7 @@ flowchart TB
 POST https://your-frappe-site.com/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp
 ```
 
-**Protocol:** MCP 2025-03-26 (JSON-RPC 2.0)
+**Protocol:** MCP 2025-06-18 (JSON-RPC 2.0)
 **Authentication:** OAuth 2.0 Bearer tokens
 **Content-Type:** application/json
 
@@ -176,7 +176,7 @@ Host: your-frappe-site.com
   "id_token_signing_alg_values_supported": ["RS256"],
   "token_endpoint_auth_methods_supported": ["none", "client_secret_basic", "client_secret_post"],
   "mcp_endpoint": "https://your-frappe-site.com/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp",
-  "mcp_protocol_version": "2025-03-26",
+  "mcp_protocol_version": "2025-06-18",
   "mcp_transport": "StreamableHTTP"
 }
 ```
@@ -330,7 +330,7 @@ All MCP requests follow JSON-RPC 2.0 specification:
   "jsonrpc": "2.0",
   "method": "initialize",
   "params": {
-    "protocolVersion": "2025-03-26",
+    "protocolVersion": "2025-06-18",
     "capabilities": {}
   },
   "id": 1
@@ -342,7 +342,7 @@ All MCP requests follow JSON-RPC 2.0 specification:
 {
   "jsonrpc": "2.0",
   "result": {
-    "protocolVersion": "2025-03-26",
+    "protocolVersion": "2025-06-18",
     "capabilities": {
       "tools": {}
     },
@@ -724,4 +724,4 @@ While MCP doesn't support batch requests, you can optimize by:
 ---
 
 **Applies to:** Frappe Assistant Core v2.2.0+
-**Protocol:** MCP 2025-03-26 with StreamableHTTP transport
+**Protocol:** MCP 2025-06-18 with StreamableHTTP transport

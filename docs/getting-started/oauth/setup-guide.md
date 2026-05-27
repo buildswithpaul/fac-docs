@@ -456,7 +456,7 @@ Host: your-frappe-site.com
   "code_challenge_methods_supported": ["S256"],
   "token_endpoint_auth_methods_supported": ["none", "client_secret_basic", "client_secret_post"],
   "mcp_endpoint": "https://your-frappe-site.com/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp",
-  "mcp_protocol_version": "2025-03-26",
+  "mcp_protocol_version": "2025-06-18",
   "mcp_transport": "StreamableHTTP"
 }
 ```
