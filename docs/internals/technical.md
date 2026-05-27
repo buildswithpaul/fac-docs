@@ -590,7 +590,7 @@ def get_oauth_settings():
 
 ## Refactoring & Modernization
 
-### Recent Comprehensive Refactoring (July 2025)
+### Plugin-Based Refactor (v2.0)
 
 #### 1. **Plugin-Based Architecture Implementation** ⭐ **MAJOR**
 
@@ -2183,5 +2183,4 @@ This makes skills safe under multi-worker Gunicorn deployments without extra syn
 
 ---
 
-_Last Updated: February 2026 - Version 2.3.1_
-_Architecture: Modular, Modern, Maintainable_
+_Applies to: Frappe Assistant Core v2.3.x_

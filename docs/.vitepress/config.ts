@@ -17,7 +17,7 @@ export default defineConfig({
 
 	head: [
 		['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
-		['meta', { name: 'theme-color', content: '#0ea5e9' }],
+		['meta', { name: 'theme-color', content: '#0981E3' }],
 		['meta', { property: 'og:title', content: 'Frappe Assistant Core Docs' }],
 		['meta', { property: 'og:description', content: 'Open-source AI assistant for Frappe.' }],
 		['meta', { property: 'og:type', content: 'website' }],
@@ -25,7 +25,8 @@ export default defineConfig({
 	],
 
 	themeConfig: {
-		logo: '/logo.svg',
+		logo: '/FAC_mark.svg',
+		siteTitle: 'Frappe Assistant Core',
 
 		nav: [
 			{ text: 'Guide', link: '/getting-started/introduction' },

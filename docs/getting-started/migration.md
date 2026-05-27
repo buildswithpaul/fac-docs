@@ -471,6 +471,5 @@ After successful migration:
 
 ---
 
-**Migration Version:** 1.x/2.0.x/2.1.x → 2.2.0
-**Last Updated:** October 2025
+**Migration:** STDIO bridge → OAuth + StreamableHTTP (Frappe Assistant Core v2.2.0+)
 **Status:** Recommended for all users

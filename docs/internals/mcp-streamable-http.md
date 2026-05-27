@@ -723,6 +723,5 @@ While MCP doesn't support batch requests, you can optimize by:
 
 ---
 
-**Version:** 2.2.0+
-**Last Updated:** January 2025
+**Applies to:** Frappe Assistant Core v2.2.0+
 **Protocol:** MCP 2025-03-26 with StreamableHTTP transport

@@ -233,8 +233,6 @@ Once authorized, you can use ChatGPT to interact with your Frappe data:
 - "Create a sales order for customer ABC"
 - "Show me this month's sales report"
 
-**[📖 See ChatGPT integration details](../integrations/CHATGPT_INTEGRATION.md)** *(coming soon)*
-
 ### Option D: Custom Application Integration
 
 For custom applications or other MCP clients, see the complete OAuth integration example in our [MCP StreamableHTTP Guide](../architecture/MCP_STREAMABLEHTTP_GUIDE.md#option-3-custom-application-integration).
