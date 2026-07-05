@@ -30,8 +30,7 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 									<rect class="sig-wipe" x="345" y="88" width="665" height="604" fill="#fff" />
 								</mask>
 							</defs>
-							<g mask="url(#sig-reveal)" fill="currentColor" stroke="currentColor" stroke-width="30"
-								stroke-linejoin="round" stroke-linecap="round">
+							<g mask="url(#sig-reveal)" fill="currentColor">
 								<path :d="SIG_PATH" />
 							</g>
 						</svg>
@@ -203,8 +202,7 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 			<div class="colo-inner">
 				<div class="countersign" aria-hidden="true">
 					<svg class="sig sig-small" viewBox="345 88 665 604">
-						<g fill="currentColor" stroke="currentColor" stroke-width="30"
-							stroke-linejoin="round" stroke-linecap="round">
+						<g fill="currentColor">
 							<path :d="SIG_PATH" />
 						</g>
 					</svg>
