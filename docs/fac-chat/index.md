@@ -1,5 +1,6 @@
 ---
 title: FAC Chat
+description: FAC Chat brings an AI assistant inside Frappe — a chat widget on every Desk page and a full-screen SPA at /copilot, powered by FAC Cloud. Coming in FAC 3.0, disabled by default.
 ---
 
 # FAC Chat

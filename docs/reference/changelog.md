@@ -1,5 +1,6 @@
 ---
 title: Changelog
+description: Release history of Frappe Assistant Core (FAC), generated automatically from GitHub releases at build time.
 ---
 
 <script setup>

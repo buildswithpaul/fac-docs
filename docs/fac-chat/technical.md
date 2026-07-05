@@ -1,5 +1,6 @@
 ---
 title: FAC Chat — Technical
+description: Client-side mechanics of FAC Chat — how the widget mounts on Frappe Desk pages, how streamed responses render as blocks, and how sessions move between widget, SPA, and mobile.
 ---
 
 # FAC Chat — Technical (client side)

@@ -1,9 +1,41 @@
 import { defineConfig } from 'vitepress'
 
+const SITE = 'https://docs.assistantcore.cloud'
+const OG_DESCRIPTION =
+	'Talk to your ERP. FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an MCP server with OAuth, 24 tools, and a full audit trail.'
+
+// Entity graph: teaches search engines that "FAC" and "Frappe Assistant Core"
+// are the same thing, what it is, and where it lives.
+const JSON_LD = JSON.stringify({
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'WebSite',
+			name: 'Frappe Assistant Core',
+			alternateName: ['FAC', 'FAC Docs'],
+			url: `${SITE}/`,
+		},
+		{
+			'@type': 'SoftwareApplication',
+			name: 'Frappe Assistant Core',
+			alternateName: 'FAC',
+			applicationCategory: 'BusinessApplication',
+			operatingSystem: 'Linux',
+			description: OG_DESCRIPTION,
+			url: `${SITE}/`,
+			downloadUrl: 'https://github.com/buildswithpaul/Frappe_Assistant_Core',
+			softwareHelp: `${SITE}/getting-started/installation`,
+			license: 'https://www.gnu.org/licenses/agpl-3.0.html',
+			offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+			author: { '@type': 'Person', name: 'Paul Clinton' },
+		},
+	],
+})
+
 export default defineConfig({
 	title: 'FAC',
 	titleTemplate: ':title — FAC Docs',
-	description: 'Open-source AI assistant for ERP — MCP tools, OAuth, and an extensible plugin system.',
+	description: OG_DESCRIPTION,
 	lang: 'en-US',
 	cleanUrls: true,
 	lastUpdated: true,
@@ -14,13 +46,34 @@ export default defineConfig({
 
 	base: '/',
 
+	sitemap: { hostname: SITE },
+
+	// Per-page canonical URL (clean URLs, index.md → directory root).
+	transformPageData(pageData) {
+		const path = pageData.relativePath
+			.replace(/index\.md$/, '')
+			.replace(/\.md$/, '')
+		const canonical = `${SITE}/${path}`
+		pageData.frontmatter.head ??= []
+		pageData.frontmatter.head.push(['link', { rel: 'canonical', href: canonical }])
+	},
+
 	head: [
 		['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
 		['meta', { name: 'theme-color', content: '#0981E3' }],
-		['meta', { property: 'og:title', content: 'FAC Docs' }],
-		['meta', { property: 'og:description', content: 'Open-source AI assistant for ERP.' }],
+		['meta', { property: 'og:site_name', content: 'FAC — Frappe Assistant Core' }],
+		['meta', { property: 'og:title', content: 'FAC — Talk to your ERP' }],
+		['meta', { property: 'og:description', content: OG_DESCRIPTION }],
 		['meta', { property: 'og:type', content: 'website' }],
-		['meta', { property: 'og:url', content: 'https://docs.assistantcore.cloud' }],
+		['meta', { property: 'og:url', content: `${SITE}/` }],
+		['meta', { property: 'og:image', content: `${SITE}/og-card.png` }],
+		['meta', { property: 'og:image:width', content: '1200' }],
+		['meta', { property: 'og:image:height', content: '630' }],
+		['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+		['meta', { name: 'twitter:title', content: 'FAC — Talk to your ERP' }],
+		['meta', { name: 'twitter:description', content: OG_DESCRIPTION }],
+		['meta', { name: 'twitter:image', content: `${SITE}/og-card.png` }],
+		['script', { type: 'application/ld+json' }, JSON_LD],
 	],
 
 	themeConfig: {
