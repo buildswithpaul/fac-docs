@@ -180,10 +180,9 @@ export default defineConfig({
 			provider: 'local',
 		},
 
-		footer: {
-			message: 'Released under the AGPL-3.0 License.',
-			copyright: 'Copyright © 2025 — present, Paul Clinton',
-		},
+		// No themeConfig.footer: it only ever rendered on the landing page
+		// (sidebar pages hide it), where the signed colophon already carries
+		// the license + copyright line.
 
 		editLink: {
 			pattern: 'https://github.com/buildswithpaul/fac-docs/edit/main/docs/:path',

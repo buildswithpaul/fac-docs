@@ -208,7 +208,7 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 					</svg>
 				</div>
 				<div class="colo-text">
-					<p class="colo-line">Signed, <b>Paul Clinton</b> — free and open source under AGPL-3.0.</p>
+					<p class="colo-line">Signed, <b>Paul Clinton</b> — free and open source under AGPL-3.0. © 2025–present.</p>
 					<p class="colo-links">
 						<a href="https://github.com/buildswithpaul/Frappe_Assistant_Core">GitHub</a>
 						<a href="https://github.com/buildswithpaul/Frappe_Assistant_Core/issues">Report an issue</a>
