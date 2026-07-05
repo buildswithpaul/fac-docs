@@ -1,0 +1,113 @@
+/* ============================================================
+   FAC brand theme — "The Signed Ledger"
+   Machine-ruled ledger paper + living ink.
+   Light = bond paper · Dark = the carbon copy.
+   Display: Space Grotesk · Body: Inter · Numerals: JetBrains Mono
+   ============================================================ */
+
+:root {
+	/* Ledger palette (light) */
+	--fac-paper: #f7f9fc;      /* bond white — never cream */
+	--fac-rule: #d9e5f2;       /* feint ruling lines */
+	--fac-fill: #edf4fb;       /* feint fill: hovers, tints, code bg */
+	--fac-ink-text: #17222e;   /* fountain-pen blue-black */
+	--fac-ink: #0981e3;        /* THE ink: signature, CTAs, links, stamps */
+	--fac-ink-deep: #0a5aa0;
+	--fac-red: #b23b2e;        /* margin rule + COMING SOON stamp ONLY */
+	--fac-card: #ffffff;
+
+	/* Type roles */
+	--fac-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--fac-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--fac-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+	/* Map onto VitePress (docs inherit paper, not ruling) */
+	--vp-font-family-base: var(--fac-body);
+	--vp-font-family-mono: var(--fac-mono);
+
+	--vp-c-brand-1: var(--fac-ink);
+	--vp-c-brand-2: var(--fac-ink-deep);
+	--vp-c-brand-3: var(--fac-ink-deep);
+	--vp-c-brand-soft: var(--fac-fill);
+
+	--vp-c-bg: var(--fac-paper);
+	--vp-c-bg-alt: #eef4fa;
+	--vp-c-text-1: var(--fac-ink-text);
+	--vp-c-text-2: #4c5d6e;
+	--vp-c-divider: var(--fac-rule);
+
+	--vp-button-brand-bg: var(--fac-ink);
+	--vp-button-brand-hover-bg: var(--fac-ink-deep);
+	--vp-button-brand-active-bg: var(--fac-ink-deep);
+	--vp-button-brand-border: transparent;
+}
+
+.dark {
+	/* The carbon copy */
+	--fac-paper: #0c141e;
+	--fac-rule: #1b2a3b;
+	--fac-fill: #12233b;
+	--fac-ink-text: #e6edf5;
+	--fac-ink: #58aff2;
+	--fac-ink-deep: #7cc4ff;
+	--fac-card: #101a29;
+
+	--vp-c-bg: var(--fac-paper);
+	--vp-c-bg-alt: #0a111a;
+	--vp-c-text-1: var(--fac-ink-text);
+	--vp-c-text-2: #93a4b8;
+	--vp-c-divider: var(--fac-rule);
+	--vp-c-brand-1: var(--fac-ink);
+	--vp-c-brand-soft: var(--fac-fill);
+}
+
+/* ---- Global type treatment ---- */
+h1, h2, h3, h4,
+.vp-doc h1, .vp-doc h2, .vp-doc h3 {
+	font-family: var(--fac-display);
+	letter-spacing: -0.02em;
+	color: var(--fac-ink-text);
+}
+
+.vp-doc h2 {
+	padding-top: 1.6rem;
+	border-top: 1px solid var(--fac-rule);
+}
+
+/* Every digit machine-set: tabular numerals wherever mono appears */
+code, kbd, pre, samp { font-variant-numeric: tabular-nums; }
+
+.vp-doc :not(pre) > code {
+	font-family: var(--fac-mono);
+	font-size: 0.85em;
+	background: var(--fac-fill);
+	color: var(--fac-ink-deep);
+	border-radius: 4px;
+	padding: 0.15em 0.4em;
+}
+
+/* ---- Nav chrome ---- */
+.VPNavBar .title {
+	font-family: var(--fac-display);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+.VPNavBar {
+	border-bottom: 1px solid var(--fac-rule);
+	backdrop-filter: saturate(1.4) blur(8px);
+}
+
+/* Home page: Landing goes full-bleed inside layout:page */
+.VPContent.is-home,
+.VPPage:has(.fac-landing) { padding: 0 !important; }
+.VPPage:has(.fac-landing) .vp-doc,
+.VPPage:has(.fac-landing) > div { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+
+/* Callouts pick up the ledger tints */
+.vp-doc .custom-block.info {
+	border-color: var(--fac-rule);
+	background: var(--fac-fill);
+}
+.vp-doc .custom-block.tip {
+	border-color: var(--fac-ink);
+}

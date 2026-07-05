@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Nightly rebuild so the changelog picks up new FAC releases automatically.
+  schedule:
+    - cron: '30 2 * * *'
+  # Instant sync: the FAC release pipeline can fire this event on publish.
+  repository_dispatch:
+    types: [fac-release]
 
 permissions:
   contents: read
@@ -32,6 +38,9 @@ jobs:
 
       - name: Build with VitePress
         run: npm run docs:build
+        env:
+          # Rate-limit headroom for the changelog release fetch (public reads).
+          GITHUB_TOKEN: ${{ github.token }}
 
       - uses: actions/configure-pages@v5
 

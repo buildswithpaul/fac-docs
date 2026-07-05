@@ -29,6 +29,7 @@ export default defineConfig({
 
 		nav: [
 			{ text: 'Guide', link: '/getting-started/installation' },
+			{ text: 'FAC Chat', link: '/fac-chat/' },
 			{ text: 'API', link: '/api/overview' },
 			{
 				text: 'Resources',
@@ -43,6 +44,16 @@ export default defineConfig({
 		],
 
 		sidebar: {
+			'/fac-chat/': [
+				{
+					text: 'FAC Chat',
+					items: [
+						{ text: 'Overview', link: '/fac-chat/' },
+						{ text: 'Technical (client side)', link: '/fac-chat/technical' },
+					],
+				},
+			],
+
 			'/getting-started/': [
 				{
 					text: 'Getting Started',
