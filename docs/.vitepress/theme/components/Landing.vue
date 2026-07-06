@@ -381,6 +381,9 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 	background: var(--fac-card);
 	position: relative;
 }
+/* grid items default to min-width:auto — an unbreakable <pre> line would
+   blow the column past the viewport instead of scrolling inside it */
+.pages > * { min-width: 0; }
 .pages::before {
 	/* the gutter between facing pages — doubled feint rule */
 	content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
@@ -430,6 +433,7 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 }
 .index-sub { color: color-mix(in srgb, var(--fac-ink-text) 75%, transparent); max-width: 60ch; margin: 0 0 34px; font-size: 15.5px; line-height: 1.6; }
 .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(24px, 4vw, 56px); }
+.tool-grid > * { min-width: 0; }
 .tool-group { margin-bottom: 22px; }
 .tool-head {
 	font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
@@ -498,6 +502,12 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 }
 @media (max-width: 640px) {
 	.fac-landing { --rhythm: 0px; }
+	.soon-stamp {
+		position: static; display: inline-block;
+		margin-bottom: 12px; transform: rotate(-1.5deg);
+	}
+	.tool-row { flex-wrap: wrap; }
+	.approve-tag { margin-left: 34px; }
 	.sheet { background: var(--fac-paper); }
 	.margin-rule { display: none; }
 	.cta-row .btn-ink, .cta-row .btn-ghost { flex: 1 1 auto; justify-content: center; }
