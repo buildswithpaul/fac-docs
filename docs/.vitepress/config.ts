@@ -81,7 +81,7 @@ export default defineConfig({
 		siteTitle: 'FAC',
 
 		nav: [
-			{ text: 'Guide', link: '/getting-started/installation' },
+			{ text: 'Getting Started', link: '/getting-started/installation' },
 			{ text: 'Guides', link: '/guides/fac-admin' },
 			{ text: 'FAC Chat', link: '/fac-chat/' },
 			{ text: 'API', link: '/api/overview' },
