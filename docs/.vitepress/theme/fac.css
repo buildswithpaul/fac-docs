@@ -111,3 +111,32 @@ code, kbd, pre, samp { font-variant-numeric: tabular-nums; }
 .vp-doc .custom-block.tip {
 	border-color: var(--fac-ink);
 }
+
+/* ============================================================
+   Click-to-zoom screenshots (medium-zoom)
+   ============================================================ */
+
+/* Affordance: framed, hoverable, cursor signals it opens */
+.vp-doc img {
+	cursor: zoom-in;
+	border: 1px solid var(--fac-rule);
+	border-radius: 8px;
+	transition: box-shadow 0.2s ease;
+}
+.vp-doc img:hover {
+	box-shadow: 0 2px 14px rgba(9, 129, 227, 0.16);
+}
+
+/* The zoomed image and its backdrop must clear the sticky nav */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+	z-index: 100;
+}
+.medium-zoom-overlay {
+	backdrop-filter: blur(2px);
+}
+/* Don't frame the enlarged copy */
+.medium-zoom-image--opened {
+	border: none;
+	border-radius: 0;
+}

@@ -82,6 +82,7 @@ export default defineConfig({
 
 		nav: [
 			{ text: 'Guide', link: '/getting-started/installation' },
+			{ text: 'Guides', link: '/guides/fac-admin' },
 			{ text: 'FAC Chat', link: '/fac-chat/' },
 			{ text: 'API', link: '/api/overview' },
 			{
@@ -131,6 +132,7 @@ export default defineConfig({
 				{
 					text: 'Guides',
 					items: [
+						{ text: 'FAC Admin Page', link: '/guides/fac-admin' },
 						{ text: 'Plugin Management', link: '/guides/plugin-management' },
 						{ text: 'Tool Management', link: '/guides/tool-management' },
 						{ text: 'Skills', link: '/guides/skills-user-guide' },
