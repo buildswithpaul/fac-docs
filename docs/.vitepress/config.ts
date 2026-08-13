@@ -59,6 +59,14 @@ export default defineConfig({
 	},
 
 	head: [
+		// Google Search Console ownership proof. Must stay — Google re-checks.
+		[
+			'meta',
+			{
+				name: 'google-site-verification',
+				content: 'L7mCcJvP4Muk6xDmGUrgoxiiM2F7SWMzCZWc-3SAeLY',
+			},
+		],
 		['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
 		['meta', { name: 'theme-color', content: '#0981E3' }],
 		['meta', { property: 'og:site_name', content: 'FAC — Frappe Assistant Core' }],
