@@ -111,6 +111,7 @@ export default defineConfig({
 					text: 'FAC Chat',
 					items: [
 						{ text: 'Overview', link: '/fac-chat/' },
+						{ text: 'Local and private sites', link: '/fac-chat/local-sites' },
 						{ text: 'Technical (client side)', link: '/fac-chat/technical' },
 					],
 				},

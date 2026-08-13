@@ -47,6 +47,17 @@ Both options share the same plugin registry, the same **Assistant Audit Log**, a
 the same OAuth-based authentication. Enabling FAC Chat does **not** change anything
 for your MCP clients — both can run side by side.
 
+## Requirements
+
+FAC Chat runs the assistant in FAC Cloud and calls your site back for every action,
+so **your site must be reachable from the public internet**. A bench on `localhost`,
+on a private network, or behind a firewall with no inbound access cannot use FAC
+Chat — registration checks this up front and tells you rather than failing later.
+
+That is a limitation of the cloud path only. The free MCP server has no such
+requirement, and it is the better fit for local and personal use. See
+[Local and private sites](/fac-chat/local-sites) for both options.
+
 ## What you get
 
 FAC Chat is an AI assistant embedded in your Frappe site, across three surfaces:
