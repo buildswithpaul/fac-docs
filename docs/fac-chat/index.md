@@ -1,14 +1,17 @@
 ---
 title: FAC Chat
-description: FAC Chat brings an AI assistant inside Frappe — a chat widget on every Desk page and a full-screen SPA at /copilot, powered by FAC Cloud. Coming in FAC 3.0, disabled by default.
+description: FAC Chat brings an AI assistant inside Frappe — a chat widget on every Desk page and a full-screen SPA at /copilot, powered by FAC Cloud. Available now in the FAC 3.0 public beta, disabled by default.
 ---
 
 # FAC Chat
 
-::: info FAC 3.0 — Coming soon
-FAC Chat ships in **FAC 3.0**. This page describes what it does and how it works
-so you can plan ahead. It arrives **disabled by default** — nothing about your
-existing MCP setup changes when you upgrade.
+::: tip FAC 3.0 — Public beta, available now
+FAC Chat is available today in the **FAC 3.0 public beta** (`v3.0.0-beta.1`). You can
+install it from the `beta` branch — see [Install the beta](#install-the-beta) below.
+
+It ships **disabled by default**, and nothing about your existing MCP setup changes
+when you upgrade. Being a beta, expect rough edges; please
+[report anything you hit](https://github.com/buildswithpaul/Frappe_Assistant_Core/issues).
 :::
 
 **FAC Chat is an opt-in, in-Frappe AI chat assistant** powered by our managed
@@ -62,11 +65,32 @@ automation. Conversations are mirrored into your own Frappe database; the assist
 authenticates as a real Frappe user, so it only touches data that user can already
 see, and every action stays inside your existing permissions and audit trail.
 
+## Install the beta
+
+FAC Chat ships in the 3.0 line, which is currently on the `beta` release channel. On a
+self-hosted bench:
+
+```bash
+# New install
+bench get-app --branch beta https://github.com/buildswithpaul/Frappe_Assistant_Core
+bench --site yoursite install-app frappe_assistant_core
+
+# Existing FAC 2.x install — switch to the beta channel
+cd apps/frappe_assistant_core && git fetch origin && git checkout beta && git pull
+cd ../.. && bench --site yoursite migrate && bench restart
+```
+
+Upgrading from 2.x leaves your MCP setup, tools, plugins, and audit log untouched —
+FAC Chat is additive and starts switched off.
+
 ## Enabling FAC Chat
 
 1. Go to **Assistant Core Settings → FAC Chat tab**.
 2. Toggle **Enable FAC Chat** to ✓ and save.
-3. Run `bench restart`.
+
+That is the whole change — **no `bench restart` is required**. The chat hooks are always
+registered and check the setting at runtime, so other workers pick up the new state on
+their next request.
 
 A discovery banner on the Desk landing page also walks admins through enabling
 chat — it appears once per admin and can be dismissed.
@@ -110,8 +134,14 @@ re-enable it later — that personal choice is always respected, admins included
   lives in your Frappe database; only the LLM request payload (messages + tool-call
   results) is forwarded to FAC Cloud to generate the next response.
 
-## How it works, under the hood
+## Read next
 
-For the client-side mechanics — how the widget mounts on Desk pages, how streamed
-responses are rendered, and how a session follows you between the widget, the SPA,
-and mobile — see [FAC Chat Technical](./technical).
+- **[Files & attachments](./attachments)** — what you can attach, the size and type
+  limits, where the bytes are stored, and how attached files reach the model.
+- **[Welcome suggestions](./suggestions)** — how the starter tiles on the landing
+  screen are personalised, and how to turn them off.
+- **[Browser diagnostics](./browser-diagnostics)** — how the widget helps debug a
+  broken page, exactly what it records, what is redacted, and the admin kill switch.
+- **[Technical (client side)](./technical)** — how the widget mounts on Desk pages,
+  how streamed responses are rendered, and how a session follows you between the
+  widget, the SPA, and mobile.

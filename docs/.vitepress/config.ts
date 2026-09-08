@@ -111,6 +111,9 @@ export default defineConfig({
 					text: 'FAC Chat',
 					items: [
 						{ text: 'Overview', link: '/fac-chat/' },
+						{ text: 'Files & Attachments', link: '/fac-chat/attachments' },
+						{ text: 'Welcome Suggestions', link: '/fac-chat/suggestions' },
+						{ text: 'Browser Diagnostics', link: '/fac-chat/browser-diagnostics' },
 						{ text: 'Technical (client side)', link: '/fac-chat/technical' },
 					],
 				},
