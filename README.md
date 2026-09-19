@@ -32,8 +32,8 @@ docs/
 ├── getting-started/
 ├── guides/
 ├── api/
-├── skills/
-├── development/
+├── fac-chat/              FAC Chat: overview, attachments, suggestions,
+│                          browser diagnostics, conversation recall, technical
 ├── internals/
 └── reference/
 ```

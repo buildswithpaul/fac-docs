@@ -142,6 +142,9 @@ re-enable it later — that personal choice is always respected, admins included
   screen are personalised, and how to turn them off.
 - **[Browser diagnostics](./browser-diagnostics)** — how the widget helps debug a
   broken page, exactly what it records, what is redacted, and the admin kill switch.
+- **[Continuing a previous conversation](./conversation-recall)** — how the assistant
+  finds and reads your own earlier conversations, and the limitation worth knowing
+  before you rely on it.
 - **[Technical (client side)](./technical)** — how the widget mounts on Desk pages,
   how streamed responses are rendered, and how a session follows you between the
   widget, the SPA, and mobile.

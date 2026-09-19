@@ -88,6 +88,109 @@ it up on mobile) is done with short-lived handoff cookies:
 Because all three surfaces share the same `session_id` namespace, messages and
 history stay consistent no matter where you continue the conversation.
 
+## Conversation recall (`recall_conversations`)
+
+For what this looks like to use, see
+[Continuing a previous conversation](./conversation-recall). This section covers
+the guards, the search algorithm, and how a compacted conversation is
+reassembled — all of it local FAC code, registered on the `faco` MCP plugin
+alongside the browser and document tools
+([plugin.py:82](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/plugin.py#L82)).
+The tool is classified **read-only**
+([tool_category_detector.py:85](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/tool_category_detector.py#L85)),
+so it defaults to "Always allow" rather than sitting behind an approval card.
+
+### Ownership is structural, not a permission check
+
+Every query in `RecallConversations`
+([recall_conversations.py:122](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L122))
+filters on `frappe.session.user` directly, in both the listing path
+([`_index`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L191))
+and the transcript path
+([`_transcript`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L366)).
+That closes the System Manager exemption present in the shared FAC Chat Message
+permission condition — an admin gets no special reach through this tool — and
+it is why the tool has no `user` argument at all: the model has no vocabulary
+to ask for someone else's history. Archived messages (`is_archived=1`) are
+excluded from every filter, so an archived conversation is unreachable by
+either listing or direct `session_id` lookup.
+
+### Listing: term-matching, not phrase-matching
+
+`_terms()` ([recall_conversations.py:102](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L102))
+splits a query into lowercase content words, drops stop-words, and trims a
+trailing `s` (length > 3, not a double-`s`) so "reminders" and "reminder" both
+reduce to the same term. `_matching_session_ids()`
+([recall_conversations.py:263](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L263))
+then runs one `LIKE` query per term (values parameterised throughout) and
+intersects the resulting session-id sets in Python — a session qualifies when
+every term appears *somewhere* in that session, not necessarily the same
+message. When the intersection is empty, the tool falls back to the plain
+recent-conversations listing and sets `fell_back_to_recent: true` rather than
+returning nothing.
+
+Per-session `preview` and `matched_snippet` text are fetched with one bounded
+query per session id, not a single shared-limit query across all of them —
+see the docstrings on `_previews()` and `_snippets()`
+([recall_conversations.py:291](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L291),
+[recall_conversations.py:321](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L321)).
+A single shared row budget ordered by creation can be spent entirely by one
+chatty session before the query reaches a sparser one, leaving it listed but
+without a preview.
+
+### Transcript: latest summary + messages after its anchor
+
+`_transcript()` ([recall_conversations.py:366](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/recall_conversations.py#L366))
+reads the newest non-superseded row from **FAC Chat Summary**
+(`FACChatSummary.latest_for_session`,
+[fac_chat_summary.py:78](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_summary/fac_chat_summary.py#L78)),
+resolves its `anchor_message_id` to that message's `creation` timestamp, and
+returns the summary text plus every message **after** that timestamp — cutting
+at the anchor message, not at the summary row's own (later) creation time,
+since the summary is written after every message of the turn it describes.
+An anchor that no longer resolves (its message was purged) degrades to the
+plain recent-messages tail; the summary still carries the earlier context.
+
+This is deliberately not "the whole conversation" or "the last N messages" —
+compactions are cumulative (each new summary is written from the *previous*
+summary plus everything since, so it subsumes it), which is exactly what makes
+`latest summary + post-anchor messages` a complete account of the conversation
+rather than a slice of it. **FAC Chat Summary** rows are written by the relay
+as the compaction event arrives —
+`_persist_chat_summary()` calls `FACChatSummary.record()`
+([relay.py:92](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L92)
+→ [fac_chat_summary.py:45](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_summary/fac_chat_summary.py#L45)),
+called from the shared event dispatcher's `context_summarized` branch
+([relay.py:110](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L110),
+branch at [relay.py:127](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L127))
+— and `record()` supersedes every prior row for that session in the same call,
+so exactly one row is ever "live" per session even though older rows are kept
+(each one still anchors a divider in the transcript; see below). A failed
+summary write is caught and logged rather than allowed to fail the turn.
+
+`get_session_history` returns every summary for a session (oldest first, for
+rebuilding dividers) alongside its usual message page
+([sessions.py:21](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/sessions.py#L21),
+`FACChatSummary.all_for_session` called at
+[sessions.py:55](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/sessions.py#L55)).
+
+### The summarization divider is now durable and expandable
+
+Earlier, the "Earlier messages were summarized" divider was pushed only by the
+live `context_summarized` socket event — a page reload showed an unbroken
+transcript with no sign a compaction had happened, and the summary text was
+never visible anywhere. `mergeSummaryDividers()`
+([summaryDividers.js:15](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/chat/summaryDividers.js#L15))
+now rebuilds one divider per **FAC Chat Summary** row on load and on
+reconnect-reconciliation, keyed to the message it anchors to (a summary whose
+anchor has aged out of the loaded window is appended instead of dropped — the
+compaction still happened). `ChatInterface.vue` renders a matching divider as
+clickable and expands it in place to show `summaryText`, with the expanded-set
+keyed by `anchorMessageId` (falling back to the row's timestamp) rather than
+list position — a v-for index is not stable across a session switch or as
+older rows age out of the server's windowed history, so an index-keyed set
+could leak "expanded" onto the wrong divider entirely.
+
 ## What lives on the backend (not here)
 
 The following are handled by the managed FAC Cloud backend and are
