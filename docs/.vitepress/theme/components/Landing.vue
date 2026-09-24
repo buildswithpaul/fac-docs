@@ -1,18 +1,52 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { withBase } from 'vitepress'
 
 // The hand-drawn "fac" glyph from FAC_mark.svg, inlined so the ink can be
 // mask-revealed as if the page is being signed. One path, calligraphic stroke.
 const SIG_PATH = "M 424.76 657.47 C412.31,650.54 410.94,602.06 420.46,506.00 C421.25,498.02 422.20,488.03 422.56,483.79 L 423.23 476.08 L 417.36 473.46 C414.14,472.01 404.99,468.14 397.04,464.84 C382.00,458.60 377.70,456.17 375.98,452.96 C373.62,448.56 388.67,437.14 413.50,424.47 C421.20,420.54 428.06,417.14 428.75,416.91 C429.57,416.64 431.56,406.56 434.47,388.00 C457.98,238.06 480.94,146.01 499.45,127.49 C508.42,118.53 518.73,120.82 522.00,132.50 C523.55,138.03 522.34,140.00 517.38,140.00 C506.40,140.00 495.19,164.61 482.54,216.49 C477.04,239.08 472.54,260.13 469.07,279.50 C467.99,285.55 463.67,309.17 459.48,332.00 C448.68,390.74 445.70,408.04 446.30,408.63 C446.59,408.92 453.95,406.13 462.66,402.44 C511.28,381.82 578.89,362.43 609.00,360.48 C618.96,359.84 619.68,359.92 622.91,362.15 C627.07,365.02 629.72,368.49 630.89,372.62 C632.85,379.46 628.39,379.50 623.47,372.69 C619.50,367.21 616.53,366.92 606.33,371.00 C590.88,377.19 573.53,391.10 567.54,402.10 C561.66,412.90 568.32,411.66 599.92,396.04 C619.47,386.38 625.50,383.83 629.13,383.69 C636.78,383.39 638.51,386.46 635.51,394.96 C630.81,408.30 631.64,417.50 637.94,421.74 C644.35,426.06 651.02,427.32 660.65,426.04 C677.98,423.73 707.33,413.70 748.50,396.02 C786.72,379.60 797.89,374.33 803.32,370.15 C819.60,357.60 842.38,353.26 846.00,362.01 C847.95,366.72 846.32,367.82 838.24,367.26 C826.30,366.44 812.60,373.13 799.92,385.98 C792.02,393.98 787.00,403.22 787.00,409.76 C787.00,422.60 807.38,427.53 834.00,421.13 C857.00,415.60 896.24,399.45 950.18,373.30 C963.20,366.99 974.68,361.98 975.68,362.18 C979.62,362.94 977.60,366.43 970.50,371.15 C956.86,380.21 907.30,403.73 877.00,415.51 C845.68,427.70 825.12,432.98 808.91,432.99 C793.12,433.00 784.66,429.71 779.00,421.33 C776.90,418.22 776.51,416.50 776.56,410.55 C776.60,404.42 777.09,402.58 780.19,396.74 C782.16,393.03 783.67,390.00 783.55,390.00 C783.44,390.00 773.93,394.32 762.42,399.61 C728.00,415.42 695.08,428.31 675.50,433.64 C667.45,435.83 663.25,436.37 653.91,436.43 C642.59,436.50 642.18,436.42 635.45,433.00 C629.90,430.17 627.99,428.55 625.54,424.57 C622.56,419.74 622.50,419.38 622.62,407.39 L 622.74 395.15 L 620.29 396.08 C618.94,396.59 609.89,401.05 600.17,406.00 C581.53,415.47 572.69,419.00 567.59,419.00 C563.90,418.99 558.58,415.96 556.96,412.92 C553.91,407.23 560.54,392.64 570.53,383.04 L 576.90 376.93 L 573.20 377.60 C557.20,380.49 512.62,394.40 482.00,406.05 C450.49,418.03 444.71,420.55 443.95,422.63 C443.57,423.66 441.78,435.42 439.96,448.76 L 436.66 473.02 L 441.08 476.67 C459.92,492.23 473.50,513.00 479.06,534.73 C481.74,545.21 481.70,564.05 478.97,576.98 C469.52,621.76 439.81,665.86 424.76,657.47 ZM 438.64 640.76 C451.62,628.80 465.27,601.51 469.88,578.33 C472.79,563.74 473.31,555.43 472.00,544.47 C469.96,527.40 465.13,515.34 454.85,501.67 C450.04,495.26 439.03,485.00 436.97,485.00 C435.36,485.00 435.13,487.13 430.98,539.94 C425.55,608.95 426.26,645.00 433.05,645.00 C433.60,645.00 436.11,643.09 438.64,640.76 ZM 426.53 446.50 C427.62,436.33 428.42,428.00 428.30,428.00 C424.50,428.00 392.00,447.54 392.00,449.83 C392.00,450.25 395.94,452.29 400.75,454.37 C405.56,456.45 412.42,459.67 416.00,461.53 C419.58,463.38 422.96,464.92 423.52,464.95 C424.11,464.98 425.38,457.23 426.53,446.50 Z"
 
+// The tool index, grouped by what each call does. FAC 3.0 collapsed the four
+// search tools (search / fetch / search_doctype / search_link) into one
+// search_documents, and shipped 30 registered tools in total.
 const READ_TOOLS = [
-	'get_document', 'list_documents', 'search', 'search_documents', 'search_doctype',
-	'search_link', 'fetch', 'get_doctype_info', 'report_list', 'report_requirements',
-	'get_pending_approvals', 'list_user_dashboards',
+	'get_document', 'list_documents', 'search_documents', 'chatgpt_search', 'chatgpt_fetch',
+	'get_doctype_info', 'report_list', 'report_requirements', 'get_pending_approvals', 'list_user_dashboards',
 ]
 const WRITE_TOOLS = ['create_document', 'update_document', 'delete_document', 'submit_document', 'run_workflow']
 const ANALYZE_TOOLS = ['generate_report', 'run_python_code', 'run_database_query', 'analyze_business_data', 'extract_file_content']
 const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
+const BROWSER_TOOLS = [
+	'send_email', 'generate_document', 'browser_get_form_data', 'browser_get_page_context',
+	'browser_capture_diagnostics', 'browser_navigate_to', 'browser_take_screenshot', 'browser_wait_for_page',
+]
+
+// Tools that genuinely mutate a record or send something outward — these get
+// the "requires approval" tag wherever they land in the index below.
+const APPROVAL_TOOLS = new Set([...WRITE_TOOLS, ...DASH_TOOLS, 'send_email', 'generate_document'])
+
+const RAW_GROUPS = [
+	{ label: 'Read', tools: READ_TOOLS },
+	{ label: 'Write', tools: WRITE_TOOLS },
+	{ label: 'Reports & analysis', tools: ANALYZE_TOOLS },
+	{ label: 'Dashboards', tools: DASH_TOOLS },
+	{ label: 'Browser & messaging', tools: BROWSER_TOOLS },
+]
+
+// Every entry number below is derived from the array lengths above, not
+// hand-offset — so the index (and the "N tools" headline) renumbers itself
+// the moment a tool is added or removed, instead of quietly going stale.
+const TOOL_GROUPS = computed(() => {
+	let n = 0
+	return RAW_GROUPS.map((group) => {
+		const offset = n
+		n += group.tools.length
+		return { ...group, offset }
+	})
+})
+const totalTools = computed(() => RAW_GROUPS.reduce((sum, group) => sum + group.tools.length, 0))
+const toolCol1 = computed(() => TOOL_GROUPS.value.slice(0, 2))
+const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 </script>
 
 <template>
@@ -48,7 +82,8 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 
 					<p class="sub">
 						FAC is an open-source MCP server for Frappe and ERPNext. Point Claude, Cursor,
-						or ChatGPT at your ERP — 24 tools, OAuth-scoped, every action journaled.
+						or ChatGPT at your ERP — {{ totalTools }} tools, OAuth-scoped, every write behind
+						an approval gate, every action journaled.
 					</p>
 
 					<div class="cta-row">
@@ -58,33 +93,80 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 					</div>
 				</div>
 
-				<!-- The Posting: a slip laid on the sheet -->
+				<!-- The Posting: a write, paused at the gate, then journaled -->
 				<div class="posting" aria-hidden="true">
 					<div class="post-head">
-						<span>Date</span><span>Particulars</span><span class="num">Days</span><span class="num">Amount</span>
+						<span>Date</span><span>Particulars</span><span class="status">Status</span><span class="num">Amount</span>
 					</div>
 					<div class="post-query">
-						<span class="q-text">&gt; which customers are overdue past 60 days?</span><span class="caret"></span>
+						<span class="q-text">&gt; mark SINV-2026-00311 paid — Meridian Traders</span><span class="caret"></span>
 					</div>
 					<div class="post-row r1">
-						<span class="mono dim">07-05</span><span>Meridian Traders <span class="mono dim">SINV-2026-00311</span></span><span class="num mono">94</span><span class="num mono">₹4,82,500</span>
+						<span class="mono dim">07-05</span><span>Payment Entry <span class="mono dim">against SINV-2026-00311</span></span><span class="status mono">awaiting approval</span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="post-row r2">
-						<span class="mono dim">07-05</span><span>Northline Exports <span class="mono dim">SINV-2026-00287</span></span><span class="num mono">81</span><span class="num mono">₹2,74,300</span>
+						<span class="mono dim">07-05</span><span>Approved by R. Iyer <span class="mono dim">Accounts Manager</span></span><span class="status mono">approved</span><span class="num mono">—</span>
 					</div>
 					<div class="post-row r3">
-						<span class="mono dim">07-05</span><span>Kavya Textiles <span class="mono dim">SINV-2026-00252</span></span><span class="num mono">73</span><span class="num mono">₹1,58,600</span>
-					</div>
-					<div class="post-row r4">
-						<span class="mono dim">07-05</span><span>Orbit Hardware <span class="mono dim">SINV-2026-00198</span></span><span class="num mono">65</span><span class="num mono">₹68,500</span>
+						<span class="mono dim">07-05</span><span>PE-2026-00142 <span class="mono dim">posted to General Ledger</span></span><span class="status mono">posted</span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="post-total">
-						<span></span><span>4 invoices overdue</span><span></span><span class="num mono">₹9,83,900</span>
+						<span></span><span>1 write, journaled</span><span></span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="stamp">
-						LOGGED #AT-88213 · run_report · 2 tools · 0 writes · scope: read · 2026-07-05 14:32 IST
+						LOGGED #AT-88214 · submit_document · 1 write · approved by R. Iyer · scope: write · 2026-07-05 14:41 IST
 					</div>
 				</div>
+			</div>
+		</section>
+
+		<!-- ================= THE LIFE OF ONE REQUEST ================= -->
+		<section class="sheet journey">
+			<div class="margin-rule" aria-hidden="true"></div>
+			<div class="journey-inner">
+				<p class="overline">The life of one request</p>
+				<h2 class="journey-title">Five entries, one posting.</h2>
+				<ol class="journey-list">
+					<li class="journey-step">
+						<span class="step-no mono" aria-hidden="true">01</span>
+						<div class="step-body">
+							<p class="step-k mono">The ask</p>
+							<p>You ask, in plain language, from Claude, Cursor, or ChatGPT — "mark this invoice as paid" or "which customers are overdue past 60 days?"</p>
+						</div>
+					</li>
+					<li class="journey-step">
+						<span class="step-no mono" aria-hidden="true">02</span>
+						<div class="step-body">
+							<p class="step-k mono">OAuth 2.0 + PKCE</p>
+							<p>The model signs in as a real user — Authorization Code flow, dynamic client registration, automatic token refresh.</p>
+						</div>
+					</li>
+					<li class="journey-step">
+						<span class="step-no mono" aria-hidden="true">03</span>
+						<div class="step-body">
+							<p class="step-k mono">Your roles, your rows</p>
+							<p>Every tool call is scoped to that user's Frappe and ERPNext permissions. Can't see it in the Desk? Can't see it through FAC.</p>
+						</div>
+					</li>
+					<li class="journey-step">
+						<span class="step-no mono" aria-hidden="true">04</span>
+						<div class="step-body">
+							<p class="step-k mono">The approval gate</p>
+							<p>
+								Writes pause before they land. A human with the right role reviews the call
+								and approves or rejects it — nothing changes in your books until they do.
+								<span class="approve-tag">pauses for approval</span>
+							</p>
+						</div>
+					</li>
+					<li class="journey-step">
+						<span class="step-no mono" aria-hidden="true">05</span>
+						<div class="step-body">
+							<p class="step-k mono">Assistant Audit Log</p>
+							<p>Caller, tool, arguments, result — every call posted to the record. The books balance because nothing skips the journal.</p>
+						</div>
+					</li>
+				</ol>
 			</div>
 		</section>
 
@@ -110,15 +192,15 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 					<a class="link-ink" :href="withBase('/getting-started/quick-start')">Connect a client →</a>
 				</div>
 				<div class="page page-right">
-					<div class="soon-stamp" aria-hidden="true">FAC 3.0 — Coming soon</div>
 					<p class="page-tag">FAC Chat + FAC Cloud</p>
 					<h2>Chat, inside Frappe</h2>
 					<p class="page-sub">
-						A chat widget on every Desk page and a full-screen SPA at
+						Shipped in FAC 3.0: a chat widget on every Desk page and a full-screen SPA at
 						<code>/copilot</code> — streaming, memory, RAG and workflows on one managed
-						FAC Cloud subscription. Ships disabled by default.
+						FAC Cloud subscription.
 					</p>
 					<div class="mini-post">
+						<div class="mini-row"><span class="mono dim">status</span><span>live in FAC 3.0</span></div>
 						<div class="mini-row"><span class="mono dim">widget</span><span>every Desk page</span></div>
 						<div class="mini-row"><span class="mono dim">/copilot</span><span>full-screen chat</span></div>
 						<div class="mini-row"><span class="mono dim">billing</span><span>one subscription, all models</span></div>
@@ -128,45 +210,33 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 			</div>
 		</section>
 
-		<!-- ================= THE TOOL INDEX: 24 entries, one journal ================= -->
+		<!-- ================= THE TOOL INDEX: one journal ================= -->
 		<section class="sheet index">
 			<div class="index-inner">
-				<p class="overline">24 tools, one journal</p>
+				<p class="overline">{{ totalTools }} tools, one journal</p>
 				<h2 class="index-title">Everything posts through the same ledger.</h2>
 				<p class="index-sub">
 					Every call runs as the signed-in user, inside their roles and permissions,
-					and lands in the <b>Assistant Audit Log</b>. Writes can require approval.
+					and lands in the <b>Assistant Audit Log</b>. Writes pause for approval before they post.
 				</p>
 				<div class="tool-grid">
-					<div class="tool-group">
-						<p class="tool-head">Read</p>
-						<div v-for="(t, i) in READ_TOOLS" :key="t" class="tool-row">
-							<span class="tool-no mono">{{ String(i + 1).padStart(2, '0') }}</span>
-							<span class="tool-name mono">{{ t }}</span>
+					<div class="tool-col1">
+						<div v-for="group in toolCol1" :key="group.label" class="tool-group">
+							<p class="tool-head">{{ group.label }}</p>
+							<div v-for="(t, i) in group.tools" :key="t" class="tool-row">
+								<span class="tool-no mono">{{ String(group.offset + i + 1).padStart(2, '0') }}</span>
+								<span class="tool-name mono">{{ t }}</span>
+								<span v-if="APPROVAL_TOOLS.has(t)" class="approve-tag">requires approval</span>
+							</div>
 						</div>
 					</div>
 					<div class="tool-col2">
-						<div class="tool-group">
-							<p class="tool-head">Write</p>
-							<div v-for="(t, i) in WRITE_TOOLS" :key="t" class="tool-row">
-								<span class="tool-no mono">{{ String(i + 13).padStart(2, '0') }}</span>
+						<div v-for="group in toolCol2" :key="group.label" class="tool-group">
+							<p class="tool-head">{{ group.label }}</p>
+							<div v-for="(t, i) in group.tools" :key="t" class="tool-row">
+								<span class="tool-no mono">{{ String(group.offset + i + 1).padStart(2, '0') }}</span>
 								<span class="tool-name mono">{{ t }}</span>
-								<span class="approve-tag">requires approval</span>
-							</div>
-						</div>
-						<div class="tool-group">
-							<p class="tool-head">Reports &amp; analysis</p>
-							<div v-for="(t, i) in ANALYZE_TOOLS" :key="t" class="tool-row">
-								<span class="tool-no mono">{{ String(i + 18).padStart(2, '0') }}</span>
-								<span class="tool-name mono">{{ t }}</span>
-							</div>
-						</div>
-						<div class="tool-group">
-							<p class="tool-head">Dashboards</p>
-							<div v-for="(t, i) in DASH_TOOLS" :key="t" class="tool-row">
-								<span class="tool-no mono">{{ String(i + 23).padStart(2, '0') }}</span>
-								<span class="tool-name mono">{{ t }}</span>
-								<span class="approve-tag">requires approval</span>
+								<span v-if="APPROVAL_TOOLS.has(t)" class="approve-tag">requires approval</span>
 							</div>
 						</div>
 					</div>
@@ -174,26 +244,25 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 			</div>
 		</section>
 
-		<!-- ================= TRUST: how the books stay clean ================= -->
-		<section class="trust">
-			<p class="overline">How the books stay clean</p>
-			<div class="trust-row">
-				<div class="trust-cell">
-					<p class="trust-k mono">OAuth 2.0 + PKCE</p>
-					<p>The model signs in as a real user — Authorization Code flow, dynamic client registration, automatic token refresh.</p>
+		<!-- ================= INSTALL ================= -->
+		<section class="install">
+			<p class="overline">Install</p>
+			<h2 class="install-title">Two ways to run it.</h2>
+			<div class="panel-row">
+				<div class="panel-cell">
+					<p class="panel-k mono">Self-hosted</p>
+					<div class="config">
+						<div class="config-name">bench</div>
+						<pre>bench get-app https://github.com/buildswithpaul/Frappe_Assistant_Core --branch main
+bench --site your-site.local install-app frappe_assistant_core</pre>
+					</div>
+					<a class="link-ink" :href="withBase('/getting-started/installation')">Full installation guide →</a>
 				</div>
-				<div class="trust-cell">
-					<p class="trust-k mono">Your roles, your rows</p>
-					<p>Every tool call is scoped to that user's Frappe and ERPNext permissions. Can't see it in the Desk? Can't see it through FAC.</p>
+				<div class="panel-cell">
+					<p class="panel-k mono">Managed</p>
+					<p>Skip the server entirely — one click from the Frappe Cloud marketplace installs and updates FAC for you, free of cost.</p>
+					<a class="link-ink" href="https://cloud.frappe.io/marketplace/apps/frappe_assistant_core">Install on Frappe Cloud →</a>
 				</div>
-				<div class="trust-cell">
-					<p class="trust-k mono">Assistant Audit Log</p>
-					<p>Caller, tool, arguments, result — every call posted to the record. The books balance because nothing skips the journal.</p>
-				</div>
-			</div>
-			<div class="cloud-line">
-				<span>Hosted on Frappe Cloud? One-click install from the marketplace, free of cost.</span>
-				<a class="link-ink" href="https://cloud.frappe.io/marketplace/apps/frappe_assistant_core">Install on Frappe Cloud →</a>
 			</div>
 		</section>
 
@@ -326,7 +395,7 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 	margin-top: var(--rhythm);
 }
 .post-head, .post-row, .post-total {
-	display: grid; grid-template-columns: 46px 1fr 44px 92px;
+	display: grid; grid-template-columns: 46px 1fr auto 92px;
 	gap: 10px; align-items: baseline; padding: 8px 2px;
 }
 .post-head {
@@ -335,6 +404,8 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 	border-bottom: 1px solid var(--fac-rule);
 }
 .num { text-align: right; }
+.status { text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; white-space: nowrap; }
+.post-row .status, .post-total .status { color: var(--fac-ink); font-size: 11px; }
 .post-query {
 	font-family: var(--fac-mono); font-size: 13px; padding: 12px 2px 10px;
 	border-bottom: 1px solid var(--fac-rule); color: var(--fac-ink);
@@ -355,8 +426,7 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 .post-row { border-bottom: 1px solid var(--fac-rule); animation: post 0.45s ease-out both; }
 .post-row .mono { font-size: 12.5px; }
 .post-row span:nth-child(2) .mono.dim { display: block; font-size: 11px; margin-top: 1px; }
-.r1 { animation-delay: 1.8s; } .r2 { animation-delay: 1.92s; }
-.r3 { animation-delay: 2.04s; } .r4 { animation-delay: 2.16s; }
+.r1 { animation-delay: 1.8s; } .r2 { animation-delay: 1.92s; } .r3 { animation-delay: 2.04s; }
 @keyframes post { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .post-total {
 	font-weight: 600; border-top: 3px double var(--fac-ink-text);
@@ -372,6 +442,35 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 	animation: stamp-thump 0.2s ease-out 2.5s both;
 }
 @keyframes stamp-thump { from { opacity: 0; transform: rotate(-3deg) scale(1.15); } to { opacity: 1; transform: rotate(-3deg) scale(1); } }
+
+/* ============ THE LIFE OF ONE REQUEST ============ */
+.journey { padding: clamp(48px, 7vw, 88px) 24px; }
+.journey-inner { max-width: var(--maxw); margin: 0 auto; padding-left: 48px; }
+.journey-title {
+	font-family: var(--fac-display); font-size: clamp(26px, 3.2vw, 38px);
+	letter-spacing: -0.025em; margin: 0 0 34px; border: 0; padding: 0;
+}
+.journey-list {
+	list-style: none; margin: 0; padding: 0; max-width: 74ch;
+	border-left: 2px solid var(--fac-rule);
+}
+.journey-step {
+	position: relative; display: flex; gap: 16px;
+	padding: 22px 0 22px 30px; border-bottom: 1px solid var(--fac-rule);
+}
+.journey-step:last-child { border-bottom: 0; }
+.step-no {
+	position: absolute; left: -12px; top: 22px;
+	width: 23px; height: 23px; border-radius: 50%;
+	background: var(--fac-card); border: 2px solid var(--fac-ink);
+	color: var(--fac-ink); font-size: 10px;
+	display: flex; align-items: center; justify-content: center;
+	flex: none;
+}
+.step-body { min-width: 0; }
+.step-k { font-size: 13px; font-weight: 600; color: var(--fac-ink); margin: 0 0 8px; }
+.step-body p:last-child { margin: 0; font-size: 14.5px; line-height: 1.65; color: color-mix(in srgb, var(--fac-ink-text) 78%, transparent); }
+.step-body .approve-tag { margin-left: 8px; vertical-align: 1px; }
 
 /* ============ TWO WAYS: facing pages ============ */
 .spread { padding: clamp(48px, 7vw, 88px) 24px; max-width: calc(var(--maxw) + 48px); margin: 0 auto; }
@@ -409,13 +508,6 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 .config pre {
 	margin: 0; padding: 14px; font-family: var(--fac-mono); font-size: 12.5px;
 	line-height: 1.6; color: var(--fac-ink-text); overflow-x: auto;
-}
-.soon-stamp {
-	position: absolute; top: 22px; right: 20px;
-	border: 1.5px solid var(--fac-red); color: var(--fac-red); border-radius: 6px;
-	font-family: var(--fac-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
-	padding: 6px 10px; transform: rotate(3deg);
-	opacity: 0.85;
 }
 .mini-post { border-top: 1px solid var(--fac-rule); margin-bottom: 18px; }
 .mini-row {
@@ -456,20 +548,20 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 	border-radius: 4px; padding: 2px 7px; white-space: nowrap;
 }
 
-/* ============ TRUST ============ */
-.trust { padding: clamp(48px, 7vw, 80px) 24px; max-width: calc(var(--maxw) + 48px); margin: 0 auto; }
-.trust-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.trust-cell {
+/* ============ INSTALL ============ */
+.install { padding: clamp(48px, 7vw, 80px) 24px; max-width: calc(var(--maxw) + 48px); margin: 0 auto; }
+.install-title {
+	font-family: var(--fac-display); font-size: clamp(24px, 2.8vw, 32px);
+	letter-spacing: -0.02em; margin: 0 0 28px; border: 0; padding: 0;
+}
+.panel-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.panel-cell {
 	border: 1px solid var(--fac-rule); border-radius: 4px;
 	background: var(--fac-card); padding: 24px;
 }
-.trust-k { font-size: 13px; font-weight: 600; color: var(--fac-ink); margin: 0 0 10px; }
-.trust-cell p:last-child { margin: 0; font-size: 14.5px; line-height: 1.65; color: color-mix(in srgb, var(--fac-ink-text) 78%, transparent); }
-.cloud-line {
-	display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
-	border-top: 1px solid var(--fac-rule); margin-top: 28px; padding-top: 22px;
-	font-size: 15px; color: color-mix(in srgb, var(--fac-ink-text) 80%, transparent);
-}
+.panel-k { font-size: 13px; font-weight: 600; color: var(--fac-ink); margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.panel-cell > p:not(.panel-k) { margin: 0 0 16px; font-size: 14.5px; line-height: 1.65; color: color-mix(in srgb, var(--fac-ink-text) 78%, transparent); }
+.panel-cell .config { margin-bottom: 16px; }
 
 /* ============ COLOPHON ============ */
 .colophon { border-top: 1px solid var(--fac-rule); background: var(--vp-c-bg-alt); padding: 36px 24px; }
@@ -492,20 +584,17 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 /* ============ RESPONSIVE ============ */
 @media (max-width: 960px) {
 	.hero-grid { grid-template-columns: 1fr; padding-left: 24px; }
+	.journey-inner { padding-left: 24px; }
 	.index-inner { padding-left: 24px; }
 	.margin-rule { left: 40px; }
 	.pages { grid-template-columns: 1fr; }
 	.pages::before { display: none; }
 	.page-right { border-top: 1px solid var(--fac-rule); }
-	.trust-row { grid-template-columns: 1fr; }
 	.tool-grid { grid-template-columns: 1fr; }
+	.panel-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
 	.fac-landing { --rhythm: 0px; }
-	.soon-stamp {
-		position: static; display: inline-block;
-		margin-bottom: 12px; transform: rotate(-1.5deg);
-	}
 	.tool-row { flex-wrap: wrap; }
 	.approve-tag { margin-left: 34px; }
 	.sheet { background: var(--fac-paper); }
@@ -513,17 +602,30 @@ const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 	.cta-row .btn-ink, .cta-row .btn-ghost { flex: 1 1 auto; justify-content: center; }
 	.stamp { transform: none; }
 	@keyframes stamp-thump { from { opacity: 0; transform: scale(1.15); } to { opacity: 1; transform: scale(1); } }
-	.post-head, .post-row, .post-total { grid-template-columns: 1fr 44px 88px; }
+	/* Particulars gets the full row width on its own line; status + amount
+	   drop to a second line — three columns side by side left "Payment
+	   Entry" wrapping mid-word against a squeezed particulars column. */
+	.post-head, .post-row, .post-total {
+		grid-template-columns: 1fr auto;
+		grid-template-areas: "particulars particulars" "status amount";
+		row-gap: 4px; padding: 10px 2px;
+	}
 	.post-head span:first-child, .post-row .mono.dim:first-child, .post-total span:first-child { display: none; }
+	.post-head span:nth-child(2), .post-row span:nth-child(2), .post-total span:nth-child(2) { grid-area: particulars; }
+	.post-head span:nth-child(3), .post-row span:nth-child(3), .post-total span:nth-child(3) { grid-area: status; justify-self: start; }
+	.post-head span:nth-child(4), .post-row span:nth-child(4), .post-total span:nth-child(4) { grid-area: amount; justify-self: end; }
 	/* let the question wrap instead of typing — nowrap would force overflow */
 	.post-query { white-space: normal; }
 	.q-text { animation: none; max-width: none; white-space: normal; display: inline; }
+	.journey-list { border-left-width: 1px; }
+	.journey-step { padding-left: 24px; gap: 10px; }
+	.step-no { width: 20px; height: 20px; left: -10px; font-size: 9px; }
 }
 
 /* ============ REDUCED MOTION: the completed state ============ */
 @media (prefers-reduced-motion: reduce) {
 	.sig-wipe, .flourish path, .q-text, .post-row, .post-total, .stamp { animation: none !important; }
-	
+
 	/* the blinking caret is the one permitted motion */
 }
 </style>

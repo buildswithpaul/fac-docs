@@ -1,7 +1,7 @@
 ---
 layout: page
 title: FAC — Talk to your ERP
-description: FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an MCP server with OAuth, 24 tools, and a full audit trail. Free BYO-LLM, with FAC Chat on FAC Cloud coming in 3.0.
+description: FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an OAuth-scoped MCP server with approval-gated writes and a full audit trail, free to self-host or run with FAC Chat on FAC Cloud.
 sidebar: false
 aside: false
 ---
