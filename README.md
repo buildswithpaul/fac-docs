@@ -63,6 +63,13 @@ Pushes to `main` are auto-deployed by `.github/workflows/deploy.yml`:
 - New sections need an entry in `docs/.vitepress/config.ts` `sidebar`
 - Frontmatter is optional, but `title:` overrides the H1 in the sidebar
 
+## Drift register
+
+Corrections made when this site's content disagreed with the shipped app. One line each, newest first.
+
+- **2026-09-24** — FAC 3.0 went GA (`v3.0.0`, tag cut 2026-09-23). Removed all "public beta" / "rough edges" framing from `fac-chat/index.md`; the FAC Chat install instructions told readers to `bench get-app --branch beta` / `git checkout beta`, but `public/beta` sits at `3.0.0-beta.3` — **older** than the `main`/`v3.0.0` stable release, so following them was a downgrade. All install instructions across the site now point at `main`/stable.
+- **2026-09-24** — `fac-chat/index.md` now states plainly that the pre-write approval gate (pause + approve/reject card on `create_document`/`update_document`/`delete_document`/`submit_document`) is a **FAC Chat-only** feature. Verified against the app repo: `submit_document.py`/`create_document.py` have no approval logic, every `requires_approval` enforcement point lives under `frappe_assistant_core/chat/`, and `get_pending_approvals` queries Frappe's own Workflow Actions, not an AI approval gate. Over the plain MCP server a write executes immediately, inside the caller's Frappe permissions.
+
 ## License
 
 Documentation content: same as the project (AGPL-3.0).

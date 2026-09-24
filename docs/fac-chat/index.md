@@ -1,18 +1,9 @@
 ---
 title: FAC Chat
-description: FAC Chat brings an AI assistant inside Frappe — a chat widget on every Desk page and a full-screen SPA at /copilot, powered by FAC Cloud. Available now in the FAC 3.0 public beta, disabled by default.
+description: FAC Chat brings an AI assistant inside Frappe — a chat widget on every Desk page and a full-screen SPA at /copilot, powered by FAC Cloud. Ships in FAC 3.0, disabled by default.
 ---
 
 # FAC Chat
-
-::: tip FAC 3.0 — Public beta, available now
-FAC Chat is available today in the **FAC 3.0 public beta** (`v3.0.0-beta.1`). You can
-install it from the `beta` branch — see [Install the beta](#install-the-beta) below.
-
-It ships **disabled by default**, and nothing about your existing MCP setup changes
-when you upgrade. Being a beta, expect rough edges; please
-[report anything you hit](https://github.com/buildswithpaul/Frappe_Assistant_Core/issues).
-:::
 
 **FAC Chat is an opt-in, in-Frappe AI chat assistant** powered by our managed
 **FAC Cloud** subscription. Where the MCP server lets external LLM clients
@@ -65,18 +56,31 @@ automation. Conversations are mirrored into your own Frappe database; the assist
 authenticates as a real Frappe user, so it only touches data that user can already
 see, and every action stays inside your existing permissions and audit trail.
 
-## Install the beta
+## Writes pause for approval — a FAC Chat-only gate
 
-FAC Chat ships in the 3.0 line, which is currently on the `beta` release channel. On a
-self-hosted bench:
+Over the plain MCP server, a write runs the instant the model calls it, inside the
+caller's Frappe permissions — there is no pause, no card, no approver. FAC Chat adds a
+human-in-the-loop step on top of that: by default, `create_document`, `update_document`,
+`delete_document`, and `submit_document` calls pause and show you an approval card
+before they land, and nothing changes in your books until you approve or reject it.
+
+Each user can change this default per tool from their own approval preferences —
+**Block**, **Ask** (the default for writes), or **Always Allow** — so a trusted
+workflow doesn't have to click through a card every time. This gate is specific to
+FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
+
+## Installing FAC Chat
+
+FAC Chat ships inside the same `frappe_assistant_core` app you already install for the
+MCP server — there is nothing extra to install. On a self-hosted bench:
 
 ```bash
 # New install
-bench get-app --branch beta https://github.com/buildswithpaul/Frappe_Assistant_Core
+bench get-app https://github.com/buildswithpaul/Frappe_Assistant_Core
 bench --site yoursite install-app frappe_assistant_core
 
-# Existing FAC 2.x install — switch to the beta channel
-cd apps/frappe_assistant_core && git fetch origin && git checkout beta && git pull
+# Existing install — upgrade to the FAC 3.0 stable release
+cd apps/frappe_assistant_core && git fetch origin && git checkout main && git pull
 cd ../.. && bench --site yoursite migrate && bench restart
 ```
 
