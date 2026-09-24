@@ -21,9 +21,12 @@ const BROWSER_TOOLS = [
 	'browser_capture_diagnostics', 'browser_navigate_to', 'browser_take_screenshot', 'browser_wait_for_page',
 ]
 
-// Tools that genuinely mutate a record or send something outward — these get
-// the "requires approval" tag wherever they land in the index below.
-const APPROVAL_TOOLS = new Set([...WRITE_TOOLS, ...DASH_TOOLS, 'send_email', 'generate_document'])
+// Tools that mutate a record or send something outward — these get the
+// "writes" tag wherever they land in the index below. Over plain MCP these
+// execute immediately, inside the caller's Frappe permissions; there is no
+// approval step here — that only exists in FAC Chat (see the journey and
+// "Two ways in" sections).
+const MUTATION_TOOLS = new Set([...WRITE_TOOLS, ...DASH_TOOLS, 'send_email', 'generate_document'])
 
 const RAW_GROUPS = [
 	{ label: 'Read', tools: READ_TOOLS },
@@ -82,8 +85,8 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 
 					<p class="sub">
 						FAC is an open-source MCP server for Frappe and ERPNext. Point Claude, Cursor,
-						or ChatGPT at your ERP — {{ totalTools }} tools, OAuth-scoped, every write behind
-						an approval gate, every action journaled.
+						or ChatGPT at your ERP — {{ totalTools }} tools, OAuth-scoped, every call inside
+						your Frappe permissions, every action journaled.
 					</p>
 
 					<div class="cta-row">
@@ -93,7 +96,7 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 					</div>
 				</div>
 
-				<!-- The Posting: a write, paused at the gate, then journaled -->
+				<!-- The Posting: a write, executed as the signed-in user, then journaled -->
 				<div class="posting" aria-hidden="true">
 					<div class="post-head">
 						<span>Date</span><span>Particulars</span><span class="status">Status</span><span class="num">Amount</span>
@@ -102,19 +105,19 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 						<span class="q-text">&gt; mark SINV-2026-00311 paid — Meridian Traders</span><span class="caret"></span>
 					</div>
 					<div class="post-row r1">
-						<span class="mono dim">07-05</span><span>Payment Entry <span class="mono dim">against SINV-2026-00311</span></span><span class="status mono">awaiting approval</span><span class="num mono">₹4,82,500</span>
+						<span class="mono dim">07-05</span><span>Payment Entry PE-2026-00142 <span class="mono dim">against SINV-2026-00311</span></span><span class="status mono">written</span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="post-row r2">
-						<span class="mono dim">07-05</span><span>Approved by R. Iyer <span class="mono dim">Accounts Manager</span></span><span class="status mono">approved</span><span class="num mono">—</span>
+						<span class="mono dim">07-05</span><span>Run as R. Iyer <span class="mono dim">Accounts Manager · within role permissions</span></span><span class="status mono">in scope</span><span class="num mono">—</span>
 					</div>
 					<div class="post-row r3">
-						<span class="mono dim">07-05</span><span>PE-2026-00142 <span class="mono dim">posted to General Ledger</span></span><span class="status mono">posted</span><span class="num mono">₹4,82,500</span>
+						<span class="mono dim">07-05</span><span>Assistant Audit Log <span class="mono dim">ref #AT-88214</span></span><span class="status mono">journaled</span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="post-total">
 						<span></span><span>1 write, journaled</span><span></span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="stamp">
-						LOGGED #AT-88214 · submit_document · 1 write · approved by R. Iyer · scope: write · 2026-07-05 14:41 IST
+						LOGGED #AT-88214 · submit_document · 1 write · as R. Iyer · scope: write · 2026-07-05 14:41 IST
 					</div>
 				</div>
 			</div>
@@ -151,11 +154,16 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 					<li class="journey-step">
 						<span class="step-no mono" aria-hidden="true">04</span>
 						<div class="step-body">
-							<p class="step-k mono">The approval gate</p>
+							<div class="step-k-row">
+								<p class="step-k mono">The approval gate</p>
+								<span class="fac-chat-tag">FAC Chat only</span>
+							</div>
 							<p>
-								Writes pause before they land. A human with the right role reviews the call
-								and approves or rejects it — nothing changes in your books until they do.
-								<span class="approve-tag">pauses for approval</span>
+								A human with the right role can review a write before it lands, and approve
+								or reject it. This gate is a FAC Chat feature — over the open-source MCP
+								server, this step doesn't run: a write executes immediately, inside the
+								caller's Frappe permissions (see the tool index below for exactly which
+								calls mutate data).
 							</p>
 						</div>
 					</li>
@@ -197,10 +205,12 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 					<p class="page-sub">
 						Shipped in FAC 3.0: a chat widget on every Desk page and a full-screen SPA at
 						<code>/copilot</code> — streaming, memory, RAG and workflows on one managed
-						FAC Cloud subscription.
+						FAC Cloud subscription. On top of everything the free MCP server already does,
+						every write pauses for a human's approval before it lands.
 					</p>
 					<div class="mini-post">
 						<div class="mini-row"><span class="mono dim">status</span><span>live in FAC 3.0</span></div>
+						<div class="mini-row"><span class="mono dim">writes</span><span>pause for approval before they land</span></div>
 						<div class="mini-row"><span class="mono dim">widget</span><span>every Desk page</span></div>
 						<div class="mini-row"><span class="mono dim">/copilot</span><span>full-screen chat</span></div>
 						<div class="mini-row"><span class="mono dim">billing</span><span>one subscription, all models</span></div>
@@ -217,7 +227,8 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 				<h2 class="index-title">Everything posts through the same ledger.</h2>
 				<p class="index-sub">
 					Every call runs as the signed-in user, inside their roles and permissions,
-					and lands in the <b>Assistant Audit Log</b>. Writes pause for approval before they post.
+					and lands in the <b>Assistant Audit Log</b>. Tools tagged <b>writes</b> change
+					records immediately — FAC Chat adds an approval gate in front of them.
 				</p>
 				<div class="tool-grid">
 					<div class="tool-col1">
@@ -226,7 +237,7 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 							<div v-for="(t, i) in group.tools" :key="t" class="tool-row">
 								<span class="tool-no mono">{{ String(group.offset + i + 1).padStart(2, '0') }}</span>
 								<span class="tool-name mono">{{ t }}</span>
-								<span v-if="APPROVAL_TOOLS.has(t)" class="approve-tag">requires approval</span>
+								<span v-if="MUTATION_TOOLS.has(t)" class="mutate-tag">writes</span>
 							</div>
 						</div>
 					</div>
@@ -236,7 +247,7 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 							<div v-for="(t, i) in group.tools" :key="t" class="tool-row">
 								<span class="tool-no mono">{{ String(group.offset + i + 1).padStart(2, '0') }}</span>
 								<span class="tool-name mono">{{ t }}</span>
-								<span v-if="APPROVAL_TOOLS.has(t)" class="approve-tag">requires approval</span>
+								<span v-if="MUTATION_TOOLS.has(t)" class="mutate-tag">writes</span>
 							</div>
 						</div>
 					</div>
@@ -468,9 +479,17 @@ bench --site your-site.local install-app frappe_assistant_core</pre>
 	flex: none;
 }
 .step-body { min-width: 0; }
+.step-k-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .step-k { font-size: 13px; font-weight: 600; color: var(--fac-ink); margin: 0 0 8px; }
 .step-body p:last-child { margin: 0; font-size: 14.5px; line-height: 1.65; color: color-mix(in srgb, var(--fac-ink-text) 78%, transparent); }
-.step-body .approve-tag { margin-left: 8px; vertical-align: 1px; }
+/* Unmissable, not a footnote: the one step that doesn't apply to the free
+   MCP server gets a visible badge right next to its heading. */
+.fac-chat-tag {
+	font-family: var(--fac-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+	background: var(--fac-ink); color: #fff; border-radius: 4px;
+	padding: 3px 8px; margin-bottom: 8px; white-space: nowrap;
+}
+.dark .fac-chat-tag { color: #0c141e; }
 
 /* ============ TWO WAYS: facing pages ============ */
 .spread { padding: clamp(48px, 7vw, 88px) 24px; max-width: calc(var(--maxw) + 48px); margin: 0 auto; }
@@ -541,7 +560,7 @@ bench --site your-site.local install-app frappe_assistant_core</pre>
 .tool-row:hover { background: var(--fac-fill); }
 .tool-no { font-size: 11px; color: color-mix(in srgb, var(--fac-ink-text) 40%, transparent); }
 .tool-name { font-size: 13.5px; }
-.approve-tag {
+.mutate-tag {
 	margin-left: auto; font-family: var(--fac-mono); font-size: 9.5px;
 	text-transform: uppercase; letter-spacing: 0.04em;
 	border: 1px solid var(--fac-ink); color: var(--fac-ink);
@@ -596,7 +615,7 @@ bench --site your-site.local install-app frappe_assistant_core</pre>
 @media (max-width: 640px) {
 	.fac-landing { --rhythm: 0px; }
 	.tool-row { flex-wrap: wrap; }
-	.approve-tag { margin-left: 34px; }
+	.mutate-tag { margin-left: 34px; }
 	.sheet { background: var(--fac-paper); }
 	.margin-rule { display: none; }
 	.cta-row .btn-ink, .cta-row .btn-ghost { flex: 1 1 auto; justify-content: center; }
