@@ -28,21 +28,27 @@ Each plugin has an individual configuration record:
 
 | Plugin | Status | Description | Tools |
 |--------|--------|-------------|-------|
-| **Core** | Always Enabled | Document CRUD, search, metadata, reports, workflow | 17 |
+| **Core** | Always Enabled | Document CRUD, search, metadata, reports, workflow | 15 |
 | **Data Science** | Optional | Python execution, SQL, statistical analysis, file extraction | 4 |
+| **FACO Tools** | Optional | Email, document generation, browser automation — usable standalone over MCP or via FAC Chat | 8 |
 | **Visualization** | Optional | Dashboards and charts | 3 |
 | **Custom Tools** | Always Enabled | Discovers tools registered by other apps via the `assistant_tools` hook | — |
+
+30 tools ship in total across these plugins. See [Tool Reference](../api/tool-reference) for the full per-tool list.
 
 ### 3. Plugin Architecture
 
 ```
 plugins/
-├── core/                  # Always enabled — 17 tools
+├── core/                  # Always enabled — 15 tools
 │   ├── plugin.py
 │   └── tools/             # create_document.py, get_document.py, run_workflow.py, ...
 ├── data_science/          # Optional — 4 tools
 │   ├── plugin.py
 │   └── tools/             # run_python_code.py, run_database_query.py, ...
+├── faco/                  # Optional — 8 tools
+│   ├── plugin.py
+│   └── tools/             # send_email.py, generate_document.py, browser_*.py, ...
 ├── visualization/         # Optional — 3 tools
 │   ├── plugin.py
 │   └── tools/             # create_dashboard.py, create_dashboard_chart.py, list_user_dashboards.py
@@ -107,7 +113,7 @@ print(stats)
 #     'enabled_plugins': 3,
 #     'disabled_plugins': 2,
 #     'plugins': [
-#         {'name': 'core', 'display_name': 'Core', 'enabled': True, 'tool_count': 19},
+#         {'name': 'core', 'display_name': 'Core', 'enabled': True, 'tool_count': 15},
 #         {'name': 'visualization', 'display_name': 'Visualization', 'enabled': True, 'tool_count': 3},
 #         ...
 #     ]

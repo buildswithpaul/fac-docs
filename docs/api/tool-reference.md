@@ -1,17 +1,18 @@
 # Tool Reference
 
-Frappe Assistant Core ships **24 built-in tools across 4 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
+Frappe Assistant Core ships **30 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
 
 | Plugin | Tools | Description |
 |---|---|---|
-| `core` | 17 | Always enabled. Document CRUD, search, metadata, reports, workflow. |
-| `data_science` | 4 | Python execution, SQL queries, statistical analysis, file content extraction. |
-| `visualization` | 3 | Dashboards and charts. |
+| `core` | 15 | Always enabled. Document CRUD, search, metadata, reports, workflow. |
+| `data_science` | 4 | Optional. Python execution, SQL queries, statistical analysis, file content extraction. |
+| `faco` | 8 | Optional. Email, document generation, and browser automation — migrated from `frappe_assistant_copilot`. Usable standalone over MCP, or as part of FAC Chat. |
+| `visualization` | 3 | Optional. Dashboards and charts. |
 | `custom_tools` | — | Mechanism for external Frappe apps to register their own tools via the `assistant_tools` hook. No shipped tools. |
 
 To toggle plugins, see [Plugin Management](../guides/plugin-management). To control which tools each role can call, see [Tool Management](../guides/tool-management).
 
-## Core plugin (17 tools)
+## Core plugin (15 tools)
 
 Always enabled. Provides essential Frappe operations.
 
@@ -26,13 +27,15 @@ Always enabled. Provides essential Frappe operations.
 | `delete_document` | Delete a document (`force=true` to ignore links) |
 | `list_documents` | Paginated list with filters, fields, and ordering |
 
-### Search (5)
+### Search (3)
+
+FAC 3.0 collapsed the four search tools that older versions shipped (`search`,
+`search_doctype`, `search_link`, a bare `fetch`) into a single `search_documents`
+tool, plus the two OpenAI-compatible adapters below that wrap it.
 
 | Tool | Purpose |
 |---|---|
-| `search_documents` | Global text search across common DocTypes |
-| `search_doctype` | Text search within one DocType |
-| `search_link` | Link-field autocomplete search (Frappe's standard link search) |
+| `search_documents` | Text search across DocTypes |
 | `chatgpt_search` | OpenAI MCP-compatible `search` adapter — wraps `search_documents` and returns `{id, title, url}` items |
 | `chatgpt_fetch` | OpenAI MCP-compatible `fetch` adapter — returns full document content as `{id, title, text, url, metadata}` |
 
@@ -55,7 +58,7 @@ Always enabled. Provides essential Frappe operations.
 | Tool | Purpose |
 |---|---|
 | `run_workflow` | Trigger a workflow action (`Approve`, `Reject`, etc.) on a document |
-| `get_pending_approvals` | List documents awaiting the current user's workflow action |
+| `get_pending_approvals` | List documents awaiting the current user's workflow action — this queries Frappe's own Workflow Actions, not an AI approval gate (see [FAC Chat](../fac-chat/) for that) |
 
 ## Data Science plugin (4 tools)
 
@@ -69,6 +72,27 @@ Optional. Requires `pandas` and `numpy`.
 | `extract_file_content` | File read | OCR and text extraction from File DocType attachments. Supports PDF, images, DOCX, XLSX, TXT. Backend is PaddleOCR (default) or Ollama vision (configurable). |
 
 See [Python Code Orchestration](../guides/python-code-orchestration) and [Code Execution Security](../guides/code-execution-security) for the sandbox details.
+
+## FACO plugin (8 tools)
+
+Optional. Tools migrated from `frappe_assistant_copilot` — email, document generation,
+and browser automation. Available to MCP clients (Claude Desktop, Cursor, etc.) and to
+FAC Chat alike; you can enable this plugin standalone over MCP without FAC Chat.
+
+| Tool | Purpose |
+|---|---|
+| `send_email` | Queue an email via the site's Email Account |
+| `generate_document` | Render rich-block content to an HTML/PDF document |
+| `browser_get_form_data` | Read form field values from the user's current page |
+| `browser_get_page_context` | Get structured info about the user's current page |
+| `browser_capture_diagnostics` | Collect console errors, network errors, and a screenshot from the user's browser |
+| `browser_navigate_to` | Navigate the user's browser to a Frappe route |
+| `browser_take_screenshot` | Capture a screenshot of the user's current page |
+| `browser_wait_for_page` | Wait for the user's page to finish loading |
+
+The browser tools require a connected client session (the FAC Chat widget, or an MCP
+client with the matching browser bridge) — they act on the user's own browser, not on
+the server.
 
 ## Visualization plugin (3 tools)
 
@@ -90,6 +114,7 @@ Per-tool `inputSchema`, return shape, and behaviour notes live in the source rep
 
 - [`plugins/core/tools/`](https://github.com/buildswithpaul/Frappe_Assistant_Core/tree/main/frappe_assistant_core/plugins/core/tools)
 - [`plugins/data_science/tools/`](https://github.com/buildswithpaul/Frappe_Assistant_Core/tree/main/frappe_assistant_core/plugins/data_science/tools)
+- [`plugins/faco/tools/`](https://github.com/buildswithpaul/Frappe_Assistant_Core/tree/main/frappe_assistant_core/plugins/faco/tools)
 - [`plugins/visualization/tools/`](https://github.com/buildswithpaul/Frappe_Assistant_Core/tree/main/frappe_assistant_core/plugins/visualization/tools)
 
 The authoritative `inputSchema` for any tool is in its Python file's `__init__`.

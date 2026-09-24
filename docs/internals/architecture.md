@@ -30,12 +30,16 @@ graph TB
         end
 
         subgraph "Plugin System"
-            subgraph "Core Plugin - Always Enabled (17 tools)"
-                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search tools (documents, doctype, link, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)"]
+            subgraph "Core Plugin - Always Enabled (15 tools)"
+                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search (search_documents, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)"]
             end
 
             subgraph "Data Science Plugin - Optional (4 tools)"
                 DataScienceTools["run_python_code<br/>analyze_business_data<br/>run_database_query<br/>extract_file_content"]
+            end
+
+            subgraph "FACO Plugin - Optional (8 tools)"
+                FacoTools["send_email<br/>generate_document<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page"]
             end
 
             subgraph "Visualization Plugin - Optional (3 tools)"
@@ -398,11 +402,12 @@ Essential functionality that's always available:
    - List and bulk operations
    - Transaction support
 
-2. **Search Tools** (`plugins/core/tools/search_*.py`)
+2. **Search Tools** (`plugins/core/tools/search_documents.py`, `chatgpt_search.py`, `chatgpt_fetch.py`)
 
-   - Global search across all DocTypes
-   - DocType-specific search
-   - Link field search and filtering
+   - `search_documents` — text search across DocTypes
+   - `chatgpt_search` / `chatgpt_fetch` — OpenAI MCP-compatible adapters wrapping the above
+   - FAC 3.0 collapsed the previous four search tools (`search`, `search_doctype`,
+     `search_link`, `fetch`) into `search_documents`
 
 3. **Metadata Tools** (`plugins/core/tools/metadata_*.py`)
 
@@ -453,6 +458,25 @@ Advanced analytics, visualization, and file processing capabilities:
 
 **Dependencies:** pandas, numpy, matplotlib, seaborn, plotly, scipy, pypdf, Pillow, python-docx, pytesseract
 **Environment Validation:** Automatic dependency checking on plugin load
+
+#### **FACO Plugin** (`plugins/faco/`) - Optional
+
+Tools migrated from `frappe_assistant_copilot` — email, document generation, and
+browser automation. Usable standalone over MCP, or as part of FAC Chat:
+
+1. **Messaging & Documents** (`send_email.py`, `generate_document.py`)
+
+   - Queue email via the site's Email Account
+   - Render rich-block content to an HTML/PDF document
+
+2. **Browser Tools** (`browser_*.py`)
+
+   - `browser_get_form_data`, `browser_get_page_context` — read the user's current page
+   - `browser_capture_diagnostics` — console/network errors + a screenshot
+   - `browser_navigate_to`, `browser_take_screenshot`, `browser_wait_for_page` — drive the user's browser
+
+   These act on the connected client's own browser session (the FAC Chat widget, or
+   an MCP client with the matching browser bridge), not on the server.
 
 #### **Visualization Plugin** (`plugins/visualization/`) - Optional
 
@@ -591,7 +615,7 @@ Layer 6: Audit Trail & Monitoring
 
 **1. Role-Based Access Control**
 
-FAC ships 24 built-in tools across 4 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
+FAC ships 30 built-in tools across 5 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
 
 - **System Manager**: All tools, including privileged ones like `run_python_code` and `run_database_query`
 - **Assistant Admin**: Read/write tools across all enabled plugins; privileged tools by configuration

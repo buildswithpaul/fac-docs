@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 const SITE = 'https://docs.assistantcore.cloud'
 const OG_DESCRIPTION =
-	'Talk to your ERP. FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an MCP server with OAuth, 24 tools, and a full audit trail.'
+	'Talk to your ERP. FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an MCP server with OAuth, 30 tools, and a full audit trail.'
 
 // Entity graph: teaches search engines that "FAC" and "Frappe Assistant Core"
 // are the same thing, what it is, and where it lives.
