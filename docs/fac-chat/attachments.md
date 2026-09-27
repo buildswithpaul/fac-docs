@@ -86,6 +86,12 @@ stored for repeated retrieval; message attachments are read for one turn and the
 subject to your retention policy. Do not expect a file attached in chat to become
 searchable in the Knowledge Base.
 
+The Knowledge Base is part of your FAC Cloud plan. On a plan that doesn't include it, the
+Knowledge Base page hides **Upload**, ignores files dragged onto it, and shows a note
+saying the plan doesn't include the knowledge base — with **View plans** for admins, and
+a prompt to ask an admin for everyone else. An upload that reaches FAC Cloud anyway is
+refused with FAC Cloud's own explanation rather than a generic server error.
+
 ## Retention
 
 Files that *were* sent with a message are covered by your FAC Chat retention policy —

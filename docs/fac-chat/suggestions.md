@@ -53,8 +53,14 @@ is empty, the screen renders immediately from fallbacks and regeneration runs in
 background — the new tiles appear on a later visit, not by blocking the current one.
 
 Regeneration is rate-limited to about one generation per user per 20 hours, and a
-failure backs off for an hour rather than retrying on every page load. Each generation
-is a single call on the cheapest model tier, so the running cost is negligible.
+failed generation backs off for an hour on the FAC Cloud side. Your site also remembers
+an empty or failed result — FAC Cloud refusing the call, or a timeout — for 15 minutes,
+so the landing screen does not queue the same failing job on every page load. Each
+generation is a single call on the cheapest model tier, so the running cost is negligible.
+
+Generating suggestions never holds up your own messages. On a small plan FAC Cloud runs
+one chat turn at a time, and suggestions are admitted without taking that turn's place,
+so a background suggestions call can no longer make your first message wait or be refused.
 
 ## Turning them off
 

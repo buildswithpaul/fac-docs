@@ -124,6 +124,46 @@ Maximum recursion depth: 500
 ... [OUTPUT TRUNCATED - exceeded 1024KB limit. Original size: 5120KB]
 ```
 
+### What comes back when a run fails
+
+A script that prints its totals and then raises, times out, or hits a CPU or memory limit
+still returns what it printed. Every failure path — `timeout`, `cpu_limit`, `memory`,
+`recursion`, `runtime` — carries the captured stdout in `output`, under the same 1 MB cap
+([`_run_user_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/code_execution_subprocess.py#L530)). Those printed totals are exactly what the model should
+report instead of guessing. If the subprocess dies without writing a result at all, the
+parent keeps the first 4,000 characters of whatever it did write
+([run_python_code.py:359](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/data_science/tools/run_python_code.py#L359)).
+
+Other guarantees about the result:
+
+- **The wall-clock alarm covers your code only.** It is cancelled the moment your code
+  finishes, however it finishes ([`_exec_user_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/code_execution_subprocess.py#L513)). Left armed, it could fire
+  while results were being serialized and be mistaken for a failure of one variable.
+- **A limit hit while serializing ends the run as that limit.** A timeout, CPU or memory
+  error raised while a variable is being converted is reported as that failure, not
+  swallowed as one variable that could not be returned while the run claims success.
+- **One unconvertible variable does not sink the result.** It is left out and named in
+  the `error` text (*"Some variables could not be returned: …"*); the rest come back
+  ([`_extract_variables`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/code_execution_subprocess.py#L411)). It is no longer replaced by a placeholder string.
+- **The result is always one complete JSON document.** It is built in full before it is
+  written ([`_write_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/code_execution_subprocess.py#L449)). If it cannot be encoded, a
+  `serialization` error comes back instead, still with `output`, the variables that did
+  encode, and `unserializable_variables` naming the rest. Previously a value JSON could
+  not encode left half a document on stdout and the printed output was lost.
+- **Readable values.** Dictionary keys are always strings, so a pandas `groupby` on several
+  columns or on a date encodes; numpy `datetime64`/`timedelta64` values render as dates and
+  durations rather than integer nanoseconds; dates, times and durations render as text
+  ([`_serialize_variable`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/code_execution_subprocess.py#L372)).
+- **Every failure tells the model how to recover.** The tool appends one instruction to each
+  error it reports: re-run the calculation inside the tool, fetching rows with
+  `tools.get_documents` or `data_query`; never retype figures from earlier tool output; and
+  if it cannot be completed, say it failed rather than estimate
+  ([`RETRY_BY_HAND`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/data_science/tools/run_python_code.py#L32)).
+
+Pass `return_variables` to name the values you need. Without it every user-defined
+variable is serialized, which costs time and makes it likelier that one of them cannot be
+encoded.
+
 ## Code Security Scanning
 
 Before execution, all code is scanned for dangerous patterns:
