@@ -162,11 +162,11 @@ summary plus everything since, so it subsumes it), which is exactly what makes
 rather than a slice of it. **FAC Chat Summary** rows are written by the relay
 as the compaction event arrives —
 `_persist_chat_summary()` calls `FACChatSummary.record()`
-([relay.py:117](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L117)
+([relay.py:115](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L115)
 → [fac_chat_summary.py:45](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_summary/fac_chat_summary.py#L45)),
 called from the shared event dispatcher's `context_summarized` branch
 ([relay.py:110](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L110),
-branch at [relay.py:127](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L127))
+branch at [relay.py:125](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L125))
 — and `record()` supersedes every prior row for that session in the same call,
 so exactly one row is ever "live" per session even though older rows are kept
 (each one still anchors a divider in the transcript; see below). A failed
