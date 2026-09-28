@@ -69,9 +69,13 @@ event replay and no re-streaming. What you saw when the message finished is exac
 what you see when you come back to it.
 
 If a reply was paused for an approval and later resumed, the saved blocks are
-rehydrated first, the pending interaction is resolved to approved / rejected /
-answered, and new blocks are appended after it — so the conversation stays coherent
-across the pause.
+rehydrated first. Once the assistant is running the resumed reply, the pending
+interaction is resolved to approved / rejected / answered, and new blocks are
+appended after it — so the conversation stays coherent across the pause. If the
+resume fails before that (FAC Cloud cannot be reached, or is still busy with an
+earlier request in the same conversation), the saved reply is left as it was, so
+after a reload the approval is waiting for your answer again. An approval that
+expired in the meantime is marked expired instead.
 
 ## Sessions across surfaces
 
