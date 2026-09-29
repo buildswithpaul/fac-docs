@@ -148,6 +148,7 @@ export default defineConfig({
 						{ text: 'Plugin Management', link: '/guides/plugin-management' },
 						{ text: 'Tool Management', link: '/guides/tool-management' },
 						{ text: 'Skills', link: '/guides/skills-user-guide' },
+						{ text: 'Setting Up ERPNext by Conversation', link: '/guides/setup-skills' },
 						{ text: 'Prompt Templates', link: '/guides/prompt-templates' },
 						{ text: 'Python Code Orchestration', link: '/guides/python-code-orchestration' },
 						{ text: 'Code Execution Security', link: '/guides/code-execution-security' },

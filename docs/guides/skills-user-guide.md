@@ -311,6 +311,10 @@ The counter update happens in [`SkillManager.increment_usage`](../../frappe_assi
 
 ---
 
+## Skills that ship with FAC
+
+FAC installs system skills that teach the assistant its own tools, such as `create-document-usage` or `run-python-code-usage`, plus a set of **setup skills**. The setup skills audit a site and configure it through conversation: a site health check, guided setup, custom fields, approval workflows and naming series. See [Setting Up ERPNext by Conversation](./setup-skills.md).
+
 ## Related documentation
 
 - [Skills Developer Guide](../development/SKILLS_DEVELOPER_GUIDE.md) — shipping skills with your Frappe app
