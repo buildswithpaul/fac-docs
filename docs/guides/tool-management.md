@@ -244,6 +244,7 @@ External tools from other apps (registered via the `assistant_tools` hook) are d
 **"Insufficient permissions" when calling a tool**
 - Check the tool isn't one of the [hardcoded-role tools](#hardcoded-role-limits).
 - Confirm the user has real DocType permissions on the data.
+- If `error` reads like `You need the 'create' permission on ToDo to perform this action.`, the DocType permission passed and a document-level rule refused the write. See [Permissions and error messages](/api/tool-reference#permissions-and-error-messages).
 
 **A category looks wrong**
 - Open the tool's ⚙️ panel and set the **Category** manually, then **Save Changes**.
