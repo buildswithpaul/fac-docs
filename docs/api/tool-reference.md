@@ -108,6 +108,57 @@ Optional. Requires `pandas`, `numpy`, and a charting backend.
 
 The `custom_tools` plugin discovers tools registered by other installed Frappe apps via the `assistant_tools` hook. It ships with no tools of its own — see your installed apps' documentation for what they expose.
 
+## Permission denials
+
+Frappe signals a document-level permission denial by raising a bare `frappe.PermissionError`
+and keeping the readable reason in `frappe.flags.error_message`, so `str(exception)` is an
+empty string. A tool that reported that exception directly returned an empty `error`, and the
+model treated the denial as a field problem and retried.
+
+Every write tool now reports a denial in one shape
+([`permission_error_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L86)):
+
+```json
+{
+  "success": false,
+  "error": "You need the 'create' permission on ToDo to perform this action.",
+  "error_type": "permission_error",
+  "doctype": "ToDo",
+  "guidance": "Insufficient permissions for this operation.",
+  "suggestion": "Contact your system administrator to grant necessary permissions for this DocType"
+}
+```
+
+`error` carries Frappe's own reason with its markup stripped, recovered by
+[`exception_message`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L69), which falls back to the exception's text,
+then Frappe's reason, then a per-tool default, then the exception class name — so it is never
+empty. The tools that return this shape:
+
+| Tool | Denial handler |
+|---|---|
+| `create_document` | [create_document.py:355](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L355) |
+| `update_document` | [update_document.py:395](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L395) |
+| `submit_document` | [submit_document.py:156](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/submit_document.py#L156) |
+| `create_dashboard` | [create_dashboard.py:134](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard.py#L134) |
+| `create_dashboard_chart` | [create_dashboard_chart.py:208](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard_chart.py#L208) |
+
+`delete_document` keeps its own result shape (`permission_error: true`) but reports the same
+recovered reason ([delete_document.py:136](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/delete_document.py#L136)).
+Any tool that does not catch the exception itself falls through to `BaseTool._safe_execute`
+([base_tool.py:280](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L280)), which applies the same recovery.
+
+`error_type: "permission_error"` means the request was refused, not malformed: retrying with
+different field values cannot succeed.
+
+### ToDo creation
+
+Frappe decides who may create a ToDo. Before Frappe v16.32.0 / v15.119.0, a user without a role
+granting ToDo create (such as System Manager) may create only a ToDo naming them
+(`allocated_to` or `assigned_by`), so `create_document` allocates a ToDo that names nobody to
+the calling user, and one naming someone else is still refused. From those releases
+([frappe/frappe#41869](https://github.com/frappe/frappe/pull/41869)) ownership alone carries the
+create, and the ToDo is left exactly as written.
+
 ## Per-tool documentation
 
 Per-tool `inputSchema`, return shape, and behaviour notes live in the source repo alongside each tool implementation:
