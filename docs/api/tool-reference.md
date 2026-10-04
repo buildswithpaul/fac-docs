@@ -23,7 +23,7 @@ Always enabled. Provides essential Frappe operations.
 | `create_document` | Create a new Frappe document |
 | `get_document` | Fetch a single document by name |
 | `update_document` | Update document fields (supports patch and replace modes for child tables) |
-| `submit_document` | Submit a submittable document |
+| `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
 | `delete_document` | Delete a document (`force=true` to ignore links) |
 | `list_documents` | Paginated list with filters, fields, and ordering |
 
@@ -116,7 +116,7 @@ empty string. A tool that reported that exception directly returned an empty `er
 model treated the denial as a field problem and retried.
 
 Every write tool now reports a denial in one shape
-([`permission_error_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L86)):
+([`permission_error_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L94)):
 
 ```json
 {
@@ -129,23 +129,26 @@ Every write tool now reports a denial in one shape
 }
 ```
 
-`error` carries Frappe's own reason with its markup stripped, recovered by
-[`exception_message`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L69), which falls back to the exception's text,
+`error` carries Frappe's own reason as plain text, recovered by
+[`exception_message`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L74), which falls back to the exception's text,
 then Frappe's reason, then a per-tool default, then the exception class name — so it is never
-empty. The tools that return this shape:
+empty. Markup is stripped from both sources, because Frappe and ERPNext messages embed
+`<strong>` and `<a href>`. The tools that return this shape:
 
 | Tool | Denial handler |
 |---|---|
 | `create_document` | [create_document.py:355](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L355) |
 | `update_document` | [update_document.py:395](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L395) |
-| `submit_document` | [submit_document.py:156](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/submit_document.py#L156) |
+| `document_action` (submit) | [document_action.py:241](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L241) |
+| `document_action` (cancel) | [document_action.py:352](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L352) |
+| `document_action` (amend) | [document_action.py:524](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L524) |
 | `create_dashboard` | [create_dashboard.py:134](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard.py#L134) |
-| `create_dashboard_chart` | [create_dashboard_chart.py:208](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard_chart.py#L208) |
+| `create_dashboard_chart` | [create_dashboard_chart.py:206](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard_chart.py#L206) |
 
 `delete_document` keeps its own result shape (`permission_error: true`) but reports the same
 recovered reason ([delete_document.py:136](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/delete_document.py#L136)).
 Any tool that does not catch the exception itself falls through to `BaseTool._safe_execute`
-([base_tool.py:280](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L280)), which applies the same recovery.
+([base_tool.py:288](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L288)), which applies the same recovery.
 
 `error_type: "permission_error"` means the request was refused, not malformed: retrying with
 different field values cannot succeed.
