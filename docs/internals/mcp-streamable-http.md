@@ -424,6 +424,9 @@ All MCP requests follow JSON-RPC 2.0 specification:
 }
 ```
 
+`isError` is `true` when the tool reports a failure as well as when it raises,
+so a client can branch on it without reading the text.
+
 ### Error Response
 
 ```json
@@ -524,7 +527,7 @@ json.dumps(result)  # ❌ TypeError: Object of type datetime is not JSON seriali
 json.dumps(result, default=str)  # ✅ Works perfectly
 ```
 
-This simple but critical fix is implemented in [mcp/server.py:398](../frappe_assistant_core/mcp/server.py#L398):
+This simple but critical fix is implemented in [mcp/server.py:443](../frappe_assistant_core/mcp/server.py#L443):
 
 ```python
 # CRITICAL FIX: Use json.dumps with default=str
@@ -533,8 +536,40 @@ if isinstance(result, str):
     result_text = result
 else:
     # The key fix: default=str converts any type to string
-    result_text = json.dumps(result, default=str, indent=2)
+    result_text = json.dumps(
+        result,
+        default=str,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
 ```
+
+The separators are compact and there is no `indent`, because every byte here is
+a token the model pays for. On a 50-row `list_documents` payload, dropping the
+indentation and the envelope below took the text from 15,158 to 10,360
+characters, roughly 3,789 to 2,590 tokens.
+
+### The tool result is unwrapped
+
+`BaseTool._safe_execute()` wraps a tool's output for FAC's own audit log:
+
+```python
+{"success": True, "result": <tool output>, "execution_time": 0.0123}
+```
+
+That wrapper is FAC's, not MCP's, so [mcp/server.py:416](../frappe_assistant_core/mcp/server.py#L416)
+unwraps it and returns the tool's own output. The wrapper's `execution_time` and
+its `result` nesting are gone from the response; the server-side audit record
+keeps them. Note that most FAC tools set a `success` field of their own inside
+that output, so a `success` key in the response text is the tool's, not the
+envelope's.
+
+`isError` reports what the envelope said
+([mcp/server.py:471](../frappe_assistant_core/mcp/server.py#L471)). A tool that
+returns `success: false` without raising — a permission denial, a validation
+failure — is now reported to the client as an error. Previously every call that
+did not raise was reported as a success, so a client had to parse the text to
+notice a failure.
 
 ### Token Validation Flow
 
