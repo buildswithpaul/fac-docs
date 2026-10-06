@@ -30,16 +30,16 @@ graph TB
         end
 
         subgraph "Plugin System"
-            subgraph "Core Plugin - Always Enabled (15 tools)"
-                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search (search_documents, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)"]
+            subgraph "Core Plugin - Always Enabled (16 tools)"
+                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search (search_documents, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)<br/>Email (send_email)"]
             end
 
             subgraph "Data Science Plugin - Optional (4 tools)"
                 DataScienceTools["run_python_code<br/>analyze_business_data<br/>run_database_query<br/>extract_file_content"]
             end
 
-            subgraph "FACO Plugin - Optional (8 tools)"
-                FacoTools["send_email<br/>generate_document<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page"]
+            subgraph "FACO Plugin - Optional, FAC Cloud only (7 tools)"
+                FacoTools["generate_document<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page"]
             end
 
             subgraph "Visualization Plugin - Optional (3 tools)"
@@ -461,12 +461,22 @@ Advanced analytics, visualization, and file processing capabilities:
 
 #### **FACO Plugin** (`plugins/faco/`) - Optional
 
-Tools migrated from `frappe_assistant_copilot` — email, document generation, and
-browser automation. Usable standalone over MCP, or as part of FAC Chat:
+Document generation and browser automation, migrated from `frappe_assistant_copilot`.
 
-1. **Messaging & Documents** (`send_email.py`, `generate_document.py`)
+**Reachable only from FAC Cloud.** Each of these tools needs something no other MCP
+client can give it: the browser tools run inside the FAC Chat page and reach it over
+Socket.IO, and `generate_document` renders through FAC Chat's rich-block renderer. The
+MCP endpoint therefore drops them from `tools/list` — and so from `tools/call`, which
+resolves names against the same per-request registry — for every caller it does not
+recognise as FAC Cloud. Recognition comes from the OAuth client the request's bearer
+token belongs to (`utils/mcp_caller.py`), never from anything the client asserts about
+itself. A plugin opts in by overriding `BasePlugin.is_fac_cloud_only()`.
 
-   - Queue email via the site's Email Account
+`send_email` carried no such dependency and lives in the **core** plugin, where every
+MCP client can still reach it.
+
+1. **Documents** (`generate_document.py`)
+
    - Render rich-block content to an HTML/PDF document
 
 2. **Browser Tools** (`browser_*.py`)

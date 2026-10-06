@@ -4,15 +4,15 @@ Frappe Assistant Core ships **30 built-in tools across 5 plugins**. All tools ar
 
 | Plugin | Tools | Description |
 |---|---|---|
-| `core` | 15 | Always enabled. Document CRUD, search, metadata, reports, workflow. |
+| `core` | 16 | Always enabled. Document CRUD, search, metadata, reports, workflow, email. |
 | `data_science` | 4 | Optional. Python execution, SQL queries, statistical analysis, file content extraction. |
-| `faco` | 8 | Optional. Email, document generation, and browser automation — migrated from `frappe_assistant_copilot`. Usable standalone over MCP, or as part of FAC Chat. |
+| `faco` | 7 | Optional, **FAC Cloud only**. Document generation and browser automation. These act inside the FAC Chat page, so they are not offered to other MCP clients. |
 | `visualization` | 3 | Optional. Dashboards and charts. |
 | `custom_tools` | — | Mechanism for external Frappe apps to register their own tools via the `assistant_tools` hook. No shipped tools. |
 
 To toggle plugins, see [Plugin Management](../guides/plugin-management). To control which tools each role can call, see [Tool Management](../guides/tool-management).
 
-## Core plugin (15 tools)
+## Core plugin (16 tools)
 
 Always enabled. Provides essential Frappe operations.
 
@@ -60,6 +60,12 @@ tool, plus the two OpenAI-compatible adapters below that wrap it.
 | `run_workflow` | Trigger a workflow action (`Approve`, `Reject`, etc.) on a document |
 | `get_pending_approvals` | List documents awaiting the current user's workflow action — this queries Frappe's own Workflow Actions, not an AI approval gate (see [FAC Chat](../fac-chat/) for that) |
 
+### Email (1)
+
+| Tool | Purpose |
+|---|---|
+| `send_email` | Queue an email via the site's Email Account |
+
 ## Data Science plugin (4 tools)
 
 Optional. Requires `pandas` and `numpy`.
@@ -73,15 +79,27 @@ Optional. Requires `pandas` and `numpy`.
 
 See [Python Code Orchestration](../guides/python-code-orchestration) and [Code Execution Security](../guides/code-execution-security) for the sandbox details.
 
-## FACO plugin (8 tools)
+## FACO plugin (7 tools)
 
-Optional. Tools migrated from `frappe_assistant_copilot` — email, document generation,
-and browser automation. Available to MCP clients (Claude Desktop, Cursor, etc.) and to
-FAC Chat alike; you can enable this plugin standalone over MCP without FAC Chat.
+Optional, and **reachable only from FAC Cloud**. Every tool here needs something no
+other MCP client can provide: the browser tools run inside the FAC Chat page and talk to
+it over Socket.IO, and `generate_document` renders through FAC Chat's rich-block
+renderer.
+
+So these tools are hidden from any other client. They do not appear in `tools/list`, and
+`tools/call` refuses them, for Claude Desktop, ChatGPT, Cursor or anything you connect
+yourself. FAC recognises FAC Cloud by the OAuth client its token belongs to, not by
+anything the client claims about itself.
+
+Before this, they were offered to every client and could not work: calling
+`browser_take_screenshot` from Claude Desktop published a request to a page that was not
+there and failed only after a 30 second timeout.
+
+`send_email` has no such dependency, so it lives in the **core** plugin and stays
+available to every MCP client.
 
 | Tool | Purpose |
 |---|---|
-| `send_email` | Queue an email via the site's Email Account |
 | `generate_document` | Render rich-block content to an HTML/PDF document |
 | `browser_get_form_data` | Read form field values from the user's current page |
 | `browser_get_page_context` | Get structured info about the user's current page |
@@ -90,9 +108,8 @@ FAC Chat alike; you can enable this plugin standalone over MCP without FAC Chat.
 | `browser_take_screenshot` | Capture a screenshot of the user's current page |
 | `browser_wait_for_page` | Wait for the user's page to finish loading |
 
-The browser tools require a connected client session (the FAC Chat widget, or an MCP
-client with the matching browser bridge) — they act on the user's own browser, not on
-the server.
+The browser tools act on the user's own browser, not on the server, and need the FAC
+Chat page open to reach it.
 
 ## Visualization plugin (3 tools)
 

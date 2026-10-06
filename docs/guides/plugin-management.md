@@ -28,9 +28,9 @@ Each plugin has an individual configuration record:
 
 | Plugin | Status | Description | Tools |
 |--------|--------|-------------|-------|
-| **Core** | Always Enabled | Document CRUD, search, metadata, reports, workflow | 15 |
+| **Core** | Always Enabled | Document CRUD, search, metadata, reports, workflow, email | 16 |
 | **Data Science** | Optional | Python execution, SQL, statistical analysis, file extraction | 4 |
-| **FACO Tools** | Optional | Email, document generation, browser automation — usable standalone over MCP or via FAC Chat | 8 |
+| **FACO Tools** | Optional | Document generation and browser automation. **FAC Cloud only** — these act inside the FAC Chat page, so other MCP clients are not offered them | 7 |
 | **Visualization** | Optional | Dashboards and charts | 3 |
 | **Custom Tools** | Always Enabled | Discovers tools registered by other apps via the `assistant_tools` hook | — |
 
@@ -40,15 +40,15 @@ Each plugin has an individual configuration record:
 
 ```
 plugins/
-├── core/                  # Always enabled — 15 tools
+├── core/                  # Always enabled — 16 tools
 │   ├── plugin.py
 │   └── tools/             # create_document.py, get_document.py, run_workflow.py, ...
 ├── data_science/          # Optional — 4 tools
 │   ├── plugin.py
 │   └── tools/             # run_python_code.py, run_database_query.py, ...
-├── faco/                  # Optional — 8 tools
+├── faco/                  # Optional, FAC Cloud only — 7 tools
 │   ├── plugin.py
-│   └── tools/             # send_email.py, generate_document.py, browser_*.py, ...
+│   └── tools/             # generate_document.py, browser_*.py, ...
 ├── visualization/         # Optional — 3 tools
 │   ├── plugin.py
 │   └── tools/             # create_dashboard.py, create_dashboard_chart.py, list_user_dashboards.py
