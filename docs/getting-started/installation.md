@@ -23,6 +23,10 @@ For self-hosted Frappe benches.
 
 - **Frappe / ERPNext** v15 or v16
 - **Python** 3.10+ (3.12+ recommended)
+- **Node.js 22 or newer** — on every bench, **including Frappe v15**. FAC's frontend (the FAC
+  Chat SPA and the Desk chat widget) is part of `bench build`, which needs it. Check with
+  `node --version`. If the frontend was never built, the Desk widget simply doesn't appear;
+  Desk and the MCP server are unaffected.
 - **MariaDB** or **MySQL**
 - **Administrator** access to the bench and a site
 
@@ -40,7 +44,10 @@ bench --site yoursite install-app frappe_assistant_core
 # 3. Migrate
 bench --site yoursite migrate
 
-# 4. Restart
+# 4. Build the frontend (needs Node.js 22+)
+bench build --app frappe_assistant_core
+
+# 5. Restart
 bench restart
 ```
 

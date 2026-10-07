@@ -24,7 +24,7 @@ through. Filenames are sanitised on the way in.
 
 ## Uploads happen when you pick the file
 
-Both the SPA and the widget upload a file **the moment you select it**, not when you
+Both the SPA and the Desk widget (which uses the same composer components) upload a file **the moment you select it**, not when you
 send the message. That is what makes the attachment chip appear immediately, and it
 means a large PDF is already uploading while you finish typing.
 

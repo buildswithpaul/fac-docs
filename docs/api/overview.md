@@ -3,7 +3,7 @@
 Frappe Assistant Core exposes its capabilities through two surfaces:
 
 1. **MCP endpoint** — the protocol AI clients talk to (`/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`)
-2. **Frappe whitelisted methods** — direct HTTP endpoints used by the SPA, widget, and integrations
+2. **Frappe whitelisted methods** — direct HTTP endpoints used by the SPA, the Desk widget, and integrations
 
 Most external integrations should use the MCP endpoint with OAuth — that's what Claude Desktop, ChatGPT, MCP Inspector, and other MCP-compatible clients use.
 

@@ -485,7 +485,7 @@ MCP client can still reach it.
    - `browser_capture_diagnostics` — console/network errors + a screenshot
    - `browser_navigate_to`, `browser_take_screenshot`, `browser_wait_for_page` — drive the user's browser
 
-   These act on the connected client's own browser session (the FAC Chat widget, or
+   These act on the connected client's own browser session (the FAC Chat Desk widget, or
    an MCP client with the matching browser bridge), not on the server.
 
 #### **Visualization Plugin** (`plugins/visualization/`) - Optional

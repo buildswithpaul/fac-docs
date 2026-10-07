@@ -45,7 +45,7 @@ for your MCP clients — both can run side by side.
 
 FAC Chat is an AI assistant embedded in your Frappe site, across three surfaces:
 
-- a **floating widget** mounted on every Desk page,
+- a **floating widget** on every Desk page, built from the same components as the SPA,
 - a **full-screen SPA** at `/copilot`,
 - a **mobile app** over OAuth.
 
@@ -101,7 +101,8 @@ chat — it appears once per admin and can be dismissed.
 
 After enabling:
 
-- The chat widget appears in the corner of Frappe Desk pages.
+- The chat widget appears in the corner of Frappe Desk pages. It looks like FAC Chat,
+  follows Desk's light/dark theme live, and never restyles Desk itself.
 - The full-screen SPA is reachable at `/copilot`.
 - The first time a user opens chat, they walk through a one-time onboarding that
   connects the site to FAC Cloud and links it to a subscription.

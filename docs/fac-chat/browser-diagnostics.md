@@ -32,6 +32,10 @@ holding at most **100 entries**:
 Buffers live in per-tab session storage, survive navigation within that tab, and
 entries older than **5 minutes** are dropped on load.
 
+Capturing diagnostics (like a screenshot or form data) is a sensitive browser tool: the
+widget asks you to **Reject / Approve / Always allow** first, opening the panel to ask
+even if it was closed. Anything other than Approve or Always allow counts as Reject.
+
 Recording is designed so that it can never break your page: every hook is wrapped so a
 fault in the recorder degrades to "no diagnostics", never to a broken Desk.
 

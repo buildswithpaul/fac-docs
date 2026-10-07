@@ -17,10 +17,16 @@ For what FAC Chat is and how to enable it, start with the
 
 ## The widget on the Desk page
 
-When FAC Chat is enabled, the widget's assets are loaded on every Desk page. The
-widget does not render immediately on load — it waits for Frappe's `app_ready`
-signal (with a short DOM-ready fallback), then asks the server whether it should
-render for the current user before building any UI.
+The widget is a Vue panel built from FAC Chat's own components, so it renders replies
+exactly as the SPA does. It is part of FAC's frontend build (`bench build`), which needs
+**Node.js 22 or newer on every bench, including Frappe v15**. If the frontend was never
+built, the widget simply doesn't appear and Desk is unaffected.
+
+When FAC Chat is enabled, only a tiny launcher script loads on each Desk page. It waits
+for Frappe's `app_ready` signal (with a short DOM-ready fallback), then asks the server
+whether it should render for the current user before loading the panel or building any
+UI. The panel mounts inside its own **Shadow DOM**, so its styles never leak into Desk
+and Desk's styles never reach it. It follows Desk's light/dark theme live.
 
 That server check returns two independent flags:
 
@@ -43,9 +49,31 @@ no re-login.
 
 ### Hot toggle
 
-The widget exposes small remount and teardown helpers so that toggling FAC Chat on
+The launcher exposes small remount and teardown helpers so that toggling FAC Chat on
 or off from the admin settings takes effect on the current Desk session without a
-full reload — the launcher can be mounted or removed in place.
+full reload. Disabling tears the widget down; enabling re-runs the access check and
+mounts it in place.
+
+The widget's composer has the same **Thinking** control and **Web search** toggle as FAC
+Chat. The model is always **Auto** in the widget. **Open full assistant** hands the
+conversation to FAC Chat (`/copilot`) on the same session.
+
+## Browser tools and approvals in the widget
+
+Browser tools (navigate, page context, form data, screenshot, diagnostics) work even
+while the panel is closed. The sensitive ones — screenshot, form data and diagnostics —
+ask for confirmation first, with **Reject / Approve / Always allow**. The panel opens to
+ask; anything other than Approve or Always allow is treated as Reject. The
+administrator's **Enable DOM Content Extraction** switch is honoured, and extraction
+stays off if the setting can't be read. Any approval request opens the panel and flashes
+the browser tab title so it is not missed.
+
+## Code and tables
+
+Replies render the same in the widget and the SPA: numbered lists, tables that scroll
+horizontally in a narrow panel, and syntax-highlighted code (Python, JavaScript, JSON,
+SQL, bash, HTML/XML, CSS, YAML). Thinking and tool steps appear in the order they
+happened, inside a collapsible "how this ran" card.
 
 ## Rendering streamed responses (blocks)
 
@@ -85,7 +113,9 @@ surface to another (open it in the widget, continue it full-screen in the SPA, p
 it up on mobile) is done with short-lived handoff cookies:
 
 - `faco_widget_session` — carries a conversation from the SPA into the widget.
-- `faco_active_session` — carries a conversation from the widget into the SPA.
+- `faco_active_session` — carries a conversation from the widget into the SPA. The
+  widget's **Open full assistant** button uses it to continue the same session in
+  `/copilot`.
 - `faco_widget_persistent_session` — remembers the widget's current conversation
   across page loads.
 
