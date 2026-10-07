@@ -110,7 +110,7 @@ expired in the meantime is marked expired instead.
 A conversation is identified by a `session_id`, and that identifier is shared across
 the widget, the `/copilot` SPA, and mobile. Handing a live conversation from one
 surface to another (open it in the widget, continue it full-screen in the SPA, pick
-it up on mobile) is done with short-lived handoff cookies:
+it up on mobile) is done with short-lived handoff keys in the tab's `sessionStorage`:
 
 - `faco_widget_session` — carries a conversation from the SPA into the widget.
 - `faco_active_session` — carries a conversation from the widget into the SPA. The
@@ -121,6 +121,41 @@ it up on mobile) is done with short-lived handoff cookies:
 
 Because all three surfaces share the same `session_id` namespace, messages and
 history stay consistent no matter where you continue the conversation.
+
+### A turn that is still running
+
+A reply streams into the surface that sent it, but any surface that opens the
+conversation while the reply is still being written joins it. That includes the
+widget after **Open full assistant**, the widget after **Back to Desk**, and a
+second FAC Chat tab. The joining surface shows the reply as it stands (thinking,
+tool steps, approvals and text, in order) and keeps streaming it, with the
+working indicator and Stop.
+
+- **The live snapshot.** While a turn runs, the site keeps a snapshot of it in
+  Redis under `fac_live_turn:<session_id>`. It holds the blocks so far (the same
+  shape a saved reply has), the text, the open thinking block, the turn's owner,
+  and the number of the last event folded in.
+  - Block changes are written at once; text and thinking at most every 500 ms.
+  - The snapshot expires after 10 minutes and is deleted when the turn ends.
+  - Nothing is written for users under a processing restriction.
+- **Numbered events.** Every streamed event of a turn carries the turn's token
+  (`turn`), a sequence number (`seq`), and the id of the client request that
+  started it (`client_turn`).
+- **Reading the snapshot.** `GET frappe_assistant_core.chat.api.chat.get_live_turn?session_id=…`
+  returns the snapshot to the conversation's owner, or `null` when nothing is
+  running. Anyone else is refused, even if the conversation has no saved
+  messages.
+- **Joining.** A surface that opens a conversation reads its history and the
+  snapshot together, holding streamed events meanwhile. It then shows the
+  snapshot as a live reply and applies only the events numbered after it.
+- **Catching up.** A surface re-reads the snapshot when:
+  - a sequence number is skipped;
+  - its socket reconnects;
+  - a turn starts on another surface. It reloads the history too, so that
+    surface's question appears.
+
+Desk tabs keep separate widget conversations (each tab claims its own), so two
+Desk tabs never share a turn.
 
 ## Conversation recall (`recall_conversations`)
 
