@@ -56,10 +56,16 @@ Two routes, and a single attachment can travel both.
 
 **Every file — text extraction on your server.** FAC runs its own extraction locally:
 text and tables out of PDFs, tabular data out of CSV, the text formats as-is, plus OCR
-for images and scanned PDFs. The extracted text is passed to the model as reference material for that one
-turn. It is deliberately *not* merged into your stored message, so file contents never
-pollute your conversation history, and the model is explicitly told to treat it as data
-to be read rather than as instructions to follow.
+for images and scanned PDFs. The extracted text is passed to the model as reference
+material on **every turn of the conversation**, not just the one that carried the file,
+so you can come back to a PDF several messages later. Each file is capped at 20,000
+characters of text and the whole conversation at 60,000, with the newest file read
+first. The text is deliberately *not* merged into your stored message, so file contents
+never pollute your conversation history, and the model is explicitly told to treat it as
+data to be read rather than as instructions to follow.
+
+The model is also told each file's **File ID**, so when you refer to "that receipt" it
+knows exactly which file you mean.
 
 **Images only — native vision.** Images up to **10 MB** are additionally sent to the
 model as an image, so it can see layout, charts, and screenshots rather than just OCR
@@ -69,6 +75,17 @@ so you can keep asking about a screenshot you sent earlier.
 Because images take both routes, a screenshot is both OCR'd and seen. That is
 intentional — OCR text helps considerably with dense Desk screenshots where small
 labels matter.
+
+## Attaching a chat file to a document
+
+Ask for it in plain words, for example *"attach this receipt to Purchase Invoice
+PINV-26-00050"*. The assistant attaches a **copy** to that document, so the file stays in
+your conversation too, and asks for your approval first, as it does for any change to
+your data.
+
+It can only attach a file **you** sent in the chat, and only to a document you are
+allowed to edit: the same check Frappe applies when you attach a file yourself. If the
+file is already attached to that document, it is not attached twice.
 
 ## Permissions
 
@@ -84,8 +101,8 @@ no file is linked and no extraction runs — the turn proceeds on the prompt alo
 
 Uploading a document to the **Knowledge Base** (for RAG over your documents) is a
 separate flow from attaching a file to a single message. Knowledge Base documents are
-stored for repeated retrieval; message attachments are read for one turn and then
-subject to your retention policy. Do not expect a file attached in chat to become
+stored for repeated retrieval; message attachments are read within their own
+conversation and then subject to your retention policy. Do not expect a file attached in chat to become
 searchable in the Knowledge Base.
 
 ## Retention
