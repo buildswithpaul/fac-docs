@@ -26,10 +26,12 @@ through. Filenames are sanitised on the way in.
 
 Both the SPA and the Desk widget (which uses the same composer components) upload a file **the moment you select it**, not when you
 send the message. That is what makes the attachment chip appear immediately, and it
-means a large PDF is already uploading while you finish typing.
+means a large PDF is already uploading while you finish typing. If you press Send before
+an upload has finished, the message waits for it, so the file always goes with it.
+Removing a chip before you send leaves that file out of the message.
 
 One consequence worth knowing: if you attach a file and then close the tab without ever
-sending the message, the uploaded file is left behind with nothing pointing at it. FAC
+sending the message, or remove its chip, the uploaded file is left behind with nothing pointing at it. FAC
 flags these on upload and a daily cleanup job deletes anything still unreferenced after
 24 hours, so abandoned attachments do not accumulate on your site.
 
