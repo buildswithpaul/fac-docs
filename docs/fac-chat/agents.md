@@ -38,6 +38,11 @@ required settings must be filled in, numbers must be numbers, and a linked recor
 must exist here. Every problem is listed at once. Link and email settings are never pre-filled with sample
 values. Importing an agent template needs System Manager.
 
+A template that starts on a document event also brings its trigger, and a template that runs on a schedule
+brings its schedule. Both arrive switched off: the Setup checklist's "How it starts" step tells you which one
+to turn on, and nothing runs until you do. If your site cannot create the suggested trigger (for example, the
+DocType is not installed), the agent still imports and you add a trigger yourself.
+
 ## Triggers
 
 A trigger starts an agent when a document is created, updated, submitted, cancelled or deleted.
