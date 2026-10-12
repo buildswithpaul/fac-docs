@@ -110,12 +110,12 @@ Every FAC setting in one place, grouped by what it controls. Pick a group on the
 |-------|---------------|
 | **Chat & Widget** | Context size, page-content sharing, browser diagnostics, and chat message retention |
 | **MCP Server** | The MCP and OAuth discovery URLs, the server name and protocol, and how skills are offered |
-| **OAuth** | Dynamic client registration, allowed public client origins, and discovery metadata |
+| **OAuth** | Dynamic client registration, allowed public client origins, and discovery metadata. Frappe v15 only: on v16, FAC reads OAuth from Frappe's own **OAuth Settings**, so the group is not shown |
 | **Security** | Code-execution limits and audit-log retention |
 | **OCR** | The OCR backend and its PaddleOCR or Ollama settings |
 | **FAC Cloud connection** | This site's FAC Cloud registration (read-only) |
 
-Saving runs the same checks as the settings form, so an invalid value is rejected with the same message. Only a **System Manager** can save; other admins see the values read-only. The MCP server switch and the FAC Chat switch stay where they were — in the status bar and the FAC Chat card.
+Saving runs the same checks as the settings form, so an invalid value is rejected with the same message. Only a **System Manager** can view and save these settings; other admins see a note saying so. The MCP server switch and the FAC Chat switch stay where they were — in the status bar and the FAC Chat card.
 
 ## Where to go next
 
