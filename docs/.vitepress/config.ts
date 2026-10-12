@@ -115,6 +115,7 @@ export default defineConfig({
 						{ text: 'Welcome Suggestions', link: '/fac-chat/suggestions' },
 						{ text: 'Browser Diagnostics', link: '/fac-chat/browser-diagnostics' },
 						{ text: 'Conversation Recall', link: '/fac-chat/conversation-recall' },
+						{ text: 'Agents, Templates & Triggers', link: '/fac-chat/agents' },
 						{ text: 'Technical (client side)', link: '/fac-chat/technical' },
 					],
 				},

@@ -25,7 +25,7 @@ Always enabled. Provides essential Frappe operations.
 | `update_document` | Update document fields (supports patch and replace modes for child tables) |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
 | `delete_document` | Delete a document (`force=true` to ignore links) |
-| `list_documents` | Paginated list with filters, fields, and ordering |
+| `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page |
 
 ### Search (3)
 
@@ -51,7 +51,7 @@ tool, plus the two OpenAI-compatible adapters below that wrap it.
 |---|---|
 | `report_list` | List available reports, optionally filtered by `report_type` (`Script Report`, `Query Report`, `Report Builder`) |
 | `report_requirements` | Describe a report's required filters, columns, and metadata before running it |
-| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. |
+| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A slow prepared report returns `status: "timeout"`; asking again with the same filters picks up the same report |
 
 ### Workflow (2)
 
@@ -73,7 +73,7 @@ Optional. Requires `pandas` and `numpy`.
 | Tool | Permissions | Purpose |
 |---|---|---|
 | `run_python_code` | System Manager | Execute Python in an isolated subprocess sandbox. Pre-loaded: `pd`, `np`, `frappe`, `math`, `datetime`, `json`, `re`, `random`. Plotting libraries are not available. |
-| `run_database_query` | System Manager | Execute read-only `SELECT` queries. INSERT/UPDATE/DELETE/DDL and multi-statement queries are rejected. |
+| `run_database_query` | System Manager | Execute read-only `SELECT` queries. INSERT/UPDATE/DELETE/DDL and multi-statement queries are rejected. Never returns more than 1000 rows (a larger `LIMIT` is clamped) and reports `truncated` when rows were cut. |
 | `analyze_business_data` | DocType read | Statistical / trend / correlation / aggregation analysis on a DocType. Modes: `summary`, `trends`, `correlations`, `aggregations`, `comparisons`. |
 | `extract_file_content` | File read | OCR and text extraction from File DocType attachments. Supports PDF, images, DOCX, XLSX, TXT. Backend is PaddleOCR (default) or Ollama vision (configurable). |
 
