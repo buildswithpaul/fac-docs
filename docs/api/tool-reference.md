@@ -27,6 +27,26 @@ Always enabled. Provides essential Frappe operations.
 | `delete_document` | Delete a document (`force=true` to ignore links) |
 | `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page |
 
+#### Permissions and error messages
+
+`create_document`, `update_document` and `submit_document` run as the calling user. Frappe checks the user's permission on the DocType and then on the document itself, and a DocType can add document-level rules of its own. When the DocType-level check fails, the tool returns `{"success": false, "error": "Insufficient create permissions for <DocType>"}` with no `error_type`. When the document-level check refuses a create (for example, a ToDo allocated to someone else, when the caller holds no role that grants ToDo access beyond the automatic roles, on Frappe before v16.32.0 / v15.119.0), the tool's result has `success: false`, the reason in `error`, and `error_type: "permission_error"`:
+
+```json
+{
+  "success": false,
+  "error": "You need the 'create' permission on ToDo to perform this action.",
+  "error_type": "permission_error",
+  "doctype": "ToDo",
+  "guidance": "Insufficient permissions for this operation.",
+  "suggestion": "Contact your system administrator to grant necessary permissions for this DocType"
+}
+```
+
+Over MCP, this tool result is nested under the `result` key in the response, and the top-level `error_type` is `ToolReportedError`.
+
+- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse.
+- **ToDo.** Frappe decides who may create a ToDo. Before v16.32.0 / v15.119.0, a user without a role that grants ToDo access beyond the automatic roles (on a stock site, System Manager) could create only a ToDo that names them, as `allocated_to` or `assigned_by`. From those releases the ToDo's owner is also accepted, and the creator owns it, so a user may create any ToDo. On the older releases, `create_document` allocates a ToDo that names nobody to the calling user instead of failing; on the newer ones it changes nothing. Administrator and System Managers are unaffected: their ToDo stays unallocated. On the older releases a ToDo allocated to someone else is still refused, and `error` says why. If the ToDo also names a `reference_type` and `reference_name`, allocating it to you also assigns that document to you, exactly as Assign to me does in the Desk: you are added to the document's assignments and an Assigned comment is posted on its timeline.
+
 ### Search (3)
 
 FAC 3.0 collapsed the four search tools that older versions shipped (`search`,

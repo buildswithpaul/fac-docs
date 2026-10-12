@@ -249,7 +249,7 @@ BaseTool (Abstract)
 
 - **Consistent Interface**: All tools follow same patterns
 - **Built-in Validation**: Automatic argument and permission checking
-- **Error Handling**: Standardized error capture and reporting
+- **Error Handling**: Standardized error capture and reporting; a `PermissionError` that Frappe raises without a message is reported with the reason Frappe stored for it
 - **MCP Compliance**: Automatic protocol formatting
 
 ### 4. Plugin System
@@ -676,6 +676,8 @@ def validate_document_access(user, doctype, name, perm_type="read"):
     if perm_type in ["write", "delete"] and doc.docstatus == 1:
         return submitted_document_protection
 ```
+
+For `create` there is no document yet, so step 3 has nothing to check. Frappe checks the new document itself when `create_document` calls `insert()`, through `has_permission` hooks that a DocType can customize. A refusal is a message-less `frappe.PermissionError`, because Frappe keeps the reason in `frappe.flags.error_message`. The `exception_message()` helper in `core/base_tool.py` recovers it (with markup stripped and whitespace collapsed), so the tool result carries the reason instead of an empty error. See [Permissions and error messages](../api/tool-reference#permissions-and-error-messages).
 
 #### **Row-Level Security Implementation**
 
