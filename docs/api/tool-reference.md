@@ -29,7 +29,7 @@ Always enabled. Provides essential Frappe operations.
 
 #### Permissions and error messages
 
-`create_document`, `update_document` and `submit_document` run as the calling user. Frappe checks the user's permission on the DocType and then on the document itself, and a DocType can add document-level rules of its own. When the DocType-level check fails, the tool returns `{"success": false, "error": "Insufficient create permissions for <DocType>"}` with no `error_type`. When the document-level check refuses a create (for example, a ToDo allocated to someone else, when the caller holds no role that grants ToDo access beyond the automatic roles, on Frappe before v16.32.0 / v15.119.0), the tool's result has `success: false`, the reason in `error`, and `error_type: "permission_error"`:
+`create_document`, `update_document` and `document_action` run as the calling user. Frappe checks the user's permission on the DocType and then on the document itself, and a DocType can add document-level rules of its own. When the DocType-level check fails, the tool returns `{"success": false, "error": "Insufficient create permissions for <DocType>"}` with no `error_type`. When the document-level check refuses a create (for example, a ToDo allocated to someone else, when the caller holds no role that grants ToDo access beyond the automatic roles, on Frappe before v16.32.0 / v15.119.0), the tool's result has `success: false`, the reason in `error`, and `error_type: "permission_error"`:
 
 ```json
 {
