@@ -485,6 +485,20 @@ print(df.to_string(index=False))
 print(df.to_markdown())
 ```
 
+### 5. Report Only What the Run Computed
+
+The tool's own instructions tell the model to report only figures a successful run
+computed:
+
+- **Fetch rows inside the code** with `tools.get_documents` or `data_query`. Never paste
+  rows from an earlier tool result into the script as literals — that is where retyped,
+  wrong totals come from.
+- **Set `return_variables`** to the values you need. Returning every variable serializes
+  the whole frame, and one value JSON cannot encode used to discard the printed result.
+- **If the tool returns an error, say the calculation failed.** Do not retype or estimate
+  the totals. A failed run still returns whatever it printed before failing (see
+  [Code Execution Security](./code-execution-security#what-comes-back-when-a-run-fails)).
+
 ## Advanced Techniques
 
 ### Complex Aggregations
