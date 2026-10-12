@@ -11,6 +11,7 @@ Think of it as the **home base** for FAC. Almost every day-to-day admin task sta
 - Enable/disable tools and control which roles can use them
 - Publish and manage prompt templates and skills
 - Watch recent tool activity and jump to the full audit log
+- Change every FAC setting — MCP server, OAuth, security limits, OCR, chat and widget — on one Settings tab
 
 ::: tip Who can open it
 FAC Admin is available to users with the **System Manager** or **Assistant Admin** role. Other users never see it.
@@ -36,7 +37,7 @@ The page is laid out top to bottom:
 
 ### 1. Status bar
 
-The top strip shows the FAC server state — **Running** or **Stopped** — with a button to toggle it. Disabling the server stops *all* MCP clients from reaching FAC until you re-enable it, so you're asked to confirm. The **Settings** button opens the full `Assistant Core Settings` for advanced options.
+The top strip shows the FAC server state — **Running** or **Stopped** — with a button to toggle it. Disabling the server stops *all* MCP clients from reaching FAC until you re-enable it, so you're asked to confirm. The **Advanced form** button in the sidebar opens the raw `Assistant Core Settings` form; day-to-day changes belong on the **Settings** tab.
 
 ### 2. MCP endpoint
 
@@ -62,7 +63,7 @@ Five at-a-glance counters:
 
 ### 4. Tabs
 
-The working area has three tabs — **Tools**, **Prompt Templates**, and **Skills** — described below.
+The working area has four tabs — **Tools**, **Prompt Templates**, **Skills**, and **Settings** — described below.
 
 ### 5. Recent Activity
 
@@ -70,7 +71,7 @@ A live feed of the last few tool calls (action, tool, user, status, time), with 
 
 ---
 
-## The three tabs
+## The four tabs
 
 ### 🔧 Tools
 
@@ -100,6 +101,21 @@ Manage skills — structured guidance that teaches the assistant how to use a to
 ➡️ Authoring, visibility, and publishing: **[Skills](/guides/skills-user-guide)**.
 
 ---
+
+### ⚙️ Settings
+
+Every FAC setting in one place, grouped by what it controls. Pick a group on the left, change what you need, and click **Save**. The group's URL (`?tab=settings&group=oauth`) can be bookmarked or shared.
+
+| Group | What it holds |
+|-------|---------------|
+| **Chat & Widget** | Context size, page-content sharing, browser diagnostics, and chat message retention |
+| **MCP Server** | The MCP and OAuth discovery URLs, the server name and protocol, and how skills are offered |
+| **OAuth** | Dynamic client registration, allowed public client origins, and discovery metadata |
+| **Security** | Code-execution limits and audit-log retention |
+| **OCR** | The OCR backend and its PaddleOCR or Ollama settings |
+| **FAC Cloud connection** | This site's FAC Cloud registration (read-only) |
+
+Saving runs the same checks as the settings form, so an invalid value is rejected with the same message. Only a **System Manager** can save; other admins see the values read-only. The MCP server switch and the FAC Chat switch stay where they were — in the status bar and the FAC Chat card.
 
 ## Where to go next
 
