@@ -79,12 +79,12 @@ Optional. Requires `pandas` and `numpy`.
 
 See [Python Code Orchestration](../guides/python-code-orchestration) and [Code Execution Security](../guides/code-execution-security) for the sandbox details.
 
-## FACO plugin (7 tools)
+## FACO plugin (8 tools)
 
 Optional, and **reachable only from FAC Cloud**. Every tool here needs something no
 other MCP client can provide: the browser tools run inside the FAC Chat page and talk to
-it over Socket.IO, and `generate_document` renders through FAC Chat's rich-block
-renderer.
+it over Socket.IO, `generate_document` renders through FAC Chat's rich-block
+renderer, and `attach_chat_file` acts on files uploaded in FAC Chat.
 
 So these tools are hidden from any other client. They do not appear in `tools/list`, and
 `tools/call` refuses them, for Claude Desktop, ChatGPT, Cursor or anything you connect
@@ -101,6 +101,7 @@ available to every MCP client.
 | Tool | Purpose |
 |---|---|
 | `generate_document` | Render rich-block content to an HTML/PDF document |
+| `attach_chat_file` | Attach a file the user uploaded in chat to a document, as a copy |
 | `browser_get_form_data` | Read form field values from the user's current page |
 | `browser_get_page_context` | Get structured info about the user's current page |
 | `browser_capture_diagnostics` | Collect console errors, network errors, and a screenshot from the user's browser |
