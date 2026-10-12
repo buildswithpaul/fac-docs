@@ -13,7 +13,7 @@ const READ_TOOLS = [
 	'get_document', 'list_documents', 'search_documents', 'chatgpt_search', 'chatgpt_fetch',
 	'get_doctype_info', 'report_list', 'report_requirements', 'get_pending_approvals', 'list_user_dashboards',
 ]
-const WRITE_TOOLS = ['create_document', 'update_document', 'delete_document', 'submit_document', 'run_workflow']
+const WRITE_TOOLS = ['create_document', 'update_document', 'delete_document', 'document_action', 'run_workflow']
 const ANALYZE_TOOLS = ['generate_report', 'run_python_code', 'run_database_query', 'analyze_business_data', 'extract_file_content']
 const DASH_TOOLS = ['create_dashboard', 'create_dashboard_chart']
 const BROWSER_TOOLS = [
@@ -117,7 +117,7 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 						<span></span><span>1 write, journaled</span><span></span><span class="num mono">₹4,82,500</span>
 					</div>
 					<div class="stamp">
-						LOGGED #AT-88214 · submit_document · 1 write · as R. Iyer · scope: write · 2026-07-05 14:41 IST
+						LOGGED #AT-88214 · document_action · 1 write · as R. Iyer · scope: write · 2026-07-05 14:41 IST
 					</div>
 				</div>
 			</div>

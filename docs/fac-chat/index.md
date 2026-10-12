@@ -72,7 +72,7 @@ see, and every action stays inside your existing permissions and audit trail.
 Over the plain MCP server, a write runs the instant the model calls it, inside the
 caller's Frappe permissions — there is no pause, no card, no approver. FAC Chat adds a
 human-in-the-loop step on top of that: by default, `create_document`, `update_document`,
-`delete_document`, and `submit_document` calls pause and show you an approval card
+`delete_document`, and `document_action` calls pause and show you an approval card
 before they land, and nothing changes in your books until you approve or reject it.
 
 Each user can change this default per tool from their own approval preferences —
