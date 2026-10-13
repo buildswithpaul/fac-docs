@@ -27,6 +27,23 @@ on screen. Tell it the filters you are using ("for this quarter only") and it ap
 Ask FACO to post in Raven ("share this ticket in #support") and it drafts the message for a
 channel or DM you are already in. You approve it before it is sent, and it is sent as you.
 
+## FAC Bot in Raven
+
+FAC Bot lets your team ask FACO from inside Raven conversations, without opening the widget.
+
+- **Switch it on** in **FAC Admin → Settings → Other Frappe apps → FAC Bot in Raven**. It is off
+  until an administrator turns it on, because each answer uses the asker's FACO credits.
+- **Direct messages:** message **FAC Bot** like any colleague. The conversation keeps its memory.
+- **Channels:** add FAC Bot to a channel, then **@mention** it. It answers in a thread on your
+  message. **Everyone in the channel can read the answer**, so ask about sensitive figures in a DM.
+- **Files:** send a PDF, a spreadsheet or an image with your question and FACO reads it.
+- **Who it answers:** only people who can use FACO in the widget, and always with their own ERPNext
+  permissions. Someone without a FACO seat gets a reply saying why.
+- **Changing data:** when FACO needs your approval (or asks you a question), FAC Bot posts a link
+  that opens the conversation in FAC Chat, where you approve, decline or answer.
+- **Stop:** delete FAC Bot's reply while it is still writing.
+- Raven cannot draw charts. FAC Bot replaces them with a link to the same conversation in FAC Chat.
+
 ## What works outside Desk
 
 Chat, streamed answers, attachments, approvals and conversation history work as in Desk.
