@@ -112,6 +112,7 @@ export default defineConfig({
 					items: [
 						{ text: 'Overview', link: '/fac-chat/' },
 						{ text: 'Local & Private Sites', link: '/fac-chat/local-sites' },
+						{ text: 'Widget in Other Apps', link: '/fac-chat/other-apps' },
 						{ text: 'Files & Attachments', link: '/fac-chat/attachments' },
 						{ text: 'Welcome Suggestions', link: '/fac-chat/suggestions' },
 						{ text: 'Browser Diagnostics', link: '/fac-chat/browser-diagnostics' },
