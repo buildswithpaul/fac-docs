@@ -17,10 +17,11 @@ The same people who see it in Desk: **System Users with FAC access** while FAC C
 
 Chat, streamed answers, attachments, approvals and conversation history work as in Desk.
 
+**FACO knows which document you have open** in Helpdesk (tickets), CRM (leads and deals) and Insights (dashboards, charts and queries). Ask "what is this ticket about?" and it reads the ticket for you, with your own permissions. On any other page it knows only which app you are in. It never reads the text on your screen, only the document itself, so a ticket's wording cannot steer it.
+
 These need Desk and are not available inside other apps:
 
-- **Page context and screen reading** — FACO does not know which ticket or dashboard you are looking at.
-- **Navigation and screenshots** — FACO cannot move you around the app or capture it.
+- **Reading the screen, navigation and screenshots** — FACO cannot see filters you applied on screen, move you around the app, or capture it. For an Insights dashboard, tell it any filters you are using.
 - **Approval prompts while the widget is closed** — open the widget to see an approval that is waiting.
 
 A link to a Desk page in an answer opens in a new tab, so you keep your place in the app.
