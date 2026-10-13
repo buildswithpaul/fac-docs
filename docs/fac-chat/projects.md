@@ -84,7 +84,65 @@ started with **New chat in this project** is in that project from its first mess
 ### Deleting a project
 
 **Delete project** (after a confirmation) removes the project and its instructions. **Its
-chats are kept**: they move out of the project and stay in Recents.
+chats are kept**: they move out of the project and stay in Recents. If the project has
+[documents](#project-documents), they are kept too: they move into your Knowledge Base as
+private documents.
+
+## Project documents
+
+A project can hold its own documents, such as policies, SOPs, contracts or long PDFs. In a
+chat inside that project, the assistant looks at those documents first and still has the rest
+of your Knowledge Base to fall back on.
+
+### Add documents
+
+Open the project page and use **Upload** in the **Documents** block, or drag files onto it.
+The block sits between the instructions and the chats. It accepts the same files as the
+Knowledge Base: PDF, Markdown and text files, up to 10 MB each.
+
+Each document shows its name, size and a status:
+
+| Status | Meaning |
+|---|---|
+| **Processing** | The document was uploaded and is being prepared for search. The list refreshes by itself every few seconds until nothing is processing. |
+| **Ready** | The assistant can search and cite it. |
+| **Failed** | The document could not be prepared. Delete it and upload it again. |
+
+A document can still be downloaded or deleted from its **⋯** menu. Deleting asks you to
+confirm, and the assistant stops using the document in this project.
+
+### How the assistant uses them
+
+Inside the project, the assistant sees a list of the project's documents first, and prefers
+them when they are relevant to your question. When it answers from one, the source it cites is
+marked as **from this project**. You do not need to ask it to search. Documents still being
+processed are not searched until they are **Ready**.
+
+### Who can see them
+
+- **Project documents are never used outside their project.** The assistant does not list or
+  search them in chats that are not in the project, or in other projects.
+- **They are private to you.** Other users never see or retrieve them, and they cannot be shared
+  or made public while they belong to a project.
+- **They do not appear on the Knowledge Base page** while they belong to a project.
+
+### When you delete a project
+
+The project's documents are not deleted. They move into your Knowledge Base as **private**
+documents, and from then on they behave like any other document you uploaded there.
+
+Deleting a project needs FAC Cloud to be reachable, because FAC has to ask it to release the
+documents first. If it cannot, the delete is refused with "Couldn't release this project's
+documents; try again", and nothing is removed, so no document is left stranded. Try again once
+the connection is back.
+
+### Requirements
+
+- **A FAC Cloud that supports project documents.** If yours does not yet, the Documents block is
+  hidden and projects work exactly as before.
+- **The knowledge base turned on** for your site. Without it the block is hidden.
+- **A plan that includes the knowledge base.** Without it you can see a project's existing
+  documents but the **Upload** button and drag-and-drop are not offered.
 
 ## Privacy
 
@@ -93,7 +151,8 @@ chats are kept**: they move out of the project and stay in Recents.
   have access to the underlying records on the site, as they do for chat messages.
 - **Export and erasure.** In FAC Chat's settings, under **Your Privacy**, the **Your Data**
   section has **Download your data** ("Export all your data as a JSON file"; the button is **Download**).
-  That file now includes your projects (title, instructions, created date) and your
+  That file now includes your projects (title, instructions, created date, and the names of
+  their documents when FAC Cloud is reachable) and your
   conversations (title, project, dates and archived flag). **Delete all my data**
   (**Delete Everything**, which asks for your password) permanently deletes your
   conversations and projects along with your messages. Frappe's own **Download My Data** also
