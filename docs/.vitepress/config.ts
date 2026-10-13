@@ -114,6 +114,7 @@ export default defineConfig({
 						{ text: 'Local & Private Sites', link: '/fac-chat/local-sites' },
 						{ text: 'Widget in Other Apps', link: '/fac-chat/other-apps' },
 						{ text: 'Files & Attachments', link: '/fac-chat/attachments' },
+						{ text: 'Projects & Chat History', link: '/fac-chat/projects' },
 						{ text: 'Welcome Suggestions', link: '/fac-chat/suggestions' },
 						{ text: 'Browser Diagnostics', link: '/fac-chat/browser-diagnostics' },
 						{ text: 'Conversation Recall', link: '/fac-chat/conversation-recall' },
