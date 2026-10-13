@@ -15,8 +15,8 @@ The same people who see it in Desk: **System Users with FAC access** while FAC C
 
 ## Insights dashboards
 
-Turn on the **Frappe Insights** plugin in **FAC Admin → Tools** and FACO can read your Insights
-dashboards and charts, with their numbers. Ask "what does this dashboard show?" or "how are sales
+On a site with Frappe Insights v3 installed, FACO can read your Insights dashboards and charts,
+with their numbers. There is nothing to switch on: the Insights tools come with FAC Chat. Ask "what does this dashboard show?" or "how are sales
 trending?" — FACO finds and reads the dashboard as you, so it sees only what Insights lets you see.
 
 FACO reads the numbers with the dashboard's **default** filters; it cannot see filters you changed
