@@ -91,9 +91,13 @@ chats are kept**: they move out of the project and stay in Recents.
 - **Projects are private to you.** Every project belongs to the person who created it, and
   other users cannot see, open, change or delete it, or move chats into it. System Managers
   have access to the underlying records on the site, as they do for chat messages.
-- **Export and erasure.** Your projects and your conversation titles are included when you
-  use Frappe's **Download My Data**, and are removed when you use **Delete My Data**,
-  alongside your chat messages.
+- **Export and erasure.** In FAC Chat's settings, under **Your Privacy**, the **Your Data**
+  section has **Download your data** ("Export all your data as a JSON file"; the button is **Download**).
+  That file now includes your projects (title, instructions, created date) and your
+  conversations (title, project, dates and archived flag). **Delete all my data**
+  (**Delete Everything**, which asks for your password) permanently deletes your
+  conversations and projects along with your messages. Frappe's own **Download My Data** also
+  lists these records.
 - If you are under a GDPR processing restriction, your messages are not stored (see
   [Files & attachments](./attachments)). A project's instructions still apply to your chats.
 
@@ -101,3 +105,4 @@ chats are kept**: they move out of the project and stay in Recents.
 
 When a site is updated to include this feature, FAC builds the history list from your
 existing chat messages, so older chats appear in Recents without any action from you.
+Chats you had already archived stay archived.
