@@ -13,6 +13,20 @@ FAC lists every installed app that registers its own route on the apps screen. N
 
 The same people who see it in Desk: **System Users with FAC access** while FAC Chat is enabled. Website and portal users — Helpdesk customers, for example — never get the widget, even in an app where it is on.
 
+## Insights dashboards
+
+Turn on the **Frappe Insights** plugin in **FAC Admin → Tools** and FACO can read your Insights
+dashboards and charts, with their numbers. Ask "what does this dashboard show?" or "how are sales
+trending?" — FACO finds and reads the dashboard as you, so it sees only what Insights lets you see.
+
+FACO reads the numbers with the dashboard's **default** filters; it cannot see filters you changed
+on screen. Tell it the filters you are using ("for this quarter only") and it applies them.
+
+## Posting in Raven
+
+Ask FACO to post in Raven ("share this ticket in #support") and it drafts the message for a
+channel or DM you are already in. You approve it before it is sent, and it is sent as you.
+
 ## What works outside Desk
 
 Chat, streamed answers, attachments, approvals and conversation history work as in Desk.
