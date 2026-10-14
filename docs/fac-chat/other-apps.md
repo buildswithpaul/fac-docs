@@ -34,6 +34,7 @@ FAC Bot lets your team ask FACO from inside Raven conversations. Raven does not 
 - **Switch it on** in **FAC Admin → Settings → Other Frappe apps → FAC Bot in Raven**. It is off
   until an administrator turns it on, because each answer uses the asker's FACO credits.
 - **Direct messages:** message **FAC Bot** like any colleague. The conversation keeps its memory.
+- **Chats with a colleague:** **@mention** FAC Bot in a direct message with another person; it answers in a thread, and you both see the answer.
 - **Channels:** add FAC Bot to a channel, then **@mention** it. It answers in a thread on your
   message. **Everyone in the channel can read the answer**, so ask about sensitive figures in a DM.
 - **Files:** send a PDF, a spreadsheet or an image with your question and FACO reads it.
