@@ -128,6 +128,7 @@ export default defineConfig({
 					items: [
 						{ text: 'Installation', link: '/getting-started/installation' },
 						{ text: 'Quick Start', link: '/getting-started/quick-start' },
+						{ text: 'Updating FAC', link: '/getting-started/updating' },
 						{ text: 'Migration from STDIO', link: '/getting-started/migration' },
 					],
 				},
