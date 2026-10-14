@@ -86,7 +86,7 @@ started with **New chat in this project** is in that project from its first mess
 **Delete project** (after a confirmation) removes the project and its instructions. **Its
 chats are kept**: they move out of the project and stay in Recents. If the project has
 [documents](#project-documents), they are kept too: they move into your Knowledge Base as
-private documents.
+private documents. The project's [memories](#project-memory) are deleted with it.
 
 ## Project documents
 
@@ -144,6 +144,74 @@ the connection is back.
 - **A plan that includes the knowledge base.** Without it you can see a project's existing
   documents but the **Upload** button and drag-and-drop are not offered.
 
+## Project memory
+
+Inside a project, the assistant builds up its own memory of that project, separate from your
+personal memory. A fact such as "our Q4 target region is Kerala" is kept for the project, while a
+habit such as "I prefer bullet points" stays personal and applies in every chat.
+
+### What is kept where
+
+When the assistant learns something from a chat inside a project, it labels each memory as either
+**project** or **global**:
+
+- **Preferences and corrections about how you work** are global by default. They follow you into
+  every chat, in or out of projects.
+- **Facts, summaries and anything about the project's subject** are project memories by default.
+
+If you ask the assistant to remember something while in a project, it picks the same way, and you
+can say which you mean ("remember this for the whole workspace" or "only for this project").
+Outside a project everything is global, as before.
+
+### Where the assistant uses them
+
+- In a chat in the project, the assistant recalls your global memories **and** that project's
+  memories. Your project preferences and corrections are listed first, under "In this project",
+  among the standing instructions it follows.
+- In a chat in **another project**, or in no project, the project's memories are not recalled and
+  its project preferences are not applied. Your global memories still are.
+- Project memories are private to you. Other users never see, recall or edit them.
+
+### The Memory block
+
+The project page shows a **Memory** block after the documents. It lists the project's memories
+with their type (preference, fact, correction or summary). From there you can:
+
+- **Edit** a memory in place,
+- **Delete** one memory (after a confirmation), and
+- **Clear project memory** to remove all of this project's memories at once (after a confirmation).
+
+Clearing does not switch learning off: the assistant starts building the project's memory again
+as you keep chatting. While there is nothing to show, the block says nothing has been remembered
+for this project yet. The list does not refresh by itself while you chat; reopen the page to see
+new memories.
+
+### Settings > Memory stays personal
+
+**Settings > Memory**, with its list, statistics and summary, shows **global memories only**.
+**Clear all** there clears the memories that are not tied to a project; project memories stay with
+their projects and are managed on the project page.
+
+### Moving a chat between projects
+
+When you move a chat out of a project, or into another one, only the messages **after** the move
+are used to build memory in the new place. Earlier messages belong to the old scope and are
+dropped rather than carried over, so a project's facts do not leak into another project or into
+your global memory.
+
+### When you delete a project
+
+Deleting a project deletes its memories too. The delete confirmation says so. If FAC Cloud cannot
+be reached, the delete is refused with "Couldn't delete this project's memories; try again" and
+nothing is removed. Once a project is deleted, its memories cannot be rebuilt from chats that
+were still being processed at the time.
+
+### Requirements
+
+- **A FAC Cloud / Assistant Runtime connection with project memory available.** If yours does not
+  have it yet, the Memory block is hidden and projects work exactly as before.
+- **Memory turned on** for your site and for you. Without it the block is hidden.
+
 ## Privacy
 
 - **Projects are private to you.** Every project belongs to the person who created it, and
@@ -152,10 +220,10 @@ the connection is back.
 - **Export and erasure.** In FAC Chat's settings, under **Your Privacy**, the **Your Data**
   section has **Download your data** ("Export all your data as a JSON file"; the button is **Download**).
   That file now includes your projects (title, instructions, created date, and the names of
-  their documents when FAC Cloud is reachable) and your
+  their documents and a count of their memories when FAC Cloud is reachable) and your
   conversations (title, project, dates and archived flag). **Delete all my data**
   (**Delete Everything**, which asks for your password) permanently deletes your
-  conversations and projects along with your messages. Frappe's own **Download My Data** also
+  conversations and projects along with your messages. Project memories are erased with the rest of your memory data. Frappe's own **Download My Data** also
   lists these records.
 - If you are under a GDPR processing restriction, your messages are not stored (see
   [Files & attachments](./attachments)). A project's instructions still apply to your chats.
