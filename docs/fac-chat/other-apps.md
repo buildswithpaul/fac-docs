@@ -1,6 +1,6 @@
 # Use the widget in other Frappe apps
 
-The FACO widget lives in Desk. It can also appear inside Frappe's standalone apps — Helpdesk, Insights, CRM, Raven and any other app that adds itself to the apps screen — so your team can ask FACO without leaving the app they work in.
+The FACO widget lives in Desk. It can also appear inside Frappe's standalone apps — Helpdesk, Insights, CRM and any other app that adds itself to the apps screen — so your team can ask FACO without leaving the app they work in. Raven is the exception: it is a chat app, so FACO answers there as [FAC Bot](#fac-bot-in-raven) instead of a widget.
 
 ## Switch it on
 
@@ -29,7 +29,7 @@ channel or DM you are already in. You approve it before it is sent, and it is se
 
 ## FAC Bot in Raven
 
-FAC Bot lets your team ask FACO from inside Raven conversations, without opening the widget.
+FAC Bot lets your team ask FACO from inside Raven conversations. Raven does not show the FACO widget.
 
 - **Switch it on** in **FAC Admin → Settings → Other Frappe apps → FAC Bot in Raven**. It is off
   until an administrator turns it on, because each answer uses the asker's FACO credits.
