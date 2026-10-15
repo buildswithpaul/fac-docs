@@ -260,6 +260,38 @@ list position — a v-for index is not stable across a session switch or as
 older rows age out of the server's windowed history, so an index-keyed set
 could leak "expanded" onto the wrong divider entirely.
 
+## Installable app (PWA)
+
+The SPA ships a web app manifest and a service worker, following Raven's approach, so
+browsers can install `/copilot` as an app. Nothing outside FAC is configured: no web
+server or nginx change.
+
+- **Manifest.** A static `manifest.webmanifest` in the SPA build, linked from the page
+  head, sets `/copilot/` as the app's id, start URL and scope, `standalone` display,
+  the colours, and the icons (192 and 512 px, a maskable 512 px for Android, and a
+  180 px Apple touch icon).
+- **Service worker at `/copilot/sw.js`.** A worker only controls pages under the path
+  its script is served from, and the build lands under `/assets/`, so a Frappe page
+  renderer serves the built worker from within the SPA's path, with
+  `Cache-Control: no-cache` so a deploy reaches installed apps without a stale-worker
+  window. With FAC Chat switched off, the renderer declines and the URL answers 404
+  like the rest of `/copilot`.
+- **What is cached.** The precache holds what the first screen needs (the entry
+  script, its static imports and CSS, fonts, icons and the offline page), read from
+  Vite's build manifest, about 0.6 MB. Every other chunk (diagram renderers, the
+  workflow builder) is cached the first time it is used; chunk names carry a content
+  hash, so a cached copy never goes stale.
+- **Navigations always go to the network.** The rendered `/copilot` page carries the
+  user's boot data and CSRF token, so it is never cached. When the network fails, the
+  worker answers with the precached offline page. Only `/copilot` navigations are
+  handled; Desk, `/api` and the rest of the site are untouched.
+- **Install prompt.** Chrome and Edge fire `beforeinstallprompt` once, often before the
+  app mounts, so the SPA captures it at start-up. The account menu's **Install app**
+  item shows while the browser offers installation and the app is not already running
+  installed; on iPhone and iPad, which have no prompt, it explains Add to Home Screen.
+
+The Desk widget is built separately and has no service worker.
+
 ## What lives on the backend (not here)
 
 The following are handled by the managed FAC Cloud backend and are
