@@ -25,7 +25,7 @@ Always enabled. Provides essential Frappe operations.
 | `update_document` | Update document fields (supports patch and replace modes for child tables) |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
 | `delete_document` | Delete a document (`force=true` to ignore links) |
-| `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page |
+| `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page. `group_by` with `aggregate` returns database-computed totals per group instead (see [Answering business questions](#answering-business-questions)) |
 
 #### Permissions and error messages
 
@@ -63,15 +63,59 @@ tool, plus the two OpenAI-compatible adapters below that wrap it.
 
 | Tool | Purpose |
 |---|---|
-| `get_doctype_info` | Field definitions, link fields, permissions, and naming info for a DocType |
+| `get_doctype_info` | Field definitions, link fields, permissions, and naming info for a DocType. Pass `topic` instead of `doctype` to find where a subject's data lives |
 
 ### Reports (3)
 
 | Tool | Purpose |
 |---|---|
-| `report_list` | List available reports, optionally filtered by `report_type` (`Script Report`, `Query Report`, `Report Builder`) |
+| `report_list` | Find reports the user can run. `query` searches by what the user asked (`limit` default 10, max 25); `module` and `report_type` (`Script Report`, `Query Report`, `Report Builder`) filter. With no arguments it returns a per-module report count, not every report |
 | `report_requirements` | Describe a report's required filters, columns, and metadata before running it |
-| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A slow prepared report returns `status: "timeout"`; asking again with the same filters picks up the same report |
+| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A prepared report is awaited for at most 15 seconds, then the call returns `status: "timeout"` (still being prepared); calling again with the same filters picks up the same report. Every result has `defaulted_filters`, the filters FAC filled in |
+
+#### Answering business questions
+
+When a user asks a business question ("what are our overdue receivables?", "sales by territory this quarter"), the assistant tries sources in this order and stops at the first that fits:
+
+1. **A matching custom report on the site.** A report someone built in the UI is the site's own definition of the number, so it ranks above a standard report.
+2. **A standard ERPNext report.**
+3. **A grouped query on the right DocType**, using `list_documents` with `group_by` and `aggregate`. `get_doctype_info` with `topic` finds the DocType first when the subject is not obvious.
+
+The answer names the report and the filters it ran with, or the records and DocType it used. When FAC filled in a filter the user did not give (period, company), the answer states the value used; the `defaulted_filters` field of `generate_report` lists them.
+
+**Finding a report: `report_list`**
+
+- `query` ranks the reports the user can run against the question. `limit` caps the list (default 10, maximum 25).
+- Each result carries `origin` (`custom` or `standard`), `ref_doctype` (the source DocType), `mandatory_filters`, `prepared` (the report runs in the background) and, for standard reports, a short `purpose`.
+- With no arguments the tool returns a count of reports per module rather than every report.
+- Only reports the user may run are listed: enabled, permitted by the report's roles, and with `report` permission on its reference DocType. This is Frappe's own rule.
+
+**Running a report: `generate_report`**
+
+- A prepared report is awaited for at most 15 seconds. If it is not ready, the result is `status: "timeout"` with the report's `prepared_report_name`: the report is still being prepared, not empty. Call again with the same filters and the retry picks up that report.
+- A prepared report that fails returns `success: false` and `status: "error"` with the error text.
+- For totals, the assistant uses `summary_only`, which returns the columns, `row_count` and `report_summary` without rows.
+
+**Locating data: `get_doctype_info` with `topic`**
+
+Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to eight DocTypes whose name or module matches, singular or plural, custom DocTypes first on a tie. Each entry has `has_data` (yes or no, never a count), `date_fields`, `amount_fields`, `party_fields` and `custom_fields`. Only DocTypes the user may read are listed, and fields above the user's permission level or marked sensitive are left out. Child tables and Single DocTypes are not listed.
+
+**Grouped totals: `list_documents` with `group_by` and `aggregate`**
+
+```json
+{
+  "doctype": "Sales Invoice",
+  "filters": {"posting_date": [">=", "2026-01-01"]},
+  "group_by": "territory",
+  "aggregate": [{"function": "sum", "field": "base_grand_total"}]
+}
+```
+
+- `function` is `sum`, `count`, `avg`, `min` or `max`, with at most 5 aggregates. `sum` and `avg` need a numeric field (Currency, Float, Int or Percent).
+- The database computes each figure over only the records the user may read, under both role permissions and User Permissions. The numbers are not summed from a truncated listing.
+- Submittable DocTypes default to submitted documents; the response says so with `docstatus_defaulted`.
+- Restricted, higher-permlevel and non-numeric (for `sum` and `avg`) fields are refused with an explanation. Admin-only DocTypes and virtual DocTypes are refused.
+- `limit` caps the number of groups (default 100); `has_more` is true when groups were cut off.
 
 ### Workflow (2)
 
