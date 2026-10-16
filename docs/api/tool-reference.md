@@ -71,13 +71,13 @@ tool, plus the two OpenAI-compatible adapters below that wrap it.
 |---|---|
 | `report_list` | Find reports the user can run. `query` searches by what the user asked (`limit` default 10, max 25); `module` and `report_type` (`Script Report`, `Query Report`, `Report Builder`) filter. With no arguments it returns a per-module report count, not every report |
 | `report_requirements` | Describe a report's required filters, columns, and metadata before running it |
-| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A prepared report is awaited for at most 15 seconds, then the call returns `status: "timeout"` (still being prepared); calling again with the same filters picks up the same report. Every result has `defaulted_filters`, the filters FAC filled in |
+| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A prepared report is awaited for at most 15 seconds, then the call returns `status: "timeout"` (still being prepared); calling again with the same filters picks up the same report. Every successful result has `defaulted_filters`, the filters FAC filled in |
 
 #### Answering business questions
 
-When a user asks a business question ("what are our overdue receivables?", "sales by territory this quarter"), the assistant tries sources in this order and stops at the first that fits:
+When a user asks a business question ("what are our overdue receivables?", "sales by territory this quarter"), the assistant is instructed (in the tool descriptions; the code does not enforce the order) to try sources in this order and stop at the first that fits:
 
-1. **A matching custom report on the site.** A report someone built in the UI is the site's own definition of the number, so it ranks above a standard report.
+1. **A matching custom report on the site.** A report someone built in the UI is the site's own definition of the number, so on an equal match a report built on this site ranks above a standard one.
 2. **A standard ERPNext report.**
 3. **A grouped query on the right DocType**, using `list_documents` with `group_by` and `aggregate`. `get_doctype_info` with `topic` finds the DocType first when the subject is not obvious.
 
@@ -86,7 +86,8 @@ The answer names the report and the filters it ran with, or the records and DocT
 **Finding a report: `report_list`**
 
 - `query` ranks the reports the user can run against the question. `limit` caps the list (default 10, maximum 25).
-- Each result carries `origin` (`custom` or `standard`), `ref_doctype` (the source DocType), `mandatory_filters`, `prepared` (the report runs in the background) and, for standard reports, a short `purpose`.
+- `report_type` is ignored when `query` is given.
+- Each `query` result carries `origin` (`custom` or `standard`), `ref_doctype` (the source DocType), `mandatory_filters`, `prepared` (the report runs in the background) and `purpose` (a short description for standard reports, otherwise null). Results from `module` or `report_type` without `query` carry `name`, `report_name`, `report_type`, `module`, `is_standard` and `disabled` instead.
 - With no arguments the tool returns a count of reports per module rather than every report.
 - Only reports the user may run are listed: enabled, permitted by the report's roles, and with `report` permission on its reference DocType. This is Frappe's own rule.
 
@@ -98,7 +99,7 @@ The answer names the report and the filters it ran with, or the records and DocT
 
 **Locating data: `get_doctype_info` with `topic`**
 
-Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to eight DocTypes whose name or module matches, singular or plural, custom DocTypes first on a tie. Each entry has `has_data` (yes or no, never a count), `date_fields`, `amount_fields`, `party_fields` and `custom_fields`. Only DocTypes the user may read are listed, and fields above the user's permission level or marked sensitive are left out. Child tables and Single DocTypes are not listed.
+Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to eight DocTypes whose name or module matches, singular or plural, custom DocTypes first on a tie. Each entry has `has_data` (yes or no, never a count), `date_fields`, `amount_fields`, `party_fields` and `custom_fields`. Only DocTypes the user may read are listed, and fields above the user's permission level or marked sensitive are left out. Child tables and Single DocTypes are not listed. For users with the Assistant User role, the settings DocTypes FAC hides from that role are also left out.
 
 **Grouped totals: `list_documents` with `group_by` and `aggregate`**
 
@@ -113,8 +114,8 @@ Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to ei
 
 - `function` is `sum`, `count`, `avg`, `min` or `max`, with at most 5 aggregates. `sum` and `avg` need a numeric field (Currency, Float, Int or Percent).
 - The database computes each figure over only the records the user may read, under both role permissions and User Permissions. The numbers are not summed from a truncated listing.
-- Submittable DocTypes default to submitted documents; the response says so with `docstatus_defaulted`.
-- Restricted, higher-permlevel and non-numeric (for `sum` and `avg`) fields are refused with an explanation. Admin-only DocTypes and virtual DocTypes are refused.
+- Submittable DocTypes default to submitted documents unless you pass `docstatus`; the response says so with `docstatus_defaulted`.
+- Restricted, higher-permlevel and non-numeric (for `sum` and `avg`) fields are refused with an explanation. For users with the Assistant User role, the settings DocTypes FAC hides from that role (System Settings, Print Settings, Email Domain, Social Login Key and similar) are refused; virtual DocTypes are refused for everyone.
 - `limit` caps the number of groups (default 100); `has_more` is true when groups were cut off.
 
 ### Workflow (2)
