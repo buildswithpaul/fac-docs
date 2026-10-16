@@ -6,7 +6,7 @@ description: What you can attach to a FAC Chat message, the size and type limits
 # Files & attachments
 
 You can attach a document or an image to a FAC Chat message from the `/copilot` SPA
-composer, from the Desk widget, or from mobile. This page covers what is accepted,
+composer, or from the Desk widget. The mobile app, coming soon, will attach files too. This page covers what is accepted,
 where the file goes, and how the assistant actually reads it.
 
 ## What you can attach

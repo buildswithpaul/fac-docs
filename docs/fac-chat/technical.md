@@ -1,6 +1,6 @@
 ---
 title: FAC Chat — Technical
-description: Client-side mechanics of FAC Chat — how the widget mounts on Frappe Desk pages, how streamed responses render as blocks, and how sessions move between widget, SPA, and mobile.
+description: Client-side mechanics of FAC Chat — how the widget mounts on Frappe Desk pages, how streamed responses render as blocks, and how sessions move between the widget and the SPA (the mobile app is coming soon).
 ---
 
 # FAC Chat — Technical (client side)
@@ -108,9 +108,9 @@ expired in the meantime is marked expired instead.
 ## Sessions across surfaces
 
 A conversation is identified by a `session_id`, and that identifier is shared across
-the widget, the `/copilot` SPA, and mobile. Handing a live conversation from one
-surface to another (open it in the widget, continue it full-screen in the SPA, pick
-it up on mobile) is done with short-lived handoff keys in the tab's `sessionStorage`:
+the widget and the `/copilot` SPA, and the mobile app will share it when it ships
+(it is coming soon). Handing a live conversation from one
+surface to another (open it in the widget, continue it full-screen in the SPA) is done with short-lived handoff keys in the tab's `sessionStorage`:
 
 - `faco_widget_session` — carries a conversation from the SPA into the widget.
 - `faco_active_session` — carries a conversation from the widget into the SPA. The

@@ -58,7 +58,7 @@ FAC Chat is an AI assistant embedded in your Frappe site, across three surfaces:
 
 - a **floating widget** on every Desk page, built from the same components as the SPA,
 - a **full-screen SPA** at `/copilot`,
-- a **mobile app** over OAuth.
+- a **mobile app** over OAuth, coming soon.
 
 It supports streaming responses, tool use against your Frappe data, file
 attachments, conversation history, and — through the FAC Cloud
@@ -163,4 +163,4 @@ re-enable it later — that personal choice is always respected, admins included
   before you rely on it.
 - **[Technical (client side)](./technical)** — how the widget mounts on Desk pages,
   how streamed responses are rendered, and how a session follows you between the
-  widget, the SPA, and mobile.
+  widget and the SPA (and the mobile app, once it ships).

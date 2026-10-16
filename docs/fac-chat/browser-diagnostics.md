@@ -14,7 +14,7 @@ that diagnostics are privacy-relevant and you should know the boundaries before 
 them on.
 
 ::: warning Desk widget only
-This applies to the chat widget on Frappe Desk pages. The `/copilot` SPA and mobile do
+This applies to the chat widget on Frappe Desk pages. The `/copilot` SPA does
 not record or send diagnostics.
 :::
 
