@@ -119,6 +119,15 @@ it up on mobile) is done with short-lived handoff keys in the tab's `sessionStor
 - `faco_widget_persistent_session` — remembers the widget's current conversation
   across page loads.
 
+The widget header's **New chat** button
+([WidgetPanel.vue:245](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L245))
+asks the server for a new `session_id` through `chatStore.createSession()`, the call the
+SPA's own **New chat** uses, then reloads the session list so the welcome screen offers
+the conversation just left. The widget's watch on the current session writes the new id
+to `faco_widget_persistent_session`, so it survives a reload. The button is disabled
+while the chat is empty, while a reply streams, and while an approved card resumes
+([WidgetPanel.vue:239](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L239)).
+
 Because all three surfaces share the same `session_id` namespace, messages and
 history stay consistent no matter where you continue the conversation.
 
