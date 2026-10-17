@@ -708,6 +708,20 @@ def filter_sensitive_fields(doc_dict, doctype, user_role):
             doc_dict[field] = "***RESTRICTED***"
 ```
 
+#### **Query Field Checks**
+
+A field the user cannot read must not narrow a query either, or its value can be worked out from
+which records match. Before `list_documents` runs a query, `check_query_fields`
+(`frappe_assistant_core/core/field_access.py`) refuses any field named in `filters`, in
+`order_by`, or inside an expression or alias in `fields`, when that field is:
+
+- above the user's permission level for the DocType (Frappe v16 refuses this itself; v15 does not), or
+- withheld for the user's role by `SENSITIVE_FIELDS`, or by a DocType's own `ADMIN_ONLY_FIELDS` entry
+  for an Assistant User.
+
+Standard columns such as `creation`, `owner` and `docstatus` stay queryable. `get_doctype_info`
+leaves the same fields out of its field lists.
+
 ### 4. SQL Security & Query Protection
 
 #### **Query Security Controls**
