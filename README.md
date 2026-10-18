@@ -31,6 +31,7 @@ docs/
 ├── index.md               Landing page
 ├── getting-started/
 ├── guides/
+├── guide-me/              Step-by-step walkthroughs with screenshots
 ├── api/
 ├── fac-chat/              FAC Chat: overview, attachments, suggestions,
 │                          browser diagnostics, conversation recall, technical
@@ -67,6 +68,7 @@ Pushes to `main` are auto-deployed by `.github/workflows/deploy.yml`:
 
 Corrections made when this site's content disagreed with the shipped app. One line each, newest first.
 
+- **2026-10-18** — FAC 3.2.0. Tool count corrected from 30 to **38 tools across 5 plugins**: `data_science` has 3 (`analyze_business_data` was removed in 3.1.0, but the tool reference, plugin management, the architecture page and the landing page still listed it), and `faco` has 16, not 7 or 8 (the three Insights tools and five CRM/Helpdesk tools were missing from the tool reference). `guides/fac-admin.md` described stat cards and a bottom Recent Activity feed that the page no longer has; it now describes the status strip and the right-hand column (MCP endpoint, FAC Chat, Chat usage, Quick actions, Recent activity), and lists the **Other Frappe apps** settings group.
 - **2026-10-04** — `docs/api/tool-reference.md` listed `submit_document` as a current tool. The app renamed it to `document_action` and added `cancel` and `amend` actions (`plugins/core/tools/document_action.py`; `submit_document` survives only as a hidden alias in `TOOL_NAME_ALIASES`). The tool table now names `document_action` and its three actions.
 - **2026-09-24** — FAC 3.0 went GA (`v3.0.0`, tag cut 2026-09-23). Removed all "public beta" / "rough edges" framing from `fac-chat/index.md`; the FAC Chat install instructions told readers to `bench get-app --branch beta` / `git checkout beta`, but `public/beta` sits at `3.0.0-beta.3` — **older** than the `main`/`v3.0.0` stable release, so following them was a downgrade. All install instructions across the site now point at `main`/stable.
 - **2026-09-24** — `fac-chat/index.md` now states plainly that the pre-write approval gate (pause + approve/reject card on `create_document`/`update_document`/`delete_document`/`submit_document`) is a **FAC Chat-only** feature. Verified against the app repo: `submit_document.py`/`create_document.py` have no approval logic, every `requires_approval` enforcement point lives under `frappe_assistant_core/chat/`, and `get_pending_approvals` queries Frappe's own Workflow Actions, not an AI approval gate. Over the plain MCP server a write executes immediately, inside the caller's Frappe permissions.
