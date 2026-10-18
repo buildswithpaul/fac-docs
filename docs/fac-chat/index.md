@@ -133,6 +133,23 @@ After enabling:
 - The first time a user opens chat, they walk through a one-time onboarding that
   connects the site to FAC Cloud and links it to a subscription.
 
+## Installing FAC Chat as an app
+
+The full-screen chat at `/copilot` can be installed as its own app, with an icon on the
+desktop or home screen and a window without browser tabs and toolbars.
+
+- **Chrome and Edge** (desktop and Android): use the install icon in the address bar,
+  or **Install app** in the account menu (the avatar at the bottom of the left rail).
+  The menu item appears only when the browser can install the app.
+- **iPhone and iPad** (Safari): tap **Share**, then **Add to Home Screen**. The
+  **Install app** menu item shows these steps.
+
+The installed app opens at `/copilot` and asks for a login like the browser does. Its
+code is cached, so it opens quickly; without a connection it shows a "You're offline"
+screen, because chat needs to reach FAC Cloud. Nothing about the user or their
+conversations is stored on the device. It needs FAC Chat enabled, and the site served
+over HTTPS, which browsers require before they offer installation.
+
 ## Who sees the widget
 
 The chat widget is **not shown to everyone by default**. Once FAC Chat is enabled,
