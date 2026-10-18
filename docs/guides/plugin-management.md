@@ -29,12 +29,12 @@ Each plugin has an individual configuration record:
 | Plugin | Status | Description | Tools |
 |--------|--------|-------------|-------|
 | **Core** | Always Enabled | Document CRUD, search, metadata, reports, workflow, email | 16 |
-| **Data Science** | Optional | Python execution, SQL, statistical analysis, file extraction | 4 |
-| **FACO Tools** | Optional | Document generation and browser automation. **FAC Cloud only** — these act inside the FAC Chat page, so other MCP clients are not offered them | 7 |
+| **Data Science** | Optional | Python execution, SQL, file extraction | 3 |
+| **FACO Tools** | Optional | Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. **FAC Cloud only** — these act inside FAC Chat, so other MCP clients are not offered them | 16 |
 | **Visualization** | Optional | Dashboards and charts | 3 |
 | **Custom Tools** | Always Enabled | Discovers tools registered by other apps via the `assistant_tools` hook | — |
 
-30 tools ship in total across these plugins. See [Tool Reference](../api/tool-reference) for the full per-tool list.
+38 tools ship in total across these plugins. See [Tool Reference](../api/tool-reference) for the full per-tool list.
 
 ### 3. Plugin Architecture
 
@@ -43,12 +43,12 @@ plugins/
 ├── core/                  # Always enabled — 16 tools
 │   ├── plugin.py
 │   └── tools/             # create_document.py, get_document.py, run_workflow.py, ...
-├── data_science/          # Optional — 4 tools
+├── data_science/          # Optional — 3 tools
 │   ├── plugin.py
 │   └── tools/             # run_python_code.py, run_database_query.py, ...
-├── faco/                  # Optional, FAC Cloud only — 7 tools
+├── faco/                  # Optional, FAC Cloud only — 16 tools
 │   ├── plugin.py
-│   └── tools/             # generate_document.py, browser_*.py, ...
+│   └── tools/             # generate_document.py, browser_*.py, *_crm_*.py, ...
 ├── visualization/         # Optional — 3 tools
 │   ├── plugin.py
 │   └── tools/             # create_dashboard.py, create_dashboard_chart.py, list_user_dashboards.py

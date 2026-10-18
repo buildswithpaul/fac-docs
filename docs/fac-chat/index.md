@@ -80,6 +80,21 @@ Each user can change this default per tool from their own approval preferences â
 workflow doesn't have to click through a card every time. This gate is specific to
 FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
 
+## Memory asks first
+
+FACO can remember preferences and facts from your conversations to give better answers.
+It only does so with your consent.
+
+Earlier versions switched memory on during FAC Chat setup instead of asking. From FAC 3.2,
+anyone whose memory was switched on that way is asked once, **"Keep AI memory on?"**, and
+memory is paused until they answer:
+
+- **Keep memory on** gives consent, and memory carries on.
+- **Turn off and delete memories** keeps memory off and deletes everything it remembered.
+- **Decide later** closes the question for now. Memory stays paused, and you are asked again the next time you open FAC Chat.
+
+You can change this any time in **Settings â†’ Privacy**.
+
 ## Installing FAC Chat
 
 FAC Chat ships inside the same `frappe_assistant_core` app you already install for the

@@ -1,12 +1,12 @@
 # Tool Reference
 
-Frappe Assistant Core ships **30 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
+Frappe Assistant Core ships **38 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
 
 | Plugin | Tools | Description |
 |---|---|---|
 | `core` | 16 | Always enabled. Document CRUD, search, metadata, reports, workflow, email. |
-| `data_science` | 4 | Optional. Python execution, SQL queries, statistical analysis, file content extraction. |
-| `faco` | 7 | Optional, **FAC Cloud only**. Document generation and browser automation. These act inside the FAC Chat page, so they are not offered to other MCP clients. |
+| `data_science` | 3 | Optional. Python execution, SQL queries, file content extraction. |
+| `faco` | 16 | Optional, **FAC Cloud only**. Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. These act inside FAC Chat, so they are not offered to other MCP clients. |
 | `visualization` | 3 | Optional. Dashboards and charts. |
 | `custom_tools` | — | Mechanism for external Frappe apps to register their own tools via the `assistant_tools` hook. No shipped tools. |
 
@@ -25,7 +25,7 @@ Always enabled. Provides essential Frappe operations.
 | `update_document` | Update document fields (supports patch and replace modes for child tables) |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
 | `delete_document` | Delete a document (`force=true` to ignore links) |
-| `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page |
+| `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page. `group_by` with `aggregate` returns database-computed totals per group instead (see [Answering business questions](#answering-business-questions)) |
 
 #### Permissions and error messages
 
@@ -63,15 +63,60 @@ tool, plus the two OpenAI-compatible adapters below that wrap it.
 
 | Tool | Purpose |
 |---|---|
-| `get_doctype_info` | Field definitions, link fields, permissions, and naming info for a DocType |
+| `get_doctype_info` | Field definitions, link fields, permissions, and naming info for a DocType. Pass `topic` instead of `doctype` to find where a subject's data lives |
 
 ### Reports (3)
 
 | Tool | Purpose |
 |---|---|
-| `report_list` | List available reports, optionally filtered by `report_type` (`Script Report`, `Query Report`, `Report Builder`) |
+| `report_list` | Find reports the user can run. `query` searches by what the user asked (`limit` default 10, max 25); `module` and `report_type` (`Script Report`, `Query Report`, `Report Builder`) filter. With no arguments it returns a per-module report count, not every report |
 | `report_requirements` | Describe a report's required filters, columns, and metadata before running it |
-| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A slow prepared report returns `status: "timeout"`; asking again with the same filters picks up the same report |
+| `generate_report` | Execute a Script or Query Report. Report Builder reports are not supported. Returns at most `max_rows` rows (default 500, up to 5000) with `row_count` and `truncated`; a totals row is kept. `summary_only` returns the count and columns without rows. A prepared report is awaited for at most 15 seconds, then the call returns `status: "timeout"` (still being prepared); calling again with the same filters picks up the same report. Every successful result has `defaulted_filters`, the filters FAC filled in |
+
+#### Answering business questions
+
+When a user asks a business question ("what are our overdue receivables?", "sales by territory this quarter"), the assistant is instructed (in the tool descriptions; the code does not enforce the order) to try sources in this order and stop at the first that fits:
+
+1. **A matching custom report on the site.** A report someone built in the UI is the site's own definition of the number, so on an equal match a report built on this site ranks above a standard one.
+2. **A standard ERPNext report.**
+3. **A grouped query on the right DocType**, using `list_documents` with `group_by` and `aggregate`. `get_doctype_info` with `topic` finds the DocType first when the subject is not obvious.
+
+The answer names the report and the filters it ran with, or the records and DocType it used. When FAC filled in a filter the user did not give (period, company), the answer states the value used; the `defaulted_filters` field of `generate_report` lists them.
+
+**Finding a report: `report_list`**
+
+- `query` ranks the reports the user can run against the question. `limit` caps the list (default 10, maximum 25).
+- `report_type` is ignored when `query` is given.
+- Each `query` result carries `origin` (`custom` or `standard`), `ref_doctype` (the source DocType), `mandatory_filters`, `prepared` (the report runs in the background) and `purpose` (a short description for standard reports, otherwise null). Results from `module` or `report_type` without `query` carry `name`, `report_name`, `report_type`, `module`, `is_standard` and `disabled` instead.
+- With no arguments the tool returns a count of reports per module rather than every report.
+- Only reports the user may run are listed: enabled, permitted by the report's roles, and with `report` permission on its reference DocType. This is Frappe's own rule.
+
+**Running a report: `generate_report`**
+
+- A prepared report is awaited for at most 15 seconds. If it is not ready, the result is `status: "timeout"` with the report's `prepared_report_name`: the report is still being prepared, not empty. Call again with the same filters and the retry picks up that report.
+- A prepared report that fails returns `success: false` and `status: "error"` with the error text.
+- For totals, the assistant uses `summary_only`, which returns the columns, `row_count` and `report_summary` without rows.
+
+**Locating data: `get_doctype_info` with `topic`**
+
+Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to eight DocTypes whose name or module matches, singular or plural, custom DocTypes first on a tie. Each entry has `has_data` (yes or no, never a count), `date_fields`, `amount_fields`, `party_fields` and `custom_fields`. Only DocTypes the user may read are listed, and fields above the user's permission level or marked sensitive are left out. Child tables and Single DocTypes are not listed. For users with the Assistant User role, the settings DocTypes FAC hides from that role are also left out.
+
+**Grouped totals: `list_documents` with `group_by` and `aggregate`**
+
+```json
+{
+  "doctype": "Sales Invoice",
+  "filters": {"posting_date": [">=", "2026-01-01"]},
+  "group_by": "territory",
+  "aggregate": [{"function": "sum", "field": "base_grand_total"}]
+}
+```
+
+- `function` is `sum`, `count`, `avg`, `min` or `max`, with at most 5 aggregates. `sum` and `avg` need a numeric field (Currency, Float, Int or Percent).
+- The database computes each figure over only the records the user may read, under both role permissions and User Permissions. The numbers are not summed from a truncated listing.
+- Submittable DocTypes default to submitted documents unless you pass `docstatus`; the response says so with `docstatus_defaulted`.
+- Restricted, higher-permlevel and non-numeric (for `sum` and `avg`) fields are refused with an explanation. For users with the Assistant User role, the settings DocTypes FAC hides from that role (System Settings, Print Settings, Email Domain, Social Login Key and similar) are refused; virtual DocTypes are refused for everyone.
+- `limit` caps the number of groups (default 100); `has_more` is true when groups were cut off.
 
 ### Workflow (2)
 
@@ -86,7 +131,7 @@ tool, plus the two OpenAI-compatible adapters below that wrap it.
 |---|---|
 | `send_email` | Queue an email via the site's Email Account |
 
-## Data Science plugin (4 tools)
+## Data Science plugin (3 tools)
 
 Optional. Requires `pandas` and `numpy`.
 
@@ -94,12 +139,11 @@ Optional. Requires `pandas` and `numpy`.
 |---|---|---|
 | `run_python_code` | System Manager | Execute Python in an isolated subprocess sandbox. Pre-loaded: `pd`, `np`, `frappe`, `math`, `datetime`, `json`, `re`, `random`. Plotting libraries are not available. |
 | `run_database_query` | System Manager | Execute read-only `SELECT` queries. INSERT/UPDATE/DELETE/DDL and multi-statement queries are rejected. Never returns more than 1000 rows (a larger `LIMIT` is clamped) and reports `truncated` when rows were cut. |
-| `analyze_business_data` | DocType read | Statistical / trend / correlation / aggregation analysis on a DocType. Modes: `summary`, `trends`, `correlations`, `aggregations`, `comparisons`. |
 | `extract_file_content` | File read | OCR and text extraction from File DocType attachments. Supports PDF, images, DOCX, XLSX, TXT. Backend is PaddleOCR (default) or Ollama vision (configurable). |
 
 See [Python Code Orchestration](../guides/python-code-orchestration) and [Code Execution Security](../guides/code-execution-security) for the sandbox details.
 
-## FACO plugin (8 tools)
+## FACO plugin (16 tools)
 
 Optional, and **reachable only from FAC Cloud**. Every tool here needs something no
 other MCP client can provide: the browser tools run inside the FAC Chat page and talk to
@@ -131,6 +175,25 @@ available to every MCP client.
 
 The browser tools act on the user's own browser, not on the server, and need the FAC
 Chat page open to reach it.
+
+### Frappe CRM, Helpdesk and Insights (8)
+
+These work on sites with the app installed, and always as the user asking, with that
+user's own permissions in the app.
+
+| Tool | Purpose |
+|---|---|
+| `get_crm_activity` | Read a CRM lead's or deal's whole history (emails, notes, calls, tasks, comments and field changes, newest first) through CRM's own timeline |
+| `send_crm_email` | Email a CRM lead or deal from the record, as CRM's email composer does: it lands on the record's **Emails** tab and goes out from the user's email account. The user sees the full email in an approval card first |
+| `add_crm_activity` | Add a note, a follow-up task or a call log to a lead or deal, linked so it shows on the record's **Notes**, **Tasks** or **Calls** tab. A task is assigned to the user unless someone else is named |
+| `convert_crm_lead` | Convert a lead into a deal through CRM's own conversion, as the **Convert to Deal** button does: a contact and organization are created or reused and the deal carries the lead's history. Converting the same lead again returns its deal |
+| `reply_to_helpdesk_ticket` | Reply to the customer on a Helpdesk ticket, as an agent would: the reply is added to the ticket thread and emailed to the person who raised it. The user approves the reply in a card first. Only Helpdesk agents can reply |
+| `list_insights_dashboards` | List the Insights dashboards the user can open, optionally searching titles |
+| `get_insights_dashboard` | Read an Insights dashboard as the user sees it: its filters and each chart's numbers, with the dashboard's default filters or the overrides given |
+| `get_insights_chart` | Read one Insights chart in depth, applying its dashboard's filters |
+
+Writes such as these pause for approval in FAC Chat, so nothing is sent or changed until the
+user approves it. See [Use the widget in other Frappe apps](../fac-chat/other-apps).
 
 ## Visualization plugin (3 tools)
 

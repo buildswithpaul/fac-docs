@@ -19,7 +19,7 @@ For what FAC Chat is and how to enable it, start with the
 
 The widget is a Vue panel built from FAC Chat's own components, so it renders replies
 exactly as the SPA does. It is part of FAC's frontend build (`bench build`), which needs
-**Node.js 22 or newer on every bench, including Frappe v15**. If the frontend was never
+**Node.js 22.12 or newer on every bench, including Frappe v15**. If the frontend was never
 built, the widget simply doesn't appear and Desk is unaffected.
 
 When FAC Chat is enabled, only a tiny launcher script loads on each Desk page. It waits

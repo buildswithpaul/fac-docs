@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 const SITE = 'https://docs.assistantcore.cloud'
 const OG_DESCRIPTION =
-	'Talk to your ERP. FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an MCP server with OAuth, 30 tools, and a full audit trail.'
+	'Talk to your ERP. FAC (Frappe Assistant Core) is the open-source AI assistant for Frappe and ERPNext — an MCP server with OAuth, 38 tools, and a full audit trail.'
 
 // Entity graph: teaches search engines that "FAC" and "Frappe Assistant Core"
 // are the same thing, what it is, and where it lives.
@@ -91,6 +91,7 @@ export default defineConfig({
 		nav: [
 			{ text: 'Getting Started', link: '/getting-started/installation' },
 			{ text: 'Guides', link: '/guides/fac-admin' },
+			{ text: 'Guide me', link: '/guide-me/' },
 			{ text: 'FAC Chat', link: '/fac-chat/' },
 			{ text: 'API', link: '/api/overview' },
 			{
@@ -112,7 +113,9 @@ export default defineConfig({
 					items: [
 						{ text: 'Overview', link: '/fac-chat/' },
 						{ text: 'Local & Private Sites', link: '/fac-chat/local-sites' },
+						{ text: 'Widget in Other Apps', link: '/fac-chat/other-apps' },
 						{ text: 'Files & Attachments', link: '/fac-chat/attachments' },
+						{ text: 'Projects & Chat History', link: '/fac-chat/projects' },
 						{ text: 'Welcome Suggestions', link: '/fac-chat/suggestions' },
 						{ text: 'Browser Diagnostics', link: '/fac-chat/browser-diagnostics' },
 						{ text: 'Conversation Recall', link: '/fac-chat/conversation-recall' },
@@ -155,6 +158,34 @@ export default defineConfig({
 						{ text: 'Prompt Templates', link: '/guides/prompt-templates' },
 						{ text: 'Python Code Orchestration', link: '/guides/python-code-orchestration' },
 						{ text: 'Code Execution Security', link: '/guides/code-execution-security' },
+					],
+				},
+			],
+
+			'/guide-me/': [
+				{
+					text: 'Guide me',
+					items: [
+						{ text: 'All guides', link: '/guide-me/' },
+					],
+				},
+				{
+					text: 'FAC Admin',
+					items: [
+						{ text: 'Change a FAC setting', link: '/guide-me/fac-admin-settings' },
+						{ text: 'FACO in Helpdesk, CRM & Insights', link: '/guide-me/other-frappe-apps' },
+						{ text: 'Ask FAC Bot in Raven', link: '/guide-me/fac-bot-raven' },
+					],
+				},
+				{
+					text: 'FAC Chat',
+					items: [
+						{ text: 'Start a project', link: '/guide-me/start-a-project' },
+						{ text: 'Organise your chats', link: '/guide-me/organise-chats' },
+						{ text: "Review a project's memory", link: '/guide-me/project-memory' },
+						{ text: 'Choose what your home shows', link: '/guide-me/home-page' },
+						{ text: 'Email a CRM lead', link: '/guide-me/crm-email' },
+						{ text: 'Install FAC Chat as an app', link: '/guide-me/install-app' },
 					],
 				},
 			],
