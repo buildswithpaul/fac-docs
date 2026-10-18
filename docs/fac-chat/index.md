@@ -129,6 +129,9 @@ After enabling:
 
 - The chat widget appears in the corner of Frappe Desk pages. It looks like FAC Chat,
   follows Desk's light/dark theme live, and never restyles Desk itself.
+- The widget's **+** button in its header starts a new chat on the spot. The chat you
+  leave is kept in your history and offered on the widget's welcome screen, so you can
+  go back to it. The button is greyed out while the assistant is still replying.
 - The full-screen SPA is reachable at `/copilot`.
 - The first time a user opens chat, they walk through a one-time onboarding that
   connects the site to FAC Cloud and links it to a subscription.
