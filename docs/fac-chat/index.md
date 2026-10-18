@@ -189,8 +189,8 @@ re-enable it later — that personal choice is always respected, admins included
 
 - **[Files & attachments](./attachments)** — what you can attach, the size and type
   limits, where the bytes are stored, and how attached files reach the model.
-- **[Welcome suggestions](./suggestions)** — how the starter tiles on the landing
-  screen are personalised, and how to turn them off.
+- **[Home page and suggestions](./suggestions)** — what the landing screen shows: the
+  "Needs you" list, role-aware starters, the widget's page asks, and how to turn suggestions off.
 - **[Browser diagnostics](./browser-diagnostics)** — how the widget helps debug a
   broken page, exactly what it records, what is redacted, and the admin kill switch.
 - **[Continuing a previous conversation](./conversation-recall)** — how the assistant

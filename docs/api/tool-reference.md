@@ -123,7 +123,7 @@ Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to ei
 | Tool | Purpose |
 |---|---|
 | `run_workflow` | Trigger a workflow action (`Approve`, `Reject`, etc.) on a document |
-| `get_pending_approvals` | List documents awaiting the current user's workflow action — this queries Frappe's own Workflow Actions, not an AI approval gate (see [FAC Chat](../fac-chat/) for that) |
+| `get_pending_approvals` | List documents awaiting the current user's workflow action — this queries Frappe's own Workflow Actions, not an AI approval gate (see [FAC Chat](../fac-chat/) for that). Only documents the user can open are listed: User Permissions on the referenced document apply |
 
 ### Email (1)
 
