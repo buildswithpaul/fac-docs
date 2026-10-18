@@ -106,6 +106,38 @@ The message box also changes its placeholder to "Ask about this Sales Invoice…
 you are on a form, and follows you as you move between records. On a form, even on your
 first visit, the page asks are shown rather than the See it / Find it / Do it cards.
 
+## Make it yours
+
+Everything on the home page is on by default and nobody has to configure anything. Each
+person can then trim it for themselves, in two places. These are per-user choices: they
+change only your own home page, and administrators have nothing to set.
+
+**On a card.** Every "Needs you" card has a **⋯** menu with **Don't show this on my
+home**. It hides that one signal for you, and a short note in its place links to
+**Settings** so you can bring it back.
+
+**In Settings → Home page.** The same choices, gathered in one place:
+
+- **Needs you** on or off.
+- **Cards to show**: 1, 2 or 3 (the default is 3).
+- **Shown in Needs you**: a checklist of the signals that apply to your roles. Untick
+  any you do not want; the failed-workflows card is in this list too.
+- **Suggested questions** on or off (the starter tiles and first-visit cards).
+- **Personalised suggestions** on or off (the ✦ tiles; see below).
+
+Changes save as you make them.
+
+### What uses AI
+
+Almost nothing on the home page does, and none of it spends your usage except one item:
+
+- The "Needs you" counts, the role starters and the "On this page" questions are
+  computed on your site and use no AI.
+- Selecting a card sends an ordinary chat message, the same as typing it.
+- **Personalised ("For you") suggestions are the only AI part**: one small call per user
+  about once a day. Turning **Personalised suggestions** off stops that generation
+  itself, not only the display, so it costs you nothing.
+
 ---
 
 ## Welcome suggestions
@@ -169,7 +201,7 @@ so a background suggestions call can no longer make your first message wait or b
 
 ### Turning them off
 
-Set **Show suggested prompts** to off in your FAC Chat user preferences. The grid is
+Set **Suggested questions** to off in Settings → Home page (or **Personalised suggestions** to keep the starters but drop the AI-written ones). The grid is
 then hidden entirely — not shown empty — and neither the personalisation read nor the
 background regeneration runs for you.
 
