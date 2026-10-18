@@ -7,7 +7,7 @@
 Think of it as the **home base** for FAC. Almost every day-to-day admin task starts here:
 
 - Turn the MCP server on or off, and copy the endpoint URL for your client
-- See at a glance how much is enabled and how busy the assistant has been
+- See whether FAC Chat is on and how much it is being used
 - Enable/disable tools and control which roles can use them
 - Publish and manage prompt templates and skills
 - Watch recent tool activity and jump to the full audit log
@@ -23,7 +23,7 @@ FAC Admin is available to users with the **System Manager** or **Assistant Admin
 
 Three ways to reach it:
 
-- Go straight to **`/app/fac-admin`** in your browser.
+- Go straight to **`/app/fac-admin`** in your browser. On Frappe v16, Desk lives under `/desk`, so the address is **`/desk/fac-admin`** (`/app/fac-admin` redirects there).
 - Use the desk **awesomebar** (`Ctrl/Cmd + G`) and type *"FAC Admin"*.
 - From the FAC **workspace**, click the **FAC Admin** shortcut.
 
@@ -31,43 +31,37 @@ Three ways to reach it:
 
 ## A tour of the page
 
-![The FAC Admin page: status bar, MCP endpoint, stat cards, tabs, and recent activity](/img/tool-management/01-admin-overview.png)
+![The FAC Admin page: the status strip, the tabbed registry on the left, and the operations column on the right](/img/fac-admin/overview.png)
 
-The page is laid out top to bottom:
+The page has a status strip across the top and two columns below it: the **registry** (tabs for tools, prompts, skills and settings) on the left, and an **operations** column on the right.
 
-### 1. Status bar
+### 1. Status strip
 
-The top strip shows the FAC server state — **Running** or **Stopped** — with a button to toggle it. Disabling the server stops *all* MCP clients from reaching FAC until you re-enable it, so you're asked to confirm. The **Advanced form** button in the sidebar opens the raw `Assistant Core Settings` form; day-to-day changes belong on the **Settings** tab.
+The strip shows the FAC server state, **Running** or **Stopped**, with a **Disable** (or **Enable**) button. Disabling the server stops *all* MCP clients from reaching FAC until you enable it again, so you are asked to confirm. Next to it, *Updated just now* tells you how fresh the page is, and the refresh button reloads every card.
 
-### 2. MCP endpoint
+### 2. The registry tabs
 
-Your server's MCP URL, with a copy button:
+The left column holds four tabs. **Tools**, **Prompts** and **Skills** show a count in their label, so you can see at a glance how many of each the site has. They are described [below](#the-four-tabs).
+
+### 3. The operations column
+
+![The operations column: MCP endpoint, FAC Chat, Chat usage and Quick actions](/img/fac-admin/sidebar.png)
+
+| Card | What it does |
+|------|-------------|
+| **MCP endpoint** | Your server's MCP URL with a copy button, plus **Advanced form**, which opens the raw `Assistant Core Settings` form. Day-to-day changes belong on the **Settings** tab. |
+| **FAC Chat** | Whether FAC Chat is enabled, where it appears (the widget on Desk and the `/copilot` page), a button to enable or disable it, and a link that opens FAC Chat. |
+| **Chat usage** | Messages this month and all time, active users, and credits used, with a 30-day sparkline of daily messages. |
+| **Quick actions** | Links to the **Audit log**, **FAC Chat Settings**, **Assistant settings** and **Open Copilot**. |
+| **Recent activity** | The last few tool calls (tool, user, status, time). Every tool execution is journaled in the [Assistant Audit Log](/api/reference), your record of what the assistant did and for whom. |
+
+The MCP endpoint looks like this:
 
 ```
 https://your-site/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp
 ```
 
-This is the URL you paste into an MCP client (Claude Desktop, the FAC Chat connector, etc.). See [Quick Start](/getting-started/quick-start) and [OAuth Setup](/getting-started/oauth/quick-start) for wiring up a client.
-
-### 3. Stat cards
-
-Five at-a-glance counters:
-
-| Card | Shows |
-|------|-------|
-| **Plugins** | Enabled vs total plugins |
-| **Tools Available** | Registered tools exposed to clients |
-| **Today's Activity** | Tool executions so far today |
-| **Prompt Templates** | Published vs total templates |
-| **Skills** | Published vs total skills |
-
-### 4. Tabs
-
-The working area has four tabs — **Tools**, **Prompt Templates**, **Skills**, and **Settings** — described below.
-
-### 5. Recent Activity
-
-A live feed of the last few tool calls (action, tool, user, status, time), with **View full log** linking to the [Assistant Audit Log](/api/reference). Every tool execution is journaled here, which is your record of what the assistant did and for whom.
+This is the URL you paste into an MCP client (Claude Desktop, ChatGPT, Cursor and others). See [Quick Start](/getting-started/quick-start) and [OAuth Setup](/getting-started/oauth/quick-start) for wiring up a client.
 
 ---
 
@@ -78,9 +72,12 @@ A live feed of the last few tool calls (action, tool, user, status, time), with 
 Controls which tools the MCP server exposes and who can use them. It has two views:
 
 - **Plugins** — a simple on/off switch per plugin (turning one off hides all of its tools).
-- **Individual Tools** — per-tool enable/disable, category badges, **bulk actions**, and **role-based access** (restrict a tool to specific roles).
 
-![The Tools tab in Individual Tools view](/img/tool-management/02-individual-tools.png)
+  ![The Tools tab in Plugins view](/img/fac-admin/tab-tools.png)
+
+- **Individual Tools** — per-tool enable/disable, search, category and plugin filters, a badge for what each tool can do (**Read only**, **Write**, **Privileged**), **bulk actions** (*Enable matching*, *Disable matching*), and **role-based access** (restrict a tool to specific roles).
+
+  ![The Tools tab in Individual Tools view](/img/fac-admin/tab-tools-individual.png)
 
 ➡️ Full walkthrough, including restricting a tool to a role and least-privilege setups: **[Tool Management](/guides/tool-management)**. Plugin-level control: **[Plugin Management](/guides/plugin-management)**.
 
@@ -106,16 +103,21 @@ Manage skills — structured guidance that teaches the assistant how to use a to
 
 Every FAC setting in one place, grouped by what it controls. Pick a group on the left, change what you need, and click **Save**. The group's URL (`?tab=settings&group=oauth`) can be bookmarked or shared.
 
+![The Settings tab, Chat & Widget group](/img/fac-admin/settings-chat-widget.png)
+
+➡️ Step by step, with a screenshot of each group: **[Guide me: change a FAC setting](/guide-me/fac-admin-settings)**.
+
 | Group | What it holds |
 |-------|---------------|
 | **Chat & Widget** | Context size, page-content sharing, browser diagnostics, and chat message retention |
+| **Other Frappe apps** | Which standalone Frappe apps (Helpdesk, Insights, CRM…) show the FACO widget, and **FAC Bot in Raven**. See [Use the widget in other Frappe apps](/fac-chat/other-apps) |
 | **MCP Server** | The MCP and OAuth discovery URLs, the server name and protocol, and how skills are offered |
 | **OAuth** | Dynamic client registration, allowed public client origins, and discovery metadata. Frappe v15 only: on v16, FAC reads OAuth from Frappe's own **OAuth Settings**, so the group is not shown |
 | **Security** | Code-execution limits and audit-log retention |
 | **OCR** | The OCR backend and its PaddleOCR or Ollama settings |
 | **FAC Cloud connection** | This site's FAC Cloud registration (read-only) |
 
-Saving runs the same checks as the settings form, so an invalid value is rejected with the same message. Only a **System Manager** can view and save these settings; other admins see a note saying so. The MCP server switch and the FAC Chat switch stay where they were — in the status bar and the FAC Chat card.
+Saving runs the same checks as the settings form, so an invalid value is rejected with the same message. Only a **System Manager** can view and save these settings; other admins see a note saying so. The MCP server switch and the FAC Chat switch stay where they were — in the status strip and the FAC Chat card.
 
 ## Where to go next
 
