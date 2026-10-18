@@ -22,6 +22,23 @@ trending?" — FACO finds and reads the dashboard as you, so it sees only what I
 FACO reads the numbers with the dashboard's **default** filters; it cannot see filters you changed
 on screen. Tell it the filters you are using ("for this quarter only") and it applies them.
 
+## Frappe CRM
+
+Open a lead or deal in Frappe CRM and FACO works on that record with you:
+
+- **Brief me:** it reads the record's whole history (emails, notes, calls, tasks and changes) through CRM's own timeline, so its summary covers what happened, not just the fields.
+- **Email the lead:** it writes the email, then shows it to you in full (recipient, subject, message and the account it sends from) before anything goes out. Approved, it is sent the way CRM's own composer sends it and appears on the record's **Emails** tab.
+- **Log what happened:** one sentence can become a call log, a note and a follow-up task, each linked to the record and approved by you. A task is assigned to you unless you name someone else.
+- **Convert a lead:** it uses CRM's own **Convert to Deal**, so the contact, the organization and the lead's history carry over to the deal.
+
+![FACO in Frappe CRM showing the full email in an approval card before sending](/img/guide-me/crm-email-card.webp)
+
+Step by step: [Guide me: email a CRM lead](/guide-me/crm-email).
+
+## Replying on Helpdesk tickets
+
+On a ticket, ask FACO to reply to the customer. It drafts the reply and shows it to you in an approval card. When you approve, the reply is added to the ticket thread and emailed to the person who raised it, exactly as if you had replied in Helpdesk. Only Helpdesk agents can reply.
+
 ## Posting in Raven
 
 Ask FACO to post in Raven ("share this ticket in #support") and it drafts the message for a
