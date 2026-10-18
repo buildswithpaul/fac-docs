@@ -34,12 +34,12 @@ graph TB
                 CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search (search_documents, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)<br/>Email (send_email)"]
             end
 
-            subgraph "Data Science Plugin - Optional (4 tools)"
-                DataScienceTools["run_python_code<br/>analyze_business_data<br/>run_database_query<br/>extract_file_content"]
+            subgraph "Data Science Plugin - Optional (3 tools)"
+                DataScienceTools["run_python_code<br/>run_database_query<br/>extract_file_content"]
             end
 
-            subgraph "FACO Plugin - Optional, FAC Cloud only (7 tools)"
-                FacoTools["generate_document<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page"]
+            subgraph "FACO Plugin - Optional, FAC Cloud only (16 tools)"
+                FacoTools["generate_document, attach_chat_file<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page<br/>get_crm_activity, send_crm_email<br/>add_crm_activity, convert_crm_lead<br/>reply_to_helpdesk_ticket<br/>list_insights_dashboards, get_insights_dashboard, get_insights_chart"]
             end
 
             subgraph "Visualization Plugin - Optional (3 tools)"
@@ -436,19 +436,12 @@ Advanced analytics, visualization, and file processing capabilities:
    - Pandas DataFrame integration
    - Custom business logic execution
 
-2. **Data Analysis** (`analyze_business_data.py`)
+2. **Database Queries** (`run_database_query.py`)
 
-   - Statistical analysis of business data
-   - Trend analysis and correlations
-   - Automated insights generation
+   - Read-only `SELECT` queries, System Manager only
+   - At most 1,000 rows per query
 
-3. **Query Analytics** (`query_and_analyze.py`)
-
-   - Custom SQL query execution
-   - Advanced data analysis on query results
-   - Business intelligence insights
-
-4. **File Content Extraction** (`extract_file_content.py`) 🆕
+3. **File Content Extraction** (`extract_file_content.py`)
 
    - Multi-format file processing (PDF, images, CSV, Excel, DOCX)
    - OCR capabilities for scanned documents
@@ -625,7 +618,7 @@ Layer 6: Audit Trail & Monitoring
 
 **1. Role-Based Access Control**
 
-FAC ships 30 built-in tools across 5 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
+FAC ships 38 built-in tools across 5 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
 
 - **System Manager**: All tools, including privileged ones like `run_python_code` and `run_database_query`
 - **Assistant Admin**: Read/write tools across all enabled plugins; privileged tools by configuration

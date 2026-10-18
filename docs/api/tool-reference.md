@@ -1,12 +1,12 @@
 # Tool Reference
 
-Frappe Assistant Core ships **30 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
+Frappe Assistant Core ships **38 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
 
 | Plugin | Tools | Description |
 |---|---|---|
 | `core` | 16 | Always enabled. Document CRUD, search, metadata, reports, workflow, email. |
-| `data_science` | 4 | Optional. Python execution, SQL queries, statistical analysis, file content extraction. |
-| `faco` | 7 | Optional, **FAC Cloud only**. Document generation and browser automation. These act inside the FAC Chat page, so they are not offered to other MCP clients. |
+| `data_science` | 3 | Optional. Python execution, SQL queries, file content extraction. |
+| `faco` | 16 | Optional, **FAC Cloud only**. Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. These act inside FAC Chat, so they are not offered to other MCP clients. |
 | `visualization` | 3 | Optional. Dashboards and charts. |
 | `custom_tools` | — | Mechanism for external Frappe apps to register their own tools via the `assistant_tools` hook. No shipped tools. |
 
@@ -131,7 +131,7 @@ Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to ei
 |---|---|
 | `send_email` | Queue an email via the site's Email Account |
 
-## Data Science plugin (4 tools)
+## Data Science plugin (3 tools)
 
 Optional. Requires `pandas` and `numpy`.
 
@@ -139,12 +139,11 @@ Optional. Requires `pandas` and `numpy`.
 |---|---|---|
 | `run_python_code` | System Manager | Execute Python in an isolated subprocess sandbox. Pre-loaded: `pd`, `np`, `frappe`, `math`, `datetime`, `json`, `re`, `random`. Plotting libraries are not available. |
 | `run_database_query` | System Manager | Execute read-only `SELECT` queries. INSERT/UPDATE/DELETE/DDL and multi-statement queries are rejected. Never returns more than 1000 rows (a larger `LIMIT` is clamped) and reports `truncated` when rows were cut. |
-| `analyze_business_data` | DocType read | Statistical / trend / correlation / aggregation analysis on a DocType. Modes: `summary`, `trends`, `correlations`, `aggregations`, `comparisons`. |
 | `extract_file_content` | File read | OCR and text extraction from File DocType attachments. Supports PDF, images, DOCX, XLSX, TXT. Backend is PaddleOCR (default) or Ollama vision (configurable). |
 
 See [Python Code Orchestration](../guides/python-code-orchestration) and [Code Execution Security](../guides/code-execution-security) for the sandbox details.
 
-## FACO plugin (8 tools)
+## FACO plugin (16 tools)
 
 Optional, and **reachable only from FAC Cloud**. Every tool here needs something no
 other MCP client can provide: the browser tools run inside the FAC Chat page and talk to
@@ -176,6 +175,25 @@ available to every MCP client.
 
 The browser tools act on the user's own browser, not on the server, and need the FAC
 Chat page open to reach it.
+
+### Frappe CRM, Helpdesk and Insights (8)
+
+These work on sites with the app installed, and always as the user asking, with that
+user's own permissions in the app.
+
+| Tool | Purpose |
+|---|---|
+| `get_crm_activity` | Read a CRM lead's or deal's whole history (emails, notes, calls, tasks, comments and field changes, newest first) through CRM's own timeline |
+| `send_crm_email` | Email a CRM lead or deal from the record, as CRM's email composer does: it lands on the record's **Emails** tab and goes out from the user's email account. The user sees the full email in an approval card first |
+| `add_crm_activity` | Add a note, a follow-up task or a call log to a lead or deal, linked so it shows on the record's **Notes**, **Tasks** or **Calls** tab. A task is assigned to the user unless someone else is named |
+| `convert_crm_lead` | Convert a lead into a deal through CRM's own conversion, as the **Convert to Deal** button does: a contact and organization are created or reused and the deal carries the lead's history. Converting the same lead again returns its deal |
+| `reply_to_helpdesk_ticket` | Reply to the customer on a Helpdesk ticket, as an agent would: the reply is added to the ticket thread and emailed to the person who raised it. The user approves the reply in a card first. Only Helpdesk agents can reply |
+| `list_insights_dashboards` | List the Insights dashboards the user can open, optionally searching titles |
+| `get_insights_dashboard` | Read an Insights dashboard as the user sees it: its filters and each chart's numbers, with the dashboard's default filters or the overrides given |
+| `get_insights_chart` | Read one Insights chart in depth, applying its dashboard's filters |
+
+Writes such as these pause for approval in FAC Chat, so nothing is sent or changed until the
+user approves it. See [Use the widget in other Frappe apps](../fac-chat/other-apps).
 
 ## Visualization plugin (3 tools)
 
