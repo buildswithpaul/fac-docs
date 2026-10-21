@@ -55,7 +55,7 @@ full reload. Disabling tears the widget down; enabling re-runs the access check 
 mounts it in place.
 
 The widget's composer has the same **Thinking** control and **Web search** toggle as FAC
-Chat. The model is always **Auto** in the widget. **Open full assistant** hands the
+Chat. The widget has no model picker: it starts on **Auto**, then follows the model you chose in FAC Chat (see [Model choice follows the user](#model-choice-follows-the-user)). **Open full assistant** hands the
 conversation to FAC Chat (`/copilot`) on the same session.
 
 ## Browser tools and approvals in the widget
@@ -165,6 +165,46 @@ working indicator and Stop.
 
 Desk tabs keep separate widget conversations (each tab claims its own), so two
 Desk tabs never share a turn.
+
+## Model choice follows the user
+
+The model a user picks is saved on the server, so it follows them to another browser and to the Desk widget.
+
+- **Storage.** The choice lives in the hidden `selected_model` field of **FAC Chat User Preferences**: `auto`, a model id, or empty for none. The browser's local storage is only a cache. A browser that holds a choice the server has never seen uploads it once.
+- **Reading it.** `GET frappe_assistant_core.chat.api.models.get_available_models` returns `selected_model` beside the model list, empty when the user has not chosen. It reads empty on a site that has not been migrated.
+- **Saving it.** `POST frappe_assistant_core.chat.api.models.set_selected_model` with `model_id` saves the choice for the session user, and returns `{success, selected_model}`. An empty `model_id` clears it, and an id over 140 characters is refused ([`set_selected_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/models.py#L130)). The picker saves in the background and a failed save is retried on the next change or load.
+- **The widget.** It keeps the choice in memory only and never writes the server value back.
+- **A choice that is no longer usable** (the model left the list, or auto mode is off) is dropped locally for that browser. The server value is left alone, so a short gap in the model list does not wipe every browser's choice.
+
+## Routing notice
+
+When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L315)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
+
+| `reason` | Line shown |
+|---|---|
+| `unavailable` | Switched to a different model for this task because the previous one isn't available right now |
+| `rate_limited` | ... because the previous one is busy right now |
+| `plan` | ... because the previous one isn't included in your plan |
+| `health` | ... because the previous one is having problems right now |
+| `tier` | Switched to a stronger model for this step |
+| anything else | Switched to a different model for this task |
+
+## A reply that stops making progress
+
+The relay watches the stream from the assistant. It ends the turn with a `stream_error` carrying `error_code: "RELAY_STALLED"` when it sees a heartbeat and:
+
+- no non-heartbeat event has arrived for `RELAY_NO_PROGRESS_SECONDS` (420 s), or
+- the turn has run for `RELAY_MAX_TURN_SECONDS` (1800 s).
+
+Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L366)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
+
+## Reading the stored code (`get_current_code`)
+
+The approval card compares the stored code with the proposed code on an update. It reads the stored code with `GET frappe_assistant_core.chat.api.current_code.get_current_code?doctype=…&name=…&fields=[…]` ([`get_current_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/current_code.py#L37)).
+
+- The caller needs **read** permission on that record, or the call is refused.
+- Only code-bearing fields are returned: `script`, `condition`, `query`, `html`, `javascript`, `report_script`, `css` and `message`. Other names, fields the doctype does not have, and fields above the caller's permission level are ignored.
+- The result is `{fieldname: value}`, with an empty string for a field with no value, or `{}` when nothing was requested that qualifies.
 
 ## Conversation recall (`recall_conversations`)
 

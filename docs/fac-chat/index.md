@@ -75,10 +75,30 @@ human-in-the-loop step on top of that: by default, `create_document`, `update_do
 `delete_document`, and `document_action` calls pause and show you an approval card
 before they land, and nothing changes in your books until you approve or reject it.
 
+When the write changes how the site behaves (a Server Script, Client Script, Custom
+Field, Property Setter, Workflow, Report, Print Format, Notification, and similar), the
+card is built for someone who has to approve it without reading code:
+
+- **Full code.** A script, condition, query, print layout or message shows in full in a
+  scrollable box that you can expand.
+- **Old versus new.** On an update, the card compares the stored code with the new code
+  and shows what changed.
+- **Child tables.** Rows in a table field are shown as a table, not as raw data.
+- **What this changes.** One plain sentence says what the write does, for example "This
+  code will run every time someone submits a Sales Invoice".
+- **No "Don't ask again".** The card never offers it for a customisation, so every such
+  change asks every time.
+
 Each user can change this default per tool from their own approval preferences —
 **Block**, **Ask** (the default for writes), or **Always Allow** — so a trusted
 workflow doesn't have to click through a card every time. This gate is specific to
 FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
+
+While the assistant works, the activity trail names what it did: **Created**, **Updated**
+or **Checked** (a dry run) with the record's name, and a step that failed shows a plain
+reason underneath. Records the assistant created or changed appear as chips in the side
+rail, and a chip links to the record. Questions the assistant asks you render their
+formatting (bold, lists, links).
 
 ## Memory asks first
 
@@ -109,6 +129,11 @@ bench --site yoursite install-app frappe_assistant_core
 cd apps/frappe_assistant_core && git fetch origin && git checkout main && git pull
 cd ../.. && bench --site yoursite migrate && bench restart
 ```
+
+Run `bench migrate` on every upgrade. FAC 3.2.x adds a hidden `selected_model` field to
+**FAC Chat User Preferences**, which stores each user's model choice. Until the site is
+migrated, the choice is not saved on the server and FAC Chat falls back to the choice the
+browser remembers.
 
 Upgrading from 2.x leaves your MCP setup, tools, plugins, and audit log untouched —
 FAC Chat is additive and starts switched off.
@@ -171,6 +196,21 @@ to staff who haven't been given access, and turns it on the moment they are.
 
 Each user can also hide the launcher for themselves from their own preferences, and
 re-enable it later — that personal choice is always respected, admins included.
+
+## Troubleshooting
+
+### "The assistant stopped waiting for a reply"
+
+FAC Chat stops waiting on the assistant and ends the turn with this message when a reply
+makes no progress for seven minutes (420 seconds), or when one turn has run for 30 minutes
+(1800 seconds) in total. The assistant's keep-alive signals do not count as progress: only
+real steps, text or approval cards do. Whatever the assistant had already shown stays in the
+conversation, marked as failed.
+
+What to do: anything after the last step shown may not have finished. Check the record in
+question (for example open it from its chip in the rail) before you try again. Then send
+the request again, or ask the assistant to carry on from where it stopped. If it keeps
+happening on the same request, try a smaller request.
 
 ## What FAC Chat is NOT
 
