@@ -44,7 +44,7 @@ Always enabled. Provides essential Frappe operations.
 
 Over MCP, this tool result is nested under the `result` key in the response, and the top-level `error_type` is `ToolReportedError`.
 
-- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run runs the document's own validation only and is always rolled back, whatever the outcome. It does **not** check mandatory fields, so a real create can still fail on a missing value.
+- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L66)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
 - **Plain-language refusals.** A refused write to a protected customisation DocType returns `error_type: "permission_error"` with a message that says what is missing. Changing a Server Script needs a System Manager who also holds the Script Manager role. A Query or Script Report needs the Script Manager role too.
 
 #### Customisation results
@@ -55,9 +55,10 @@ Customisation records change how a site behaves: Server Script, Client Script, C
 |---|---|---|
 | `applies_to` | Custom Field, Property Setter, Client Script, Server Script, Print Format, Notification | `{doctype, url}`: the form the customisation changes, and a link to a new document of that type, where the change shows |
 | `location` | Custom Field | `{tab, section, collapsed, first_tab}`: where the field shows on its form, read after the save. `collapsed` is true when its section starts folded, and `first_tab` is false when it sits on a later tab |
+| `placement_warning` | Custom Field | A plain sentence, present only when the field lands in a collapsed section or off the first tab, for example "Will appear on the Details tab, in the Extra section (collapsed, hidden until someone opens it). People may not notice it: the section is collapsed." |
 | `warning` | Report | Present when a non-standard Script Report is saved while server scripts are switched off: the report is saved, but it shows an error when someone runs it |
 
-([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L150))
+([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L151))
 
 #### Server scripts switched off
 

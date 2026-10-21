@@ -86,6 +86,13 @@ card is built for someone who has to approve it without reading code:
 - **Child tables.** Rows in a table field are shown as a table, not as raw data.
 - **What this changes.** One plain sentence says what the write does, for example "This
   code will run every time someone submits a Sales Invoice".
+- **Where a new field will appear.** For a new Custom Field the card says which tab and
+  section it will land in, and shows the sentence as a warning when the field would be
+  hidden: in a collapsed section, or not on the first tab.
+- **Conditions in plain words.** A `depends_on`, `mandatory_depends_on` or
+  `read_only_depends_on` condition is described in plain words, with the raw expression
+  under **Show technical details**. The card always notes that the condition is checked
+  in the Desk form only, so imports, the API and the assistant's own writes are not checked.
 - **No "Don't ask again".** The card never offers it for a customisation, so every such
   change asks every time.
 
@@ -97,7 +104,8 @@ FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
 While the assistant works, the activity trail names what it did: **Created**, **Updated**
 or **Checked** (a dry run) with the record's name, and a step that failed shows a plain
 reason underneath. Records the assistant created or changed appear as chips in the side
-rail, and a chip links to the record. Questions the assistant asks you render their
+rail, and a chip links to the record. After a customisation write, the trail row and the
+chip also show an **Open a new {doctype}** link, which opens a blank form where the change shows. Questions the assistant asks you render their
 formatting (bold, lists, links).
 
 ## Memory asks first
