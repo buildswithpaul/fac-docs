@@ -172,14 +172,14 @@ The model a user picks is saved on the server, so it follows them to another bro
 
 - **Storage.** The choice lives in the hidden `selected_model` field of **FAC Chat User Preferences**: `auto`, a model id, or empty for none. The browser's local storage is only a cache. A browser that holds a choice the server has never seen uploads it once.
 - **Reading it.** `GET frappe_assistant_core.chat.api.models.get_available_models` returns `selected_model` beside the model list, empty when the user has not chosen. It reads empty on a site that has not been migrated.
-- **Saving it.** `POST frappe_assistant_core.chat.api.models.set_selected_model` with `model_id` saves the choice for the session user, and returns `{success, selected_model}`. An empty `model_id` clears it, and an id over 140 characters is refused ([`set_selected_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/models.py#L130)). The picker saves in the background and a failed save is retried on the next change or load.
+- **Saving it.** `POST frappe_assistant_core.chat.api.models.set_selected_model` with `model_id` saves the choice for the session user, and returns `{success, selected_model}`. An empty `model_id` clears it, and an id over 140 characters is refused ([`set_selected_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L193)). The picker saves in the background and a failed save is retried on the next change or load.
 - **A turn that names no model.** When a client sends no model for a turn (the Desk widget's first turn in a fresh browser, or the Raven bot), FAC runs it on the saved model if the user can still use it, and otherwise on the default. An explicit `auto` or an explicit model id is always honoured ([`_effective_model_id`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L73), [`usable_saved_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L67)).
 - **The widget.** It keeps the choice in memory only and never writes the server value back.
 - **A choice that is no longer usable** (the model left the list, or auto mode is off) is dropped locally for that browser. The server value is left alone, so a short gap in the model list does not wipe every browser's choice.
 
 ## Routing notice
 
-When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L315)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
+When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L257)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
 
 | `reason` | Line shown |
 |---|---|
