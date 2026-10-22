@@ -21,7 +21,7 @@ its own.
 
 | Signal | Who sees it | Counts |
 |---|---|---|
-| Approvals waiting for you | everyone | Documents with an open workflow action for you |
+| Approvals waiting for you | everyone | Documents with an open workflow action for you that still have a step other than Cancel |
 | Tasks due | everyone | Your open ToDos due today or overdue |
 | Workflows that failed overnight | everyone with workflows enabled | Failed workflow runs from the last 24 hours (see below) |
 | Overdue invoices | Accounts roles | Submitted sales invoices with an outstanding amount, more than 60 days past due |
@@ -52,11 +52,15 @@ Every count is made with your own permissions, the same way a Desk list view cou
   one set of warehouses, the count covers only those records.
 - Approvals are re-checked against the documents themselves: a workflow action for a
   document you cannot read is not counted.
+- An approved, submitted document whose only step left is Cancel is not counted, although
+  Frappe keeps its workflow action open. Asking about the card gives the same total, even
+  when the answer lists only the newest documents.
 - "Items below reorder level" counts only warehouses you can read. A user with no read
   access to Warehouse does not get the card at all, because they could not see per-warehouse
   stock in Desk either.
 - Company-based signals (invoices, bank lines, orders, stock) follow your default company
-  when you have one. Approval queues for leave and expense claims do not: they are your
+  when you have one, and the question a card asks FACO names that company, so the answer
+  matches the number. Approval queues for leave and expense claims do not: they are your
   own work whatever your default company is.
 
 A card never shows a number that the matching Desk list, with the same filters, would

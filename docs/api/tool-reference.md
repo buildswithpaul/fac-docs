@@ -29,7 +29,7 @@ Always enabled. Provides essential Frappe operations.
 
 #### Permissions and error messages
 
-`create_document`, `update_document` and `document_action` run as the calling user. Frappe checks the user's permission on the DocType and then on the document itself, and a DocType can add document-level rules of its own. When the DocType-level check fails, the tool returns `{"success": false, "error": "Insufficient create permissions for <DocType>"}` with no `error_type`. When the document-level check refuses a create (for example, a ToDo allocated to someone else, when the caller holds no role that grants ToDo access beyond the automatic roles, on Frappe before v16.32.0 / v15.119.0), the tool's result has `success: false`, the reason in `error`, and `error_type: "permission_error"`:
+`create_document`, `update_document` and `document_action` run as the calling user. Frappe checks the user's permission on the DocType and then on the document itself, and a DocType can add document-level rules of its own. When the DocType-level check fails, the tool returns `{"success": false, "error": "Insufficient create permissions for <DocType>", "error_type": "permission_error"}`. When the document-level check refuses a create (for example, a ToDo allocated to someone else, when the caller holds no role that grants ToDo access beyond the automatic roles, on Frappe before v16.32.0 / v15.119.0), the tool's result has `success: false`, the reason in `error`, and `error_type: "permission_error"`:
 
 ```json
 {
@@ -44,7 +44,29 @@ Always enabled. Provides essential Frappe operations.
 
 Over MCP, this tool result is nested under the `result` key in the response, and the top-level `error_type` is `ToolReportedError`.
 
-- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse.
+- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L66)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
+- **Plain-language refusals.** A refused write to a protected customisation DocType returns `error_type: "permission_error"` with a message that says what is missing. Changing a Server Script needs a System Manager who also holds the Script Manager role. A Query or Script Report needs the Script Manager role too.
+
+#### Customisation results
+
+Customisation records change how a site behaves: Server Script, Client Script, Custom Field, Property Setter, Workflow (and its State and Action Master), Custom DocPerm, DocType, Role, Report, Print Format and Notification. A successful `create_document` or `update_document` on any record adds `url`, a link to the saved record in Desk. For these DocTypes it also adds:
+
+| Key | When | Meaning |
+|---|---|---|
+| `applies_to` | Custom Field, Property Setter, Client Script, Server Script, Print Format, Notification | `{doctype, url}`: the form the customisation changes, and a link to a new document of that type, where the change shows |
+| `location` | Custom Field | `{tab, section, collapsed, first_tab}`: where the field shows on its form, read after the save. `collapsed` is true when its section starts folded, and `first_tab` is false when it sits on a later tab |
+| `placement_warning` | Custom Field | A plain sentence, present only when the field lands in a collapsed section or off the first tab, for example "Will appear on the Details tab, in the Extra section (collapsed, hidden until someone opens it). People may not notice it: the section is collapsed." |
+| `warning` | Report | Present when a non-standard Script Report is saved while server scripts are switched off: the report is saved, but it shows an error when someone runs it |
+
+([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L151))
+
+#### Server scripts switched off
+
+Frappe runs Server Scripts only when the site's server-scripts setting is on, and switching it on needs access to the server (on Frappe Cloud, a private bench). While it is off:
+
+- `get_doctype_info` for `Server Script` or `Report` returns `server_scripts_enabled` (`true` or `false`) so the assistant can check before it plans ([`get_doctype_info`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/metadata_tools.py#L213)).
+- `create_document` or `update_document` refuses an **active** Server Script with `error_type: "server_scripts_disabled"`, because a DocType Event script would stop its document type from saving. Saving the script with `disabled` set to 1 is allowed, and it does nothing until scripts are switched on ([`server_script_guard`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L91)).
+- `update_document` never renames a record. A rename sent as `new_name`, `rename`, or a `data.name` that differs from the record is skipped, the other changes are saved, and the result carries a `warning` pointing to Rename in Desk. An update that holds only a rename returns `error_type: "rename_not_supported"`. The skills therefore name records by what they do ("Discount limit on Sales Invoice submit"), never by a value that may change, so changing a value needs no rename.
 - **ToDo.** Frappe decides who may create a ToDo. Before v16.32.0 / v15.119.0, a user without a role that grants ToDo access beyond the automatic roles (on a stock site, System Manager) could create only a ToDo that names them, as `allocated_to` or `assigned_by`. From those releases the ToDo's owner is also accepted, and the creator owns it, so a user may create any ToDo. On the older releases, `create_document` allocates a ToDo that names nobody to the calling user instead of failing; on the newer ones it changes nothing. Administrator and System Managers are unaffected: their ToDo stays unallocated. On the older releases a ToDo allocated to someone else is still refused, and `error` says why. If the ToDo also names a `reference_type` and `reference_name`, allocating it to you also assigns that document to you, exactly as Assign to me does in the Desk: you are added to the document's assignments and an Assigned comment is posted on its timeline.
 
 ### Search (3)
