@@ -186,6 +186,25 @@ screen, because chat needs to reach FAC Cloud. Nothing about the user or their
 conversations is stored on the device. It needs FAC Chat enabled, and the site served
 over HTTPS, which browsers require before they offer installation.
 
+On a phone, the installed app behaves like a native chat app:
+
+- **No zoom on tap.** Text fields use 16px type on touch screens, so iOS does not zoom
+  in when the message box or any other field takes focus. Pinch-zoom still works.
+- **Room to read while typing.** While the message box has the keyboard, the header
+  steps aside and the composer trims its padding, so the conversation keeps most of the
+  screen above the keyboard.
+- **Answers stay in view.** The view follows an answer as it is written, including tool
+  cards and plans. Scroll up to read and it stays where you are, with a **Latest**
+  button to jump back.
+- **Wide tables scroll inside the answer.** Figures keep their monospace columns; words
+  and codes use the normal message font. The page itself never scrolls sideways.
+- **The chosen model is shown.** The model picker shows a short name ("Sonnet 4.6",
+  "Auto") instead of an icon.
+- **Links stay in the app.** A link in an answer that points at the site's own address
+  (its `host_name`) opens on the address FAC Chat is open on, so it stays inside the
+  installed app and you stay logged in, even when the app was installed from another
+  address for the same site.
+
 ## Who sees the widget
 
 The chat widget is **not shown to everyone by default**. Once FAC Chat is enabled,
