@@ -108,6 +108,13 @@ rail, and a chip links to the record. After a customisation write, the trail row
 chip also show an **Open a new {doctype}** link, which opens a blank form where the change shows. Questions the assistant asks you render their
 formatting (bold, lists, links).
 
+When the assistant asks you several questions at once, they arrive as one card that says how
+many there are. Questions open one at a time. Each answer folds into a line showing what you
+picked, with **Change** to reopen it, and the footer counts how many you have answered.
+Nothing reaches the assistant until you press **Send answers**, which unlocks once every
+question has an answer. A single question still sends as soon as you pick an answer, and the
+option you picked stays marked while it sends.
+
 ## Memory asks first
 
 FACO can remember preferences and facts from your conversations to give better answers.
