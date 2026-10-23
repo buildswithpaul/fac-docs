@@ -96,6 +96,8 @@ card is built for someone who has to approve it without reading code:
 - **No "Don't ask again".** The card never offers it for a customisation, so every such
   change asks every time.
 
+One kind of customisation change shows no card: one that nobody but you can feel yet. That is a script or notification that is switched off, or a brand-new custom DocType that only System Manager can use and that has no records yet (plus its fields and permissions). It still appears in the activity trail. Switching it on, giving another role access, or touching a DocType that other people use or that already has records asks as usual, and so does every other kind of customisation. If the assistant cannot tell, or you set the tool to **Ask**, you get the card. This needs FAC 3.3 and an up-to-date FAC Cloud.
+
 Each user can change this default per tool from their own approval preferences —
 **Block**, **Ask** (the default for writes), or **Always Allow** — so a trusted
 workflow doesn't have to click through a card every time. This gate is specific to
