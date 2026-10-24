@@ -20,12 +20,29 @@ Always enabled. Provides essential Frappe operations.
 
 | Tool | Purpose |
 |---|---|
-| `create_document` | Create a new Frappe document |
+| `create_document` | Create a new Frappe document, or several with `records` (see [Many records in one call](#many-records-in-one-call)) |
 | `get_document` | Fetch a single document by name |
-| `update_document` | Update document fields (supports patch and replace modes for child tables) |
+| `update_document` | Update document fields (supports patch and replace modes for child tables), or several documents with `names` or `records` |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
-| `delete_document` | Delete a document (`force=true` to ignore links) |
+| `delete_document` | Delete a document (`force=true` to ignore links), or several with `names` |
 | `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page. `group_by` with `aggregate` returns database-computed totals per group instead (see [Answering business questions](#answering-business-questions)) |
+
+#### Many records in one call
+
+`create_document`, `update_document` and `delete_document` each take a list, so bulk work is one call instead of one per record:
+
+| Tool | One record | Many records |
+|---|---|---|
+| `create_document` | `data` | `records`: a list of field dicts |
+| `update_document` | `name` + `data` | `names` + `data` (the same change to each), or `records`: `[{"name": ..., "data": {...}}]` |
+| `delete_document` | `name` | `names` |
+
+- Each record goes through the tool's single-record path, so it gets the same permission, restricted-field, child-table and server-script checks as a call for that record alone ([`run_batch`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/batch.py#L99)).
+- `mode: "all_or_nothing"` (the default) saves nothing if any record fails; `failed_record` names the record and its error. `mode: "continue"` saves the records that pass and returns each record's outcome in `results`, with `succeeded` and `failed` counts.
+- A record that commits partway, which ends the batch's savepoint, cannot be undone with the rest. The result then has `all_undone: false` and lists the records saved before it.
+- `create_document` with `records` and `validate_only: true` checks every record, saves nothing, and reports every failing record, not only the first.
+- A call holds at most 100 records ([`MAX_BATCH_SIZE`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/batch.py#L35)). Customisation DocTypes are refused in a batch, so each customisation is still previewed and approved on its own.
+- In FAC Chat, the approval card states how many records the call creates, changes or deletes.
 
 #### Permissions and error messages
 
@@ -44,7 +61,7 @@ Always enabled. Provides essential Frappe operations.
 
 Over MCP, this tool result is nested under the `result` key in the response, and the top-level `error_type` is `ToolReportedError`.
 
-- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L66)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
+- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L67)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
 - **Plain-language refusals.** A refused write to a protected customisation DocType returns `error_type: "permission_error"` with a message that says what is missing. Changing a Server Script needs a System Manager who also holds the Script Manager role. A Query or Script Report needs the Script Manager role too.
 
 #### Customisation results
@@ -273,8 +290,8 @@ empty. Markup is stripped from both sources, because Frappe and ERPNext messages
 
 | Tool | Denial handler |
 |---|---|
-| `create_document` | [create_document.py:355](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L355) |
-| `update_document` | [update_document.py:395](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L395) |
+| `create_document` | [create_document.py:491](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L491) |
+| `update_document` | [update_document.py:527](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L527) |
 | `document_action` (submit) | [document_action.py:241](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L241) |
 | `document_action` (cancel) | [document_action.py:352](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L352) |
 | `document_action` (amend) | [document_action.py:524](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L524) |
@@ -282,7 +299,7 @@ empty. Markup is stripped from both sources, because Frappe and ERPNext messages
 | `create_dashboard_chart` | [create_dashboard_chart.py:206](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard_chart.py#L206) |
 
 `delete_document` keeps its own result shape (`permission_error: true`) but reports the same
-recovered reason ([delete_document.py:136](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/delete_document.py#L136)).
+recovered reason ([delete_document.py:170](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/delete_document.py#L170)).
 Any tool that does not catch the exception itself falls through to `BaseTool._safe_execute`
 ([base_tool.py:288](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L288)), which applies the same recovery.
 
