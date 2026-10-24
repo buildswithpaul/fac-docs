@@ -1,10 +1,10 @@
 # Tool Reference
 
-Frappe Assistant Core ships **38 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
+Frappe Assistant Core ships **41 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
 
 | Plugin | Tools | Description |
 |---|---|---|
-| `core` | 16 | Always enabled. Document CRUD, search, metadata, reports, workflow, email. |
+| `core` | 19 | Always enabled. Document CRUD, search, metadata, reports, workflow, email, builder checks. |
 | `data_science` | 3 | Optional. Python execution, SQL queries, file content extraction. |
 | `faco` | 16 | Optional, **FAC Cloud only**. Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. These act inside FAC Chat, so they are not offered to other MCP clients. |
 | `visualization` | 3 | Optional. Dashboards and charts. |
@@ -12,7 +12,7 @@ Frappe Assistant Core ships **38 built-in tools across 5 plugins**. All tools ar
 
 To toggle plugins, see [Plugin Management](../guides/plugin-management). To control which tools each role can call, see [Tool Management](../guides/tool-management).
 
-## Core plugin (16 tools)
+## Core plugin (19 tools)
 
 Always enabled. Provides essential Frappe operations.
 
@@ -152,6 +152,18 @@ Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to ei
 | Tool | Purpose |
 |---|---|
 | `send_email` | Queue an email via the site's Email Account |
+
+### Builder checks (3)
+
+Read-only tools the assistant uses while it builds a customisation, so it does not learn the Server Script sandbox by trial and error. They save nothing, run no code and never switch user. Only System Managers can call them, and they are classified read-only, so FAC Chat shows no approval card for them.
+
+| Tool | Purpose |
+|---|---|
+| `test_as_user` | Check what another user is allowed to do: up to 20 checks of a permission type (`read`, `write`, `create`, `delete`, `submit`, `cancel` and so on) on a DocType or one record. Frappe's own rules decide, for that user: role permissions, User Permissions, ownership, shares and `has_permission` hooks. Each check returns `allowed`, `refused` or `error` with a fixed reason, plus `roles_that_allow`, the roles that grant it. The result never carries the record's content ([`TestAsUser`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/test_as_user.py#L131)) |
+| `sandbox_reference` | List the names a Server Script can use on this site, built from Frappe's own sandbox, optionally filtered by a prefix such as `frappe.db`. Names unavailable in DocType Event scripts (`commit`, `rollback`, `add_index`) are listed under `not_in_doctype_event`, and `rules` lists the limits that are not names, such as SELECT-only `frappe.db.sql` ([`SandboxReference`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/sandbox_reference.py#L95)) |
+| `recent_errors` | Read recent Error Log entries and failed scheduled jobs, newest first, optionally filtered by text such as a script name. Error text can include request data, so treat it as private ([`RecentErrors`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/recent_errors.py#L47)) |
+
+A permission hook that reads `frappe.session.user` instead of its `user` argument answers `test_as_user` for the caller, not the user being checked. Administrator is always allowed.
 
 ## Data Science plugin (3 tools)
 
