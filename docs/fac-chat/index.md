@@ -76,11 +76,11 @@ human-in-the-loop step on top of that: by default, `create_document`, `update_do
 before they land, and nothing changes in your books until you approve or reject it.
 
 When the write changes how the site behaves (a Server Script, Client Script, Custom
-Field, Property Setter, Workflow, Report, Print Format, Notification, and similar), the
+Field, Property Setter, Workflow, Report, Print Format, Notification, FAC Page, and similar), the
 card is built for someone who has to approve it without reading code:
 
 - **Full code.** A script, condition, query, print layout or message shows in full in a
-  scrollable box that you can expand.
+  scrollable box that you can expand. For a FAC Page, its HTML, script and style all show as code.
 - **Old versus new.** On an update, the card compares the stored code with the new code
   and shows what changed.
 - **Child tables.** Rows in a table field are shown as a table, not as raw data.
@@ -96,7 +96,7 @@ card is built for someone who has to approve it without reading code:
 - **No "Don't ask again".** The card never offers it for a customisation, so every such
   change asks every time.
 
-One kind of customisation change shows no card: one that nobody but you can feel yet. That is a script or notification that is switched off, or a brand-new custom DocType that only System Manager can use, that has no records yet and that no other form uses (plus its fields and permissions). Creating a new table that is not used by any other form yet needs no card either, but once it exists, changing or deleting it asks, because it can sit inside other forms; the same goes for a DocType another form links to. It still appears in the activity trail. Switching it on, giving another role access, or touching a DocType that other people use or that already has records asks as usual, and so does every other kind of customisation. When a change switches a script or notification on, the card shows the code that will go live, so you see what you are turning on and not just the switch. If the assistant cannot tell, or you set the tool to **Ask**, you get the card. This needs FAC 3.3 and an up-to-date FAC Cloud. If an administrator switches off the `customisation_impact` tool or the FAC Cloud plugin, every customisation change asks for approval again.
+One kind of customisation change shows no card: one that nobody but you can feel yet. That is a script or notification that is switched off, a FAC Page that is not published, or a brand-new custom DocType that only System Manager can use, that has no records yet and that no other form uses (plus its fields and permissions). Creating a new table that is not used by any other form yet needs no card either, but once it exists, changing or deleting it asks, because it can sit inside other forms; the same goes for a DocType another form links to. It still appears in the activity trail. Switching it on, publishing a FAC Page or changing a published one, giving another role access, or touching a DocType that other people use or that already has records asks as usual, and so does every other kind of customisation. When a change switches a script or notification on, the card shows the code that will go live, so you see what you are turning on and not just the switch. If the assistant cannot tell, or you set the tool to **Ask**, you get the card. This needs FAC 3.3 and an up-to-date FAC Cloud. If an administrator switches off the `customisation_impact` tool or the FAC Cloud plugin, every customisation change asks for approval again.
 
 Each user can change this default per tool from their own approval preferences —
 **Block**, **Ask** (the default for writes), or **Always Allow** — so a trusted
@@ -122,6 +122,36 @@ picked, with **Change** to reopen it, and the footer counts how many you have an
 Nothing reaches the assistant until you press **Send answers**, which unlocks once every
 question has an answer. A single question still sends as soon as you pick an answer, and the
 option you picked stays marked while it sends.
+
+## Full-screen pages (FAC Page)
+
+Some screens need a layout of their own, such as a planner, a board or a tracker, rather
+than the cards, shortcuts and charts a Workspace gives. The assistant builds these as a
+**FAC Page**: a record that holds the page's HTML, script and style, and opens in Desk at
+<code v-pre>/app/fac-pages/&lt;slug&gt;</code>. Only System Manager can create or change a FAC Page. The
+list of pages is at `/app/fac-page`.
+
+- **Slug.** The last part of the URL: lower-case words joined by single hyphens, at most 80
+  characters. It cannot change after the page is saved.
+- **Who can open it.** Users who hold any role in the page's **Roles** table. With no roles,
+  only System Manager can open it. Listing **All** or **Guest** opens it to every logged-in
+  user, website users included. Logged-out visitors can never open a FAC Page.
+- **Drafts.** A page that is not published is a draft. Only System Manager can open it, and
+  to everyone else it reads as not found. A draft is shown without its script, and inline
+  event handlers and `javascript:` links are removed from its HTML, so opening a draft runs
+  no code. The script runs once the page is published.
+- **How it renders.** The page renders inside its own shadow root, so its style does not leak
+  into Desk. The mockup kit's `mk-` classes, the ones a build plan's mockup uses, work in the
+  page too. The script runs with the viewer's own session, so it can read and change only
+  what that user may.
+- **Approvals.** Creating, changing or deleting a draft needs no approval card. Publishing a
+  page, or changing a page that is already published, asks for approval, and the card shows
+  the HTML, script and style in full. An approved build plan that lists the page as going
+  live covers the publish.
+
+A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
+to the page itself, next to `url`, the link to its form. To link a page from a Workspace, add
+a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;slug&gt;</code> address.
 
 ## Memory asks first
 
