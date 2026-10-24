@@ -128,8 +128,9 @@ option you picked stays marked while it sends.
 Some screens need a layout of their own, such as a planner, a board or a tracker, rather
 than the cards, shortcuts and charts a Workspace gives. The assistant builds these as a
 **FAC Page**: a record that holds the page's HTML, script and style, and opens in Desk at
-<code v-pre>/app/fac-pages/&lt;slug&gt;</code>. Only System Manager can create or change a FAC Page. The
-list of pages is at `/app/fac-page`.
+<code v-pre>/app/fac-pages/&lt;slug&gt;</code>. Only System Manager can create or change a FAC Page, and
+the assistant's tools refuse to write one for anyone else even if the DocType's permissions are
+widened, because a page carries code. The list of pages is at `/app/fac-page`.
 
 - **Slug.** The last part of the URL: lower-case words joined by single hyphens, at most 80
   characters. It cannot change after the page is saved.
@@ -137,16 +138,18 @@ list of pages is at `/app/fac-page`.
   only System Manager can open it. Listing **All** or **Guest** opens it to every logged-in
   user, website users included. Logged-out visitors can never open a FAC Page.
 - **Drafts.** A page that is not published is a draft. Only System Manager can open it, and
-  to everyone else it reads as not found. A draft is shown without its script, and inline
-  event handlers and `javascript:` links are removed from its HTML, so opening a draft runs
-  no code. The script runs once the page is published.
+  to everyone else it reads as not found. A draft previews in a locked-down frame: no script
+  runs, forms do not work, and outside images, fonts and links do not load. The server also
+  leaves out the draft's script and cleans its HTML. The script and outside resources work
+  once the page is published.
 - **How it renders.** The page renders inside its own shadow root, so its style does not leak
   into Desk. The mockup kit's `mk-` classes, the ones a build plan's mockup uses, work in the
   page too. The script runs with the viewer's own session, so it can read and change only
   what that user may.
 - **Approvals.** Creating, changing or deleting a draft needs no approval card. Publishing a
-  page, or changing a page that is already published, asks for approval, and the card shows
-  the HTML, script and style in full. An approved build plan that lists the page as going
+  page, or changing a page that is already published, asks for approval. The card shows the
+  HTML, script and style in full, and who the page goes live to: its roles, "System Managers
+  only" when it has none, and a note when the roles include All or Guest. An approved build plan that lists the page as going
   live covers the publish.
 
 A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
