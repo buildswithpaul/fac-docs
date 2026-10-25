@@ -130,16 +130,25 @@ option you picked stays marked while it sends.
 Some screens need a layout of their own, such as a planner, a board or a tracker, rather
 than the cards, shortcuts and charts a Workspace gives. The assistant builds these as a
 **FAC Page**: a record that holds the page's HTML, script and style, and opens in Desk at
-<code v-pre>/app/fac-pages/&lt;slug&gt;</code>. Only System Manager can create or change a FAC Page, and
-the assistant's tools refuse to write one for anyone else even if the DocType's permissions are
-widened, because a page carries code. The list of pages is at `/app/fac-page`.
+<code v-pre>/app/fac-pages/&lt;name&gt;</code>. The list of pages is at `/app/fac-page`.
 
-- **Slug.** The last part of the URL: lower-case words joined by single hyphens, at most 80
-  characters. It cannot change after the page is saved.
-- **Who can open it.** Users who hold any role in the page's **Roles** table. With no roles,
+A page is **personal** ("Only me", the default) or **shared**:
+
+- **Personal pages.** Any Desk user can have one. It opens only for the user who built it, not
+  even for System Managers, and it is live as soon as it is saved, so building or changing your
+  own personal page needs no approval card. Its name is the slug plus a short tag for its owner
+  (for example `sales-summary-3fa9c1`), so two people can use the same slug. Website users
+  cannot build pages, and a page cannot be shared with Frappe's Share button.
+- **Shared pages.** Only System Manager can share a page, publish it, choose its roles or change a
+  shared page. The assistant's tools refuse anyone else even if the DocType's permissions are
+  widened, because a page carries code. A shared page's name is its slug.
+
+- **Slug.** Lower-case words joined by single hyphens, at most 80 characters, unique among
+  shared pages and among each user's own pages. It cannot change after the page is saved.
+- **Who can open a shared page.** Users who hold any role in the page's **Roles** table. With no roles,
   only System Manager can open it. Listing **All** or **Guest** opens it to every logged-in
   user, website users included. Logged-out visitors can never open a FAC Page.
-- **Drafts.** A page that is not published is a draft. Only System Manager can open it, and
+- **Drafts.** A shared page that is not published is a draft. Only System Manager can open it, and
   to everyone else it reads as not found. A draft previews in a locked-down frame: no script
   runs, forms do not work, and outside images, fonts and links do not load. The server also
   leaves out the draft's script and cleans its HTML. The script and outside resources work
@@ -148,15 +157,40 @@ widened, because a page carries code. The list of pages is at `/app/fac-page`.
   into Desk. The mockup kit's `mk-` classes, the ones a build plan's mockup uses, work in the
   page too. The script runs with the viewer's own session, so it can read and change only
   what that user may.
-- **Approvals.** Creating, changing or deleting a draft needs no approval card. Publishing a
-  page, or changing a page that is already published, asks for approval. The card shows the
+- **Approvals.** Creating, changing or deleting a draft needs no approval card. Sharing a
+  personal page, publishing a page, or changing a page that is already published, asks for approval. The card shows the
   HTML, script and style in full, and who the page goes live to: its roles, "System Managers
   only" when it has none, and a note when the roles include All or Guest. An approved build plan that lists the page as going
   live covers the publish.
 
 A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
 to the page itself, next to `url`, the link to its form. To link a page from a Workspace, add
-a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;slug&gt;</code> address.
+a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;name&gt;</code> address.
+
+### Pages beside the chat
+
+Ask for a report, a summary or "a PDF of …" and the assistant can build it as a personal page.
+Each page it writes shows as a chip in its reply. In the full-screen chat (`/copilot`) the chip
+opens the page in a panel beside the conversation; in the Desk widget it opens the page in Desk.
+
+- **The panel header** shows the title, the version (v1, v2, …), **Updating…** while the
+  assistant changes the page, **My pages** to switch to another of your pages, **Full screen**
+  to open it in Desk, **Share…** and **Download PDF**. **Share…** asks the assistant to share
+  the page when you are a System Manager, and otherwise says a System Manager can share it.
+- **What runs in the panel.** The page renders in its own shadow root with the mockup kit, and
+  its script reads and writes data with your session. The panel offers a small part of Desk's
+  `frappe` object (`frappe.call`, `frappe.db.get_list`, `get_value`, `get_doc`, `insert`,
+  `set_value` and `delete_doc`, `frappe.session.user`, `frappe.datetime.get_today` and
+  `str_to_user`, `frappe.format`, and `__`). A page that needs more of Desk shows **Open in
+  Desk** instead.
+- **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
+  takes an ECharts option and draws SVG, in the panel and in Desk alike.
+- **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
+  landscape when the page is wide, with the suggested file name "title date".
+- **The assistant can look at the page.** With FAC Cloud, the assistant can take a screenshot of
+  the page open in the panel, after a card asks you. It captures only that page, never the
+  chat. **Always Allow** covers that page in that conversation only. If the Desk widget and the
+  full-screen chat have the same conversation open, only the one that started the turn answers.
 
 ## Memory asks first
 

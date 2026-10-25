@@ -73,7 +73,7 @@ Customisation records change how a site behaves: Server Script, Client Script, C
 | `applies_to` | Custom Field, Property Setter, Client Script, Server Script, Print Format, Notification | `{doctype, url}`: the form the customisation changes, and a link to a new document of that type, where the change shows |
 | `location` | Custom Field | `{tab, section, collapsed, first_tab}`: where the field shows on its form, read after the save. `collapsed` is true when its section starts folded, and `first_tab` is false when it sits on a later tab |
 | `placement_warning` | Custom Field | A plain sentence, present only when the field lands in a collapsed section or off the first tab, for example "Will appear on the Details tab, in the Extra section (collapsed, hidden until someone opens it). People may not notice it: the section is collapsed." |
-| `page_url` | FAC Page | The <code v-pre>/app/fac-pages/&lt;slug&gt;</code> link where the page opens. `url` stays the link to its form |
+| `page_url` | FAC Page | The <code v-pre>/app/fac-pages/&lt;name&gt;</code> link where the page opens (a personal page's name is its slug plus an owner tag). `url` stays the link to its form |
 | `warning` | Report | Present when a non-standard Script Report is saved while server scripts are switched off: the report is saved, but it shows an error when someone runs it |
 
 ([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L362))
