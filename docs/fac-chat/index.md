@@ -128,7 +128,8 @@ When the assistant builds a Server Script, it looks up what the script sandbox a
 
 While the assistant works, the activity trail names what it did: **Created**, **Updated**
 or **Checked** (a dry run) with the record's name, and a step that failed shows a plain
-reason underneath. Records the assistant created or changed appear as chips in the side
+reason underneath. Frappe's error markup (such as `<strong>`) is dropped from that reason,
+so it reads as text in the chat app and the Desk widget ([`failureReason`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/toolResult.js#L84)). Records the assistant created or changed appear as chips in the side
 rail, and a chip links to the record. After a customisation write, the trail row and the
 chip also show an **Open a new {doctype}** link, which opens a blank form where the change shows. Questions the assistant asks you render their
 formatting (bold, lists, links).
@@ -280,12 +281,13 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   chat. The picture is drawn inside the page's own frame, so nothing the page contains is drawn or loaded
   outside it. With the picture come `page_text` (the page's visible text, figures and table cells, marked as
   untrusted page content) and `page_errors` (script errors and calls that failed), even when the picture can't
-  be taken. The card offers **Allow on this page in this chat**, never a wider trust. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L95))
+  be taken. The card offers **Allow on this page in this chat**, never a wider trust. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L168))
 - **The assistant tests a page before it says it's done.** After every save it looks at the page and checks
   the figures and `page_errors`. When it can't take a picture (a phone, the Desk widget, another page open),
   it runs the page's queries itself and tells you what it checked. To look at your data while building, it
-  uses the read tools that don't ask (`list_documents` with `group_by` and `aggregate`), not
-  `run_database_query`, which asks on every call. After publishing or changing a shared page it runs
+  uses the read tools that don't ask (`get_doctype_info` for a doctype's fields, `list_documents` with
+  `group_by` and `aggregate`), not `run_database_query`, which asks on every call, and never
+  `run_python_code` to read a doctype's fields. After publishing or changing a shared page it runs
   `browser_capture_diagnostics` on it and fixes any script error first.
 - **Open Full Assistant mid-turn.** If you move a conversation from the Desk widget to the full-screen chat
   while the assistant is still working, the chat claims the running turn, and its browser calls (such as the
