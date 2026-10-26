@@ -118,7 +118,7 @@ workflow doesn't have to click through a card every time. This gate is specific 
 FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
 
 When the assistant is about to build something that takes several records, such as a page, a workspace or a set of fields and scripts, it can show one **Build plan** card first instead of asking for each write. This needs FAC 3.3 and an up-to-date FAC Cloud that offers build plans; without one you get the per-write cards above. The card lists every change with its action and groups them under **Goes live** and **Stays dormant**, so you see which ones take effect for your users at once. When the build includes a screen, the card shows a static mockup of it. A personal ("Only me") FAC Page needs no plan: the assistant builds and changes it directly,
-and you check its code with [Run new version](#run-new-version). Press **Approve plan** to approve all of it. To change something, press **Ask for changes** or type what you want in the composer. The assistant then revises the plan and shows a new card.
+and it runs in a [walled-off frame](#how-a-personal-page-runs) that asks you before it changes anything. Press **Approve plan** to approve all of it. To change something, press **Ask for changes** or type what you want in the composer. The assistant then revises the plan and shows a new card.
 
 Before the card appears, FAC checks the plan against your site with the hidden `check_build_plan` tool, which saves nothing. An entry FAC could never match to a save, such as a doctype that does not exist and is not created in the same plan, or a child-table row like a role assignment (which is saved as an update of each User), goes back to the assistant to fix, and no card is shown. A plan entry carries no field values, so FAC cannot prove that a new role, DocType, field or permission is dormant; such an entry marked as dormant is shown under **Goes live** to be safe, and so is a change to a script that is switched on now. If the check cannot run, for example on an older FAC, the plan is shown as proposed and each write is still checked as usual.
 
@@ -151,8 +151,9 @@ A page is **personal** ("Only me", the default) or **shared**:
 
 - **Personal pages.** Any Desk user can have one. It opens only for the user who built it, not
   even for System Managers. Building or changing your own personal page needs no approval
-  card, but its **script does not run until you have seen it** (see
-  [Run new version](#run-new-version)). Its name is the slug plus a short tag for its owner
+  card. It loads and runs by itself, inside a walled-off frame that reads only what you may and
+  asks you before it changes anything (see [How a personal page runs](#how-a-personal-page-runs)).
+  Its name is the slug plus a short tag for its owner
   (for example `sales-summary-3fa9c1`), so two people can use the same slug. Website users
   cannot build pages, and a page cannot be shared with Frappe's Share button.
 - **Shared pages.** Only System Manager can share a page, publish it, choose its roles or change a
@@ -169,10 +170,11 @@ A page is **personal** ("Only me", the default) or **shared**:
   runs, forms do not work, and outside images, fonts and links do not load. The server also
   leaves out the draft's script and cleans its HTML. The script and outside resources work
   once the page is published.
-- **How it renders.** The page renders inside its own shadow root, so its style does not leak
-  into Desk. The mockup kit's `mk-` classes, the ones a build plan's mockup uses, work in the
-  page too. The script runs with the viewer's own session, so it can read and change only
-  what that user may.
+- **How it renders.** A shared page renders inside its own shadow root, so its style does not
+  leak into Desk, and its script runs with the viewer's own session, so it can read and change
+  only what that user may; its code was approved on the publish card. A personal page runs in a
+  walled-off frame instead (see [How a personal page runs](#how-a-personal-page-runs)). The mockup
+  kit's `mk-` classes, the ones a build plan's mockup uses, work in both.
 - **Approvals.** Creating, changing or deleting a draft, or a page that is only yours, needs no
   approval card. Publishing a page, making a page **Shared**, switching a rule on, or changing
   code or roles that are already live, always asks. One card leads with **This goes live** and
@@ -180,54 +182,62 @@ A page is **personal** ("Only me", the default) or **shared**:
   note when the roles include All or Guest), then shows the HTML, script and style in full. The card appears even when an approved build
   plan lists the page as going live, because the code was written after you approved the plan.
   A page that stays "Only me" never counts as going live.
-  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L312), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L285))
+  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L313), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L285))
 
-### Run new version
+### How a personal page runs
 
-A personal page's script is held until its owner has seen it. This is the one rule that
-separates a personal page from a shared one, whose script was approved on its publish card.
+A personal page loads and runs as soon as it opens, and again after every change the assistant
+makes. There is no code to check and nothing to click: you judge the page by its figures. What
+keeps this safe is where it runs.
 
-- **First run.** The first time a personal page has a script, a bar reads "This page runs code
-  FACO wrote. Check it, then run it." with **View code** and **Run new version**. The page shows
-  its layout dimmed, under "The page fills in once you run its code." The script runs only after
-  you click **Run new version**.
-- **After a change.** When the assistant changes the script, the bar reads "FACO updated this
-  page's code. Check the change, then run the new version." If you already had the page open,
-  the version you ran stays on screen and keeps working, with "You're seeing the version you
-  last ran." No new code runs until you click.
-- **View changes** shows what changed against the version you last ran, in its own scrolling
-  box: a summary ("4 lines added, 0 lines removed"), added and removed lines tinted, and runs of
-  unchanged lines folded behind **Show N unchanged lines**, keeping 3 lines of context.
-- **HTML or style only.** A change to the HTML or the style alone shows at once and needs no
-  click, because neither can run code (see the safety rules below).
-- **Until you run it,** Download PDF and the assistant's screenshots show the page without that
-  code.
-- **Where it is remembered.** The version you ran is stored in your browser for that page, so a
-  new browser or a cleared profile asks again.
-
-([`fac_page_needs_review`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/facPageApproval.js#L59), [`fac_page_script_review`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/facPageApproval.js#L68))
+- **A walled-off frame.** The page runs in a sandboxed frame with its own opaque origin: it has
+  no cookies, no login and no CSRF token, it cannot make requests itself (`connect-src 'none'`),
+  open windows, submit forms, navigate or reach the chat around it, and WebRTC is removed. Images
+  and fonts load only from your site's `/files/` and `/assets/`. ([`pageFrameCsp`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFrameDoc.js#L32), [`guardLoadingElements`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/hardening.js#L92))
+- **Reads go through at once.** The page's only way to data is its `frappe` object, which asks
+  the chat or Desk to make the call for it, as you. A fixed list of Frappe's own read endpoints
+  (`frappe.client.get`, `get_list`, `get_count`, `get_value`, `get_single_value`, the report view
+  and `query_report.run`, and `getdoc`) runs without asking, always as a read-only request. ([`PAGE_READ_METHODS`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFrameHost.js#L37))
+- **Everything else asks.** Any other call shows a prompt over the page: **Allow once**, **Allow
+  for this page** or **Don't allow**. **Allow for this page** is offered only for a Server Script
+  API method (the kind of endpoint the assistant writes), and only after the server confirms
+  that the name really is one and is not remapped; it covers that method on this version of the
+  page, and a new version starts afresh. ([`mayTrustForPage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageRequestPrompt.js#L302), [`is_page_api_method`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L126))
+- **Record changes ask every time.** Creating, changing, submitting, cancelling or deleting a
+  record is allowed one at a time, never for the page. The prompt lists every field it sets, in
+  full, and for a change reads the current record first and shows each field before → after.
+  What it shows is exactly what is sent. A save that changes only ordinary fields is sent as
+  just those fields (`set_value`), so a field you can't read is never touched. ([`describePageRequest`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageRequestPrompt.js#L224))
+- **Some changes are refused outright,** with no prompt: saving or inserting a record that is
+  not a draft, changing its submit status, owner, creation or parent, and fields whose names
+  start with `_`.
+- **No rushing.** The prompt sits over the page without moving it, **Allow** is disabled for
+  700 ms after a prompt appears, queued prompts show "1 of N", at most five wait at once, a
+  method you refused is not asked about again for that version, and after three refusals the
+  page is read-only until it changes. ([`PageWritePrompt`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/pages/PageWritePrompt.vue#L67))
+- **Walled-off, not sealed.** A deliberately malicious script could still leak small amounts of
+  what it reads through DNS lookups, preconnects or timing, which no browser policy closes. Only
+  code the assistant wrote for the page runs there.
 
 ### Safety rules for a personal page
 
-HTML and style show without a click, so the server cleans both before it hands a personal page
-to the browser. A shared page is served as approved.
+The server also cleans a personal page's HTML and style before it hands the page to the
+browser. A shared page is served as approved.
 
 - **HTML is sanitised with an allowlist.** Inline handlers (`onclick`, `onerror` and the rest),
   `javascript:` and `data:` URLs, `srcdoc`, `<script>`, `<iframe>`, `<object>`, `<embed>`,
   `<base>` and SVG animation are removed. Forms, inputs and buttons stay. Code can live only in
-  the script, behind **Run new version**. The blocked tags are taken out before Frappe's
+  the script. The blocked tags are taken out before Frappe's
   sanitiser runs, so Frappe 15 (whose sanitiser would otherwise show them as text) and Frappe 16
-  give the same page. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L176), [`_without_tags`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L221), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
+  give the same page. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L199), [`_without_tags`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L244), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
 - **Style is parsed, not pattern-matched.** The stylesheet is parsed with tinycss2 and written
   back from what survives. `@import`, any at-rule other than `@media`, `@supports`,
   `@keyframes` and `@font-face`, and any `url()`, `image-set()` or similar that does not point at
   a `/files/` or `/assets/` path on your site are stripped. Inline `style` attributes follow the
-  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L238))
-- **Paint stays in the page's box.** A page's drawing is contained in its own box, so a
-  `position: fixed` element is fixed to the page, not the screen, and cannot cover Desk or the chat.
-- **A script must not turn page text into markup.** The script runs again when only the HTML
-  changes, and HTML changes show without a click, so a script must not read text from the
-  page and write it back as HTML or run it as code. Escape record values with
+  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L261))
+- **Paint stays in the page's frame.** Nothing the page draws can cover Desk, the chat or a
+  prompt.
+- **Escape record values.** A script should not write record text back as HTML. Escape it with
   `frappe.utils.escape_html`, which works in Desk and in the chat panel.
 
 A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
@@ -243,7 +253,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
 - **It opens by itself.** In the full-screen chat (`/copilot`), a page the assistant saves in
   this turn opens in a panel beside the conversation, so it can look at it at once. A page you
   already have open stays open, and the new one waits behind its chip. Reloading an old
-  conversation opens nothing. ([`trackPageWrites`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/usePagePanel.js#L75))
+  conversation opens nothing. ([`trackPageWrites`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/usePagePanel.js#L76))
 - **On a phone** (under 768px wide) a saved page does not open over the reply; tap its chip.
 - **In the Desk widget** the chip opens the page in Desk.
 - **While a page is open** on a screen 1024px or wider, the chat sidebar folds so the
@@ -253,8 +263,9 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   Desk) and **Share**, the **Download PDF** button, and **Close**. **Share** asks the assistant
   to share the page when you are a System Manager, and otherwise says a System Manager can
   share it.
-- **What runs in the panel.** The page renders in its own shadow root with the mockup kit, and
-  its script reads and writes data with your session. The panel offers a small part of Desk's
+- **What runs in the panel.** The page runs in its [walled-off frame](#how-a-personal-page-runs)
+  with the mockup kit. Its script reaches data only through a small part of Desk's
+  `frappe` object; reads run at once and anything else asks. The panel offers a small part of Desk's
   `frappe` object (`frappe.call`, `frappe.db.get_list`, `get_value`, `get_doc`, `insert`,
   `set_value` and `delete_doc`, `frappe.session.user`, `frappe.datetime.get_today` and
   `str_to_user`, `frappe.format`, `frappe.utils.escape_html`, and `__`). A page that needs more of Desk shows **Open in
@@ -264,9 +275,22 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
 - **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
-  screenshot of the page open in the panel, after a card asks you. It captures only that page, never the
-  chat. The card offers **Allow on this page in this chat**, never a wider trust. If the Desk widget and the
-  full-screen chat have the same conversation open, only the one that started the turn answers.
+  screenshot of the page open in the panel, after a card asks you: "FACO wants to look at the page open beside
+  the chat and send the assistant a picture of it and the text it shows." It captures only that page, never the
+  chat. The picture is drawn inside the page's own frame, so nothing the page contains is drawn or loaded
+  outside it. With the picture come `page_text` (the page's visible text, figures and table cells, marked as
+  untrusted page content) and `page_errors` (script errors and calls that failed), even when the picture can't
+  be taken. The card offers **Allow on this page in this chat**, never a wider trust. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L95))
+- **The assistant tests a page before it says it's done.** After every save it looks at the page and checks
+  the figures and `page_errors`. When it can't take a picture (a phone, the Desk widget, another page open),
+  it runs the page's queries itself and tells you what it checked. To look at your data while building, it
+  uses the read tools that don't ask (`list_documents` with `group_by` and `aggregate`), not
+  `run_database_query`, which asks on every call. After publishing or changing a shared page it runs
+  `browser_capture_diagnostics` on it and fixes any script error first.
+- **Open Full Assistant mid-turn.** If you move a conversation from the Desk widget to the full-screen chat
+  while the assistant is still working, the chat claims the running turn, and its browser calls (such as the
+  page screenshot) go to the chat from then on, including any already waiting. A tool that only works in
+  Desk answers at once that the conversation moved. The claim ends with your next message. ([`claim_live_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L230), [`claim_session_for_spa`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L139))
 
 ## Memory asks first
 
