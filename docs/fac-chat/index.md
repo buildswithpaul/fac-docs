@@ -135,8 +135,9 @@ than the cards, shortcuts and charts a Workspace gives. The assistant builds the
 A page is **personal** ("Only me", the default) or **shared**:
 
 - **Personal pages.** Any Desk user can have one. It opens only for the user who built it, not
-  even for System Managers, and it is live as soon as it is saved, so building or changing your
-  own personal page needs no approval card. Its name is the slug plus a short tag for its owner
+  even for System Managers. Building or changing your own personal page needs no approval
+  card, but its **script does not run until you have seen it** (see
+  [Run new version](#run-new-version)). Its name is the slug plus a short tag for its owner
   (for example `sales-summary-3fa9c1`), so two people can use the same slug. Website users
   cannot build pages, and a page cannot be shared with Frappe's Share button.
 - **Shared pages.** Only System Manager can share a page, publish it, choose its roles or change a
@@ -157,11 +158,55 @@ A page is **personal** ("Only me", the default) or **shared**:
   into Desk. The mockup kit's `mk-` classes, the ones a build plan's mockup uses, work in the
   page too. The script runs with the viewer's own session, so it can read and change only
   what that user may.
-- **Approvals.** Creating, changing or deleting a draft needs no approval card. Sharing a
-  personal page, publishing a page, or changing a page that is already published, asks for approval. The card shows the
-  HTML, script and style in full, and who the page goes live to: its roles, "System Managers
-  only" when it has none, and a note when the roles include All or Guest. An approved build plan that lists the page as going
-  live covers the publish.
+- **Approvals.** Creating, changing or deleting a draft, or a page that is only yours, needs no
+  approval card. Publishing a page, making a page **Shared**, switching a rule on, or changing
+  code or roles that are already live, always asks. One card shows the HTML, script and style
+  in full, and who the page goes live to: its roles, "System Managers only" when it has none,
+  and a note when the roles include All or Guest. The card appears even when an approved build
+  plan lists the page as going live, because the code was written after you approved the plan.
+  A page that stays "Only me" never counts as going live.
+  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L312), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L285))
+
+### Run new version
+
+A personal page's script is held until its owner has seen it. This is the one rule that
+separates a personal page from a shared one, whose script was approved on its publish card.
+
+- **First run.** The first time a personal page has a script, the page shows its HTML and style
+  with a bar: "This page has code FACO wrote." with **View changes** and **Run new version**.
+  The script runs only after you click **Run new version**.
+- **After a change.** When the assistant changes the script, the page keeps showing the HTML and
+  style, and the bar reads "FACO changed this page's code." **View changes** shows what
+  changed against the version you last ran, and **Run new version** runs the new one.
+- **HTML or style only.** A change to the HTML or the style alone shows at once and needs no
+  click, because neither can run code (see the safety rules below).
+- **Until you run it,** Download PDF and the assistant's screenshots show the page without that
+  code.
+- **Where it is remembered.** The version you ran is stored in your browser for that page, so a
+  new browser or a cleared profile asks again.
+
+([`fac_page_needs_review`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/facPageApproval.js#L59), [`fac_page_script_review`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/facPageApproval.js#L68))
+
+### Safety rules for a personal page
+
+HTML and style show without a click, so the server cleans both before it hands a personal page
+to the browser. A shared page is served as approved.
+
+- **HTML is sanitised with an allowlist.** Inline handlers (`onclick`, `onerror` and the rest),
+  `javascript:` and `data:` URLs, `srcdoc`, `<script>`, `<iframe>`, `<object>`, `<embed>`,
+  `<base>` and SVG animation are removed. Forms, inputs and buttons stay. Code can live only in
+  the script, behind **Run new version**. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L176), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
+- **Style is parsed, not pattern-matched.** The stylesheet is parsed with tinycss2 and written
+  back from what survives. `@import`, any at-rule other than `@media`, `@supports`,
+  `@keyframes` and `@font-face`, and any `url()`, `image-set()` or similar that does not point at
+  a `/files/` or `/assets/` path on your site are stripped. Inline `style` attributes follow the
+  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L213))
+- **Paint stays in the page's box.** A page's drawing is contained in its own box, so a
+  `position: fixed` element is fixed to the page, not the screen, and cannot cover Desk or the chat.
+- **A script must not turn page text into markup.** The script runs again when only the HTML
+  changes, and HTML changes show without a click, so a script must not read text from the
+  page and write it back as HTML or run it as code. Escape record values with
+  `frappe.utils.escape_html`, which works in Desk and in the chat panel.
 
 A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
 to the page itself, next to `url`, the link to its form. To link a page from a Workspace, add
@@ -181,14 +226,14 @@ opens the page in a panel beside the conversation; in the Desk widget it opens t
   its script reads and writes data with your session. The panel offers a small part of Desk's
   `frappe` object (`frappe.call`, `frappe.db.get_list`, `get_value`, `get_doc`, `insert`,
   `set_value` and `delete_doc`, `frappe.session.user`, `frappe.datetime.get_today` and
-  `str_to_user`, `frappe.format`, and `__`). A page that needs more of Desk shows **Open in
+  `str_to_user`, `frappe.format`, `frappe.utils.escape_html`, and `__`). A page that needs more of Desk shows **Open in
   Desk** instead.
 - **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
   takes an ECharts option and draws SVG, in the panel and in Desk alike.
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
-- **The assistant can look at the page.** With FAC Cloud, the assistant can take a screenshot of
-  the page open in the panel, after a card asks you. It captures only that page, never the
+- **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
+  screenshot of the page open in the panel, after a card asks you. It captures only that page, never the
   chat. **Always Allow** covers that page in that conversation only. If the Desk widget and the
   full-screen chat have the same conversation open, only the one that started the turn answers.
 
