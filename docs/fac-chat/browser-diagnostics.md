@@ -33,9 +33,10 @@ Buffers live in per-tab session storage, survive navigation within that tab, and
 entries older than **5 minutes** are dropped on load.
 
 Capturing diagnostics (like a screenshot or form data) is a sensitive browser tool: the
-widget asks you to **Reject / Approve / Allow on this page in this chat / Always allow**
-first, opening the panel to ask even if it was closed. **Allow on this page in this chat**
-stops the questions for that tool on the page you were looking at when the card opened, in
+widget asks you first with a card ("FACO wants to collect this page's recent errors, failed
+requests and a screenshot…"): **Approve** or **Reject**, or the links **Allow on this page in
+this chat** and **Always allow**. It opens the panel to ask even if it was closed. **Allow on
+this page in this chat** stops the questions for that tool on the page you were looking at when the card opened, in
 the current chat only; another page, record or chat asks again. Anything other than one of
 the allow choices counts as Reject.
 
