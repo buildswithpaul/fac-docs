@@ -210,10 +210,10 @@ The approval card compares the stored code with the proposed code on an update. 
 
 ## Code a write puts live by opening a DocType (`get_code_going_live`)
 
-The approval card of a DocType update that sets `permissions` or `istable`, or of a Custom DocPerm write, lists the code on that DocType which the write would put live. It reads it with `GET frappe_assistant_core.chat.api.doctype_code.get_code_going_live?target=…`, or `?custom_docperm=…` for a Custom DocPerm update that leaves its parent out ([`get_code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/doctype_code.py#L19)).
+The approval card of a DocType update that sets `permissions` or `istable`, of a Property Setter on a DocType's `istable`, `issingle` or `is_virtual`, or of a Custom DocPerm write, lists the code on that DocType which the write would put live. It reads it with `GET frappe_assistant_core.chat.api.doctype_code.get_code_going_live?target=…`, or `?custom_docperm=…` for a Custom DocPerm update that leaves its parent out ([`get_code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/doctype_code.py#L19)).
 
 - The caller needs **read** permission on the DocType, and on the Custom DocPerm when one is named.
-- The result is a list of `{source, name, field, key, code}`: each `eval:` condition and HTML field's options on the DocType's own fields, its Custom Fields and its Property Setters, as the form would run them ([`code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L608)). Entries from a Custom Field or Property Setter are left out when the caller cannot read that kind of record.
+- The result is a list of `{source, name, field, key, code}`: each `eval:` condition and HTML field's options on the DocType's own fields, its Custom Fields and its Property Setters, as the form would run them ([`code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L629)). Entries from a Custom Field or Property Setter are left out when the caller cannot read that kind of record.
 - It is `[]` when the DocType is already reachable by other people, since its code went live, with its card, when it was opened.
 
 ## Field placement (`get_field_placement`)

@@ -208,7 +208,7 @@ A page is **personal** ("Only me", the default) or **shared**:
   note when the roles include All or Guest), then shows the HTML, script and style in full. The card appears even when an approved build
   plan lists the page as going live, because the code was written after you approved the plan.
   A page that stays "Only me" never counts as going live.
-  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L371), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L343))
+  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L392), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L364))
 
 ### How a personal page runs
 

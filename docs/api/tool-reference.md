@@ -77,7 +77,7 @@ Customisation records change how a site behaves: Server Script, Client Script, C
 | `page_url` | FAC Page | The <code v-pre>/app/fac-pages/&lt;name&gt;</code> link where the page opens (a personal page's name is its slug plus an owner tag). `url` stays the link to its form |
 | `warning` | Report | Present when a non-standard Script Report is saved while server scripts are switched off: the report is saved, but it shows an error when someone runs it |
 
-([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L812))
+([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L841))
 
 #### Server scripts switched off
 
