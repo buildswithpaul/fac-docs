@@ -296,17 +296,22 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   `set_value` and `delete_doc`, `frappe.session.user`, `frappe.datetime.get_today` and
   `str_to_user`, `frappe.format`, `frappe.utils.escape_html`, and `__`). A page that needs more of Desk shows **Open in
   Desk** instead.
-- **Figures read the same in the panel and in Desk.** `frappe.format` returns plain text
-  everywhere a page runs: in the panel, in a personal page's frame, and on a Shared page in Desk.
-  It shows what Desk's own formatter shows, with the site's number format, currency symbol and
-  precision, and date format, so a page that escapes it shows `₹ 79,360.00`, never markup. On a
-  Shared page Desk hands the script its own `frappe`, with only `format` changed to return the
-  text of Desk's formatted value. Outside Desk the settings arrive with the page: the site's
-  defaults and its enabled currencies, never a user's own defaults. For an amount in a record's
-  own currency, a page sets `options` to the record's currency field and passes the record:
+- **Figures read the same in the panel and in Desk.** For a number, an amount, a date or a
+  duration (`Currency`, `Float`, `Int`, `Percent`, `Date`, `Datetime`, `Time`, `Duration`),
+  `frappe.format` returns plain text everywhere a page runs: in the panel, in a personal page's
+  frame, and on a Shared page in Desk. It shows what Desk's own formatter shows, with the site's
+  number format, currency symbol and precision, and date format, so a page that escapes it shows
+  `₹ 79,360.00`, never markup. On a Shared page Desk hands the script its own `frappe`, with only
+  `format` changed to return that text. Any other fieldtype comes back exactly as Desk's formatter
+  gives it, never unescaped, because a record's text is stored html-escaped and unescaping it
+  could turn it into live markup. So a page shows text and links from the record's own value,
+  escaped with `frappe.utils.escape_html`, not through `frappe.format`. Outside Desk the settings
+  arrive with the page: the site's defaults and its enabled currencies, never a user's own
+  defaults. For an amount in a record's own currency, a page sets `options` to the record's
+  currency field and passes the record:
   `frappe.format(r.grand_total, { fieldtype: "Currency", options: "currency" }, null, r)`.
   `options` names a field, as in Desk; a currency code there is ignored.
-  ([`page_format_settings`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L141), [`fac_page_frappe`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_frappe.js#L11), [`formatValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFormat.js#L357))
+  ([`page_format_settings`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L141), [`fac_page_frappe`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_frappe.js#L16), [`formatValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFormat.js#L411))
 - **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
   takes an ECharts option and draws SVG, in the panel and in Desk alike.
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
