@@ -228,7 +228,7 @@ keeps this safe is where it runs.
   for this page** or **Don't allow**. **Allow for this page** is offered only for a Server Script
   API method (the kind of endpoint the assistant writes), and only after the server confirms
   that the name really is one and is not remapped; it covers that method on this version of the
-  page, and a new version starts afresh. ([`mayTrustForPage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageRequestPrompt.js#L302), [`is_page_api_method`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L126))
+  page, and a new version starts afresh. ([`mayTrustForPage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageRequestPrompt.js#L302), [`is_page_api_method`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L219))
 - **Record changes ask every time.** Creating, changing, submitting, cancelling or deleting a
   record is allowed one at a time, never for the page. The prompt lists every field it sets, in
   full, and for a change reads the current record first and shows each field before → after.
@@ -255,12 +255,12 @@ browser. A shared page is served as approved.
   `<base>` and SVG animation are removed. Forms, inputs and buttons stay. Code can live only in
   the script. The blocked tags are taken out before Frappe's
   sanitiser runs, so Frappe 15 (whose sanitiser would otherwise show them as text) and Frappe 16
-  give the same page. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L199), [`_without_tags`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L244), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
+  give the same page. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L292), [`_without_tags`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L337), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
 - **Style is parsed, not pattern-matched.** The stylesheet is parsed with tinycss2 and written
   back from what survives. `@import`, any at-rule other than `@media`, `@supports`,
   `@keyframes` and `@font-face`, and any `url()`, `image-set()` or similar that does not point at
   a `/files/` or `/assets/` path on your site are stripped. Inline `style` attributes follow the
-  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L261))
+  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L354))
 - **Paint stays in the page's frame.** Nothing the page draws can cover Desk, the chat or a
   prompt.
 - **Escape record values.** A script should not write record text back as HTML. Escape it with
@@ -296,6 +296,17 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   `set_value` and `delete_doc`, `frappe.session.user`, `frappe.datetime.get_today` and
   `str_to_user`, `frappe.format`, `frappe.utils.escape_html`, and `__`). A page that needs more of Desk shows **Open in
   Desk** instead.
+- **Figures read the same in the panel and in Desk.** `frappe.format` returns plain text
+  everywhere a page runs: in the panel, in a personal page's frame, and on a Shared page in Desk.
+  It shows what Desk's own formatter shows, with the site's number format, currency symbol and
+  precision, and date format, so a page that escapes it shows `₹ 79,360.00`, never markup. On a
+  Shared page Desk hands the script its own `frappe`, with only `format` changed to return the
+  text of Desk's formatted value. Outside Desk the settings arrive with the page: the site's
+  defaults and its enabled currencies, never a user's own defaults. For an amount in a record's
+  own currency, a page sets `options` to the record's currency field and passes the record:
+  `frappe.format(r.grand_total, { fieldtype: "Currency", options: "currency" }, null, r)`.
+  `options` names a field, as in Desk; a currency code there is ignored.
+  ([`page_format_settings`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L141), [`fac_page_frappe`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_frappe.js#L11), [`formatValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFormat.js#L357))
 - **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
   takes an ECharts option and draws SVG, in the panel and in Desk alike.
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
