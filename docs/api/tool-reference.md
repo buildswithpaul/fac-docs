@@ -228,6 +228,19 @@ available to every MCP client.
 The browser tools act on the user's own browser, not on the server, and need the FAC
 Chat page open to reach it.
 
+**Which chat runs which browser tool.** All of them run in the Desk widget. The full chat
+app (`/copilot`) runs only `browser_take_screenshot`, which captures the page open beside
+the chat and returns its `page_errors` and `page_text`. A call belongs to the client whose
+turn asked for it, or to the chat app once it has taken a widget's turn over with **Open
+Full Assistant**
+([`resolve_call_client`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L157)).
+When the chat app holds the turn, any other browser tool is answered at once with an error
+that tells FACO to use `browser_take_screenshot` instead
+([chat app](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/useSpaBrowserTools.js#L157),
+[`browser_navigate_to`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_navigate_to.py#L155),
+which never waits for the browser). The chat app never leaves for Desk to run one. Before
+this, it left such a call unanswered, and FACO waited until the call timed out.
+
 ### Frappe CRM, Helpdesk and Insights (8)
 
 These work on sites with the app installed, and always as the user asking, with that
