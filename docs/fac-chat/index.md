@@ -117,6 +117,13 @@ Each user can change this default per tool from their own approval preferences â
 workflow doesn't have to click through a card every time. This gate is specific to
 FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
 
+A `create_document` call with `validate_only` set saves nothing, and its card says so:
+"Checks this record against your rules without saving it. Rules that run before save
+still run." A batch says "these records" instead. The card still appears, because the
+check runs the doctype's validate hooks and any Before Save server script, and those
+can have effects outside the database (an API call, an email, a file) that the rollback
+does not undo.
+
 When the assistant is about to build something that takes several records, such as a page, a workspace or a set of fields and scripts, it can show one **Build plan** card first instead of asking for each write. This needs FAC 3.3 and an up-to-date FAC Cloud that offers build plans; without one you get the per-write cards above. The card lists every change with its action and groups them under **Goes live** and **Stays dormant**, so you see which ones take effect for your users at once. When the build includes a screen, the card shows a static mockup of it. A personal ("Only me") FAC Page needs no plan: the assistant builds and changes it directly,
 and it runs in a [walled-off frame](#how-a-personal-page-runs) that asks you before it changes anything. Press **Approve plan** to approve all of it. To change something, press **Ask for changes** or type what you want in the composer. The assistant then revises the plan and shows a new card.
 
