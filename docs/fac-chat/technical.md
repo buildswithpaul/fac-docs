@@ -204,8 +204,9 @@ Heartbeats prove the connection is alive, not that the turn is moving, so they n
 The approval card compares the stored code with the proposed code on an update. It reads the stored code with `GET frappe_assistant_core.chat.api.current_code.get_current_code?doctype=…&name=…&fields=[…]` ([`get_current_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/current_code.py#L37)).
 
 - The caller needs **read** permission on that record, or the call is refused.
-- Only code-bearing fields are returned: `script`, `condition`, `query`, `html`, `javascript`, `report_script`, `css` and `message`. Other names, fields the doctype does not have, and fields above the caller's permission level are ignored.
+- Only code-bearing fields are returned: `script`, `condition`, `query`, `html`, `javascript`, `report_script`, `css` and `message`; the go-live fields `subject`, `style` and `roles`; and fields that are code on one doctype only, such as a Print Format's `raw_commands` and `format_data`, a Custom Field's display conditions and `options`, and a Property Setter's `value`. Other names, fields the doctype does not have, and fields above the caller's permission level are ignored.
 - The result is `{fieldname: value}`, with an empty string for a field with no value, or `{}` when nothing was requested that qualifies.
+- A child table whose rows hold code can be requested by its fieldname: a Workflow's `transitions`, a Notification's `recipients` and a DocType's `fields`. It comes back as a list of its stored rows, each with the row `name`, the columns that identify the row (`state`, `action`, `next_state`; `receiver_by_document_field`, `receiver_by_role`; `fieldname`, plus `fieldtype` for a DocType field) and its code columns (`condition`; `condition`, `cc`, `bcc`; `depends_on`, `mandatory_depends_on`, `read_only_depends_on`, `options`). Only columns the caller may read on the child doctype are returned, and the table itself must be within the caller's permission levels.
 
 ## Field placement (`get_field_placement`)
 

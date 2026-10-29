@@ -78,8 +78,10 @@ before they land, and nothing changes in your books until you approve or reject 
 When a write carries code, the card shows the code in full, not just a field name. On an
 update it shows a line diff against the stored version. This covers scripts, report and
 print templates (including a raw print's commands and a print designer layout), a
-Workflow transition's condition, a Notification recipient's condition, cc and bcc, and a
-field's `eval:` display condition, which also gets a plain-English reading.
+Workflow transition's condition, a Notification recipient's condition, cc and bcc, a
+field's `eval:` display condition, which also gets a plain-English reading, and an HTML
+field's content, which the form renders as markup. A field counts whether it is a Custom
+Field, a Property Setter or a row of a DocType's own fields.
 
 The card's title says what will happen in your words, built from the call's arguments: "Create
 ToDo “Call Blue Harbor Cafés about the renewal”", "Submit Sales Order SO-0042", "Publish the
@@ -99,7 +101,10 @@ card is built for someone who has to approve it without reading code:
   scrolls, and **Show all N lines** opens the rest. Lines wrap, so nothing is cut off at the
   edge. For a FAC Page, its HTML, script and style all show as code.
 - **Old versus new.** On an update, the card compares the stored code with the new code
-  and shows what changed.
+  and shows what changed. Code in a table row (a transition's condition, a recipient's cc,
+  a DocType field's condition or HTML) is compared with the stored row it replaces, matched
+  by the row's name or, for a table sent whole, by what identifies the row (the move a
+  transition makes, a recipient, a fieldname); a new row shows as all added.
 - **Child tables.** Rows in a table field are shown as a table, not as raw data.
 - **What this changes.** One plain sentence says what the write does, for example "This
   code will run every time someone submits a Sales Invoice".
