@@ -130,7 +130,9 @@ FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
 
 A `create_document` call with `validate_only` set saves nothing, and its card says so:
 "Checks this record against your rules without saving it. Rules that run before save
-still run." A batch says "these records" instead. The card still appears, because the
+still run." A batch says "these records" instead. An `update_document` dry run reads
+"Check changes to ToDo TD-1" and "Checks this change against your rules without saving
+it. Rules that run before save still run." ("these changes" for a batch). The card still appears, because the
 check runs the doctype's validate hooks and any Before Save server script, and those
 can have effects outside the database (an API call, an email, a file) that the rollback
 does not undo.
