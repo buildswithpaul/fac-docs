@@ -34,13 +34,13 @@ Each plugin has an individual configuration record:
 | **Visualization** | Optional | Dashboards and charts | 3 |
 | **Custom Tools** | Always Enabled | Discovers tools registered by other apps via the `assistant_tools` hook | — |
 
-38 tools ship in total across these plugins. See [Tool Reference](../api/tool-reference) for the full per-tool list.
+41 tools ship in total across these plugins. See [Tool Reference](../api/tool-reference) for the full per-tool list.
 
 ### 3. Plugin Architecture
 
 ```
 plugins/
-├── core/                  # Always enabled — 16 tools
+├── core/                  # Always enabled — 19 tools
 │   ├── plugin.py
 │   └── tools/             # create_document.py, get_document.py, run_workflow.py, ...
 ├── data_science/          # Optional — 3 tools

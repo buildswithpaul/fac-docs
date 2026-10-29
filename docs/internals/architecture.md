@@ -30,8 +30,8 @@ graph TB
         end
 
         subgraph "Plugin System"
-            subgraph "Core Plugin - Always Enabled (16 tools)"
-                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search (search_documents, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)<br/>Email (send_email)"]
+            subgraph "Core Plugin - Always Enabled (19 tools)"
+                CoreTools["Document tools (create, get, update, submit, delete, list)<br/>Search (search_documents, chatgpt_search, chatgpt_fetch)<br/>Metadata (get_doctype_info)<br/>Reports (report_list, report_requirements, generate_report)<br/>Workflow (run_workflow, get_pending_approvals)<br/>Email (send_email)<br/>Builder checks (test_as_user, sandbox_reference, recent_errors)"]
             end
 
             subgraph "Data Science Plugin - Optional (3 tools)"
@@ -618,7 +618,7 @@ Layer 6: Audit Trail & Monitoring
 
 **1. Role-Based Access Control**
 
-FAC ships 38 built-in tools across 5 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
+FAC ships 41 built-in tools across 5 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
 
 - **System Manager**: All tools, including privileged ones like `run_python_code` and `run_database_query`
 - **Assistant Admin**: Read/write tools across all enabled plugins; privileged tools by configuration

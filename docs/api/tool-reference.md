@@ -1,10 +1,10 @@
 # Tool Reference
 
-Frappe Assistant Core ships **38 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
+Frappe Assistant Core ships **41 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
 
 | Plugin | Tools | Description |
 |---|---|---|
-| `core` | 16 | Always enabled. Document CRUD, search, metadata, reports, workflow, email. |
+| `core` | 19 | Always enabled. Document CRUD, search, metadata, reports, workflow, email, builder checks. |
 | `data_science` | 3 | Optional. Python execution, SQL queries, file content extraction. |
 | `faco` | 16 | Optional, **FAC Cloud only**. Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. These act inside FAC Chat, so they are not offered to other MCP clients. |
 | `visualization` | 3 | Optional. Dashboards and charts. |
@@ -12,7 +12,7 @@ Frappe Assistant Core ships **38 built-in tools across 5 plugins**. All tools ar
 
 To toggle plugins, see [Plugin Management](../guides/plugin-management). To control which tools each role can call, see [Tool Management](../guides/tool-management).
 
-## Core plugin (16 tools)
+## Core plugin (19 tools)
 
 Always enabled. Provides essential Frappe operations.
 
@@ -20,12 +20,29 @@ Always enabled. Provides essential Frappe operations.
 
 | Tool | Purpose |
 |---|---|
-| `create_document` | Create a new Frappe document |
+| `create_document` | Create a new Frappe document, or several with `records` (see [Many records in one call](#many-records-in-one-call)) |
 | `get_document` | Fetch a single document by name |
-| `update_document` | Update document fields (supports patch and replace modes for child tables) |
+| `update_document` | Update document fields (supports patch and replace modes for child tables), or several documents with `names` or `records` |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
-| `delete_document` | Delete a document (`force=true` to ignore links) |
+| `delete_document` | Delete a document (`force=true` to ignore links), or several with `names` |
 | `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page. `group_by` with `aggregate` returns database-computed totals per group instead (see [Answering business questions](#answering-business-questions)) |
+
+#### Many records in one call
+
+`create_document`, `update_document` and `delete_document` each take a list, so bulk work is one call instead of one per record:
+
+| Tool | One record | Many records |
+|---|---|---|
+| `create_document` | `data` | `records`: a list of field dicts |
+| `update_document` | `name` + `data` | `names` + `data` (the same change to each), or `records`: `[{"name": ..., "data": {...}}]` |
+| `delete_document` | `name` | `names` |
+
+- Each record goes through the tool's single-record path, so it gets the same permission, restricted-field, child-table and server-script checks as a call for that record alone ([`run_batch`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/batch.py#L99)).
+- `mode: "all_or_nothing"` (the default) saves nothing if any record fails; `failed_record` names the record and its error. `mode: "continue"` saves the records that pass and returns each record's outcome in `results`, with `succeeded` and `failed` counts.
+- A record that commits partway, which ends the batch's savepoint, cannot be undone with the rest. The result then has `all_undone: false` and lists the records saved before it.
+- `create_document` with `records` and `validate_only: true` checks every record, saves nothing, and reports every failing record, not only the first.
+- A call holds at most 100 records ([`MAX_BATCH_SIZE`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/batch.py#L35)). Customisation DocTypes are refused in a batch, so each customisation is still previewed and approved on its own.
+- In FAC Chat, the approval card states how many records the call creates, changes or deletes.
 
 #### Permissions and error messages
 
@@ -44,28 +61,29 @@ Always enabled. Provides essential Frappe operations.
 
 Over MCP, this tool result is nested under the `result` key in the response, and the top-level `error_type` is `ToolReportedError`.
 
-- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L66)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
+- **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L67)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
 - **Plain-language refusals.** A refused write to a protected customisation DocType returns `error_type: "permission_error"` with a message that says what is missing. Changing a Server Script needs a System Manager who also holds the Script Manager role. A Query or Script Report needs the Script Manager role too.
 
 #### Customisation results
 
-Customisation records change how a site behaves: Server Script, Client Script, Custom Field, Property Setter, Workflow (and its State and Action Master), Custom DocPerm, DocType, Role, Report, Print Format and Notification. A successful `create_document` or `update_document` on any record adds `url`, a link to the saved record in Desk. For these DocTypes it also adds:
+Customisation records change how a site behaves: Server Script, Client Script, Custom Field, Property Setter, Workflow (and its State and Action Master), Custom DocPerm, DocType, Role, Report, Print Format, Notification and FAC Page. A successful `create_document` or `update_document` on any record adds `url`, a link to the saved record in Desk. For these DocTypes it also adds:
 
 | Key | When | Meaning |
 |---|---|---|
 | `applies_to` | Custom Field, Property Setter, Client Script, Server Script, Print Format, Notification | `{doctype, url}`: the form the customisation changes, and a link to a new document of that type, where the change shows |
 | `location` | Custom Field | `{tab, section, collapsed, first_tab}`: where the field shows on its form, read after the save. `collapsed` is true when its section starts folded, and `first_tab` is false when it sits on a later tab |
 | `placement_warning` | Custom Field | A plain sentence, present only when the field lands in a collapsed section or off the first tab, for example "Will appear on the Details tab, in the Extra section (collapsed, hidden until someone opens it). People may not notice it: the section is collapsed." |
+| `page_url` | FAC Page | The <code v-pre>/app/fac-pages/&lt;name&gt;</code> link where the page opens (a personal page's name is its slug plus an owner tag). `url` stays the link to its form |
 | `warning` | Report | Present when a non-standard Script Report is saved while server scripts are switched off: the report is saved, but it shows an error when someone runs it |
 
-([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L151))
+([`customisation_result`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L362))
 
 #### Server scripts switched off
 
 Frappe runs Server Scripts only when the site's server-scripts setting is on, and switching it on needs access to the server (on Frappe Cloud, a private bench). While it is off:
 
 - `get_doctype_info` for `Server Script` or `Report` returns `server_scripts_enabled` (`true` or `false`) so the assistant can check before it plans ([`get_doctype_info`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/metadata_tools.py#L213)).
-- `create_document` or `update_document` refuses an **active** Server Script with `error_type: "server_scripts_disabled"`, because a DocType Event script would stop its document type from saving. Saving the script with `disabled` set to 1 is allowed, and it does nothing until scripts are switched on ([`server_script_guard`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L91)).
+- `create_document` or `update_document` refuses an **active** Server Script with `error_type: "server_scripts_disabled"`, because a DocType Event script would stop its document type from saving. Saving the script with `disabled` set to 1 is allowed, and it does nothing until scripts are switched on ([`server_script_guard`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L106)).
 - `update_document` never renames a record. A rename sent as `new_name`, `rename`, or a `data.name` that differs from the record is skipped, the other changes are saved, and the result carries a `warning` pointing to Rename in Desk. An update that holds only a rename returns `error_type: "rename_not_supported"`. The skills therefore name records by what they do ("Discount limit on Sales Invoice submit"), never by a value that may change, so changing a value needs no rename.
 - **ToDo.** Frappe decides who may create a ToDo. Before v16.32.0 / v15.119.0, a user without a role that grants ToDo access beyond the automatic roles (on a stock site, System Manager) could create only a ToDo that names them, as `allocated_to` or `assigned_by`. From those releases the ToDo's owner is also accepted, and the creator owns it, so a user may create any ToDo. On the older releases, `create_document` allocates a ToDo that names nobody to the calling user instead of failing; on the newer ones it changes nothing. Administrator and System Managers are unaffected: their ToDo stays unallocated. On the older releases a ToDo allocated to someone else is still refused, and `error` says why. If the ToDo also names a `reference_type` and `reference_name`, allocating it to you also assigns that document to you, exactly as Assign to me does in the Desk: you are added to the document's assignments and an Assigned comment is posted on its timeline.
 
@@ -152,6 +170,18 @@ Passing `topic` (for example `"bookings"`) instead of `doctype` returns up to ei
 | Tool | Purpose |
 |---|---|
 | `send_email` | Queue an email via the site's Email Account |
+
+### Builder checks (3)
+
+Read-only tools the assistant uses while it builds a customisation, so it does not learn the Server Script sandbox by trial and error. They save nothing, run no code and never switch user. Only System Managers can call them, and they are classified read-only, so FAC Chat shows no approval card for them.
+
+| Tool | Purpose |
+|---|---|
+| `test_as_user` | Check what another user is allowed to do: up to 20 checks of a permission type (`read`, `write`, `create`, `delete`, `submit`, `cancel` and so on) on a DocType or one record. Frappe's own rules decide, for that user: role permissions, User Permissions, ownership, shares and `has_permission` hooks. Each check returns `allowed`, `refused` or `error` with a fixed reason, plus `roles_that_allow`, the roles that grant it. The result never carries the record's content ([`TestAsUser`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/test_as_user.py#L131)) |
+| `sandbox_reference` | List the names a Server Script can use on this site, built from Frappe's own sandbox, optionally filtered by a prefix such as `frappe.db`. Names unavailable in DocType Event scripts (`commit`, `rollback`, `add_index`) are listed under `not_in_doctype_event`, and `rules` lists the limits that are not names, such as SELECT-only `frappe.db.sql` ([`SandboxReference`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/sandbox_reference.py#L95)) |
+| `recent_errors` | Read recent Error Log entries and failed scheduled jobs, newest first, optionally filtered by text such as a script name. Error text can include request data, so treat it as private ([`RecentErrors`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/recent_errors.py#L47)) |
+
+A permission hook that reads `frappe.session.user` instead of its `user` argument answers `test_as_user` for the caller, not the user being checked. Administrator is always allowed.
 
 ## Data Science plugin (3 tools)
 
@@ -260,8 +290,8 @@ empty. Markup is stripped from both sources, because Frappe and ERPNext messages
 
 | Tool | Denial handler |
 |---|---|
-| `create_document` | [create_document.py:355](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L355) |
-| `update_document` | [update_document.py:395](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L395) |
+| `create_document` | [create_document.py:491](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L491) |
+| `update_document` | [update_document.py:527](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L527) |
 | `document_action` (submit) | [document_action.py:241](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L241) |
 | `document_action` (cancel) | [document_action.py:352](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L352) |
 | `document_action` (amend) | [document_action.py:524](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L524) |
@@ -269,7 +299,7 @@ empty. Markup is stripped from both sources, because Frappe and ERPNext messages
 | `create_dashboard_chart` | [create_dashboard_chart.py:206](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/visualization/tools/create_dashboard_chart.py#L206) |
 
 `delete_document` keeps its own result shape (`permission_error: true`) but reports the same
-recovered reason ([delete_document.py:136](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/delete_document.py#L136)).
+recovered reason ([delete_document.py:170](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/delete_document.py#L170)).
 Any tool that does not catch the exception itself falls through to `BaseTool._safe_execute`
 ([base_tool.py:288](../../../apps/frappe_assistant_core/frappe_assistant_core/core/base_tool.py#L288)), which applies the same recovery.
 
