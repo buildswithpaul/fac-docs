@@ -75,6 +75,12 @@ human-in-the-loop step on top of that: by default, `create_document`, `update_do
 `delete_document`, and `document_action` calls pause and show you an approval card
 before they land, and nothing changes in your books until you approve or reject it.
 
+When a write carries code, the card shows the code in full, not just a field name. On an
+update it shows a line diff against the stored version. This covers scripts, report and
+print templates (including a raw print's commands and a print designer layout), a
+Workflow transition's condition, a Notification recipient's condition, cc and bcc, and a
+field's `eval:` display condition, which also gets a plain-English reading.
+
 The card's title says what will happen in your words, built from the call's arguments: "Create
 ToDo “Call Blue Harbor Cafés about the renewal”", "Submit Sales Order SO-0042", "Publish the
 work-planner page" or "Switch on the Work Plan Rules script". Fields show by their labels, a
