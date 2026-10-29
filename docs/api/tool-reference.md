@@ -233,13 +233,29 @@ app (`/copilot`) runs only `browser_take_screenshot`, which captures the page op
 the chat and returns its `page_errors` and `page_text`. A call belongs to the client whose
 turn asked for it, or to the chat app once it has taken a widget's turn over with **Open
 Full Assistant**
-([`resolve_call_client`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L157)).
+([`resolve_call_client`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L158)).
 When the chat app holds the turn, any other browser tool is answered at once with an error
 that tells FACO to use `browser_take_screenshot` instead
 ([chat app](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/useSpaBrowserTools.js#L157),
 [`browser_navigate_to`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_navigate_to.py#L155),
 which never waits for the browser). The chat app never leaves for Desk to run one. Before
 this, it left such a call unanswered, and FACO waited until the call timed out.
+
+**A call in flight when the user opens the full assistant.** **Open Full Assistant** moves
+the Desk tab to the chat app, so the widget, and any approval card it was showing, is gone.
+When the chat app takes the turn over, the server goes through every widget call it is
+still waiting on
+([`_hand_over_widget_calls`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L213)):
+
+| The call when the user opens the full assistant | What happens |
+|---|---|
+| Not yet taken by the widget | Queued again for the chat app, which answers it as its own |
+| Taken by the widget (card open, running, or picked up while the page loaded) | Answered at once with an error that says the user moved to the full chat app. For a screenshot it tells FACO to ask again, and the chat app then asks the user; any other tool gets the Desk-only error above |
+| Already answered | Left alone, and never asked about again in the chat app |
+
+So FACO is never left waiting on a widget that has gone. Before this, a call the widget had
+already taken waited up to two minutes and ended with "The user did not respond to the
+approval prompt in time".
 
 ### Frappe CRM, Helpdesk and Insights (8)
 
