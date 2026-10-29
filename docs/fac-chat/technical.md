@@ -201,12 +201,20 @@ Heartbeats prove the connection is alive, not that the turn is moving, so they n
 
 ## Reading the stored code (`get_current_code`)
 
-The approval card compares the stored code with the proposed code on an update. It reads the stored code with `GET frappe_assistant_core.chat.api.current_code.get_current_code?doctype=…&name=…&fields=[…]` ([`get_current_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/current_code.py#L37)).
+The approval card compares the stored code with the proposed code on an update. It reads the stored code with `GET frappe_assistant_core.chat.api.current_code.get_current_code?doctype=…&name=…&fields=[…]` ([`get_current_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/current_code.py#L131)).
 
 - The caller needs **read** permission on that record, or the call is refused.
 - Only code-bearing fields are returned: `script`, `condition`, `query`, `html`, `javascript`, `report_script`, `css` and `message`; the go-live fields `subject`, `style` and `roles`; and fields that are code on one doctype only, such as a Print Format's `raw_commands` and `format_data`, a Custom Field's display conditions and `options`, and a Property Setter's `value`. Other names, fields the doctype does not have, and fields above the caller's permission level are ignored.
 - The result is `{fieldname: value}`, with an empty string for a field with no value, or `{}` when nothing was requested that qualifies.
 - A child table whose rows hold code can be requested by its fieldname: a Workflow's `transitions`, a Notification's `recipients` and a DocType's `fields`. It comes back as a list of its stored rows, each with the row `name`, the columns that identify the row (`state`, `action`, `next_state`; `receiver_by_document_field`, `receiver_by_role`; `fieldname`, plus `fieldtype` for a DocType field) and its code columns (`condition`; `condition`, `cc`, `bcc`; `depends_on`, `mandatory_depends_on`, `read_only_depends_on`, `options`). Only columns the caller may read on the child doctype are returned, and the table itself must be within the caller's permission levels.
+
+## Code a write puts live by opening a DocType (`get_code_going_live`)
+
+The approval card of a DocType update that sets `permissions` or `istable`, or of a Custom DocPerm write, lists the code on that DocType which the write would put live. It reads it with `GET frappe_assistant_core.chat.api.doctype_code.get_code_going_live?target=…`, or `?custom_docperm=…` for a Custom DocPerm update that leaves its parent out ([`get_code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/doctype_code.py#L19)).
+
+- The caller needs **read** permission on the DocType, and on the Custom DocPerm when one is named.
+- The result is a list of `{source, name, field, key, code}`: each `eval:` condition and HTML field's options on the DocType's own fields, its Custom Fields and its Property Setters, as the form would run them ([`code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L608)). Entries from a Custom Field or Property Setter are left out when the caller cannot read that kind of record.
+- It is `[]` when the DocType is already reachable by other people, since its code went live, with its card, when it was opened.
 
 ## Field placement (`get_field_placement`)
 

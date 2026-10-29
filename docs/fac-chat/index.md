@@ -90,7 +90,7 @@ check field reads **Yes** or **No**, and a value that is only a date reads as a 
 2026"); anything else, including a date followed by more text, shows exactly as sent. A card
 waiting for you carries a quiet **Waiting for you** mark, **Approve** reads **Approving…** while
 it is sent, and once you decide, the card folds to one line saying what you approved or
-rejected. ([`approvalHeadline`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/approvalHeadline.js#L61), [`displayValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/helpers.js#L212))
+rejected. ([`approvalHeadline`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/approvalHeadline.js#L61), [`displayValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/helpers.js#L254))
 
 When the write changes how the site behaves (a Server Script, Client Script, Custom
 Field, Property Setter, Workflow, Report, Print Format, Notification, FAC Page, and similar), the
@@ -105,6 +105,11 @@ card is built for someone who has to approve it without reading code:
   a DocType field's condition or HTML) is compared with the stored row it replaces, matched
   by the row's name or, for a table sent whole, by what identifies the row (the move a
   transition makes, a recipient, a fieldname); a new row shows as all added.
+- **Code that goes live when a DocType opens.** A custom DocType that only System Managers can
+  open takes Custom Fields and Property Setters without a card. When a write opens it to other
+  people (a permission for another role, or making it a child table), the card lists every
+  `eval:` condition and HTML field on it, each labelled with the Custom Field, Property Setter or
+  field that sets it, and Approve waits until that list has loaded.
 - **Child tables.** Rows in a table field are shown as a table, not as raw data.
 - **What this changes.** One plain sentence says what the write does, for example "This
   code will run every time someone submits a Sales Invoice".
@@ -203,7 +208,7 @@ A page is **personal** ("Only me", the default) or **shared**:
   note when the roles include All or Guest), then shows the HTML, script and style in full. The card appears even when an approved build
   plan lists the page as going live, because the code was written after you approved the plan.
   A page that stays "Only me" never counts as going live.
-  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L313), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L285))
+  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L371), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L343))
 
 ### How a personal page runs
 
