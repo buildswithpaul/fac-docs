@@ -22,10 +22,31 @@ Always enabled. Provides essential Frappe operations.
 |---|---|
 | `create_document` | Create a new Frappe document, or several with `records` (see [Many records in one call](#many-records-in-one-call)) |
 | `get_document` | Fetch a single document by name |
-| `update_document` | Update document fields (supports patch and replace modes for child tables), or several documents with `names` or `records` |
+| `update_document` | Update document fields (supports patch and replace modes for child tables), change part of a long text or code field with `edits` (see [Small edits to long text and code](#small-edits-to-long-text-and-code)), or update several documents with `names` or `records` |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
 | `delete_document` | Delete a document (`force=true` to ignore links), or several with `names` |
 | `list_documents` | Paginated list with filters, fields, and ordering. Pass `offset` to skip rows; when `has_more` is true the response carries `next_offset` for the next page. `group_by` with `aggregate` returns database-computed totals per group instead (see [Answering business questions](#answering-business-questions)) |
+
+#### Small edits to long text and code
+
+`update_document` with `name` and `edits` changes part of a long field, such as a FAC Page's `html`, `script` or `style` or a Server Script's `script`, without sending the whole field again. Each edit is `{"field", "find", "replace"}`:
+
+```json
+{
+  "doctype": "FAC Page",
+  "name": "overdue-invoices-a1b2",
+  "edits": [{"field": "script", "find": "limit: 20", "replace": "limit: 50"}]
+}
+```
+
+- `find` is literal text, not a pattern, and must match the stored text exactly once. Zero or several matches fail.
+- Edits apply in order, so a later edit sees the result of the earlier ones.
+- A field stored with `\r\n` line endings keeps them: a bare newline in `find` and `replace` is read as `\r\n`.
+- Only Small Text, Text, Long Text, Text Editor, Markdown Editor, HTML Editor, Code and JSON fields take edits.
+- `edits` needs `name`: it is refused with `names` or `records`.
+- A field may not appear in both `edits` and `data`; `data` can still change other fields.
+- If an edit cannot be applied, nothing is saved. The result has `error_type: "edit_not_applied"`, the `field` and `match_count`.
+- The edited result goes through the same permission, restricted-field and Server Script checks as any update.
 
 #### Many records in one call
 
@@ -34,7 +55,7 @@ Always enabled. Provides essential Frappe operations.
 | Tool | One record | Many records |
 |---|---|---|
 | `create_document` | `data` | `records`: a list of field dicts |
-| `update_document` | `name` + `data` | `names` + `data` (the same change to each), or `records`: `[{"name": ..., "data": {...}}]` |
+| `update_document` | `name` + `data` (or `edits`) | `names` + `data` (the same change to each), or `records`: `[{"name": ..., "data": {...}}]`. `edits` works with `name` only |
 | `delete_document` | `name` | `names` |
 
 - Each record goes through the tool's single-record path, so it gets the same permission, restricted-field, child-table and server-script checks as a call for that record alone ([`run_batch`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/batch.py#L99)).
@@ -62,7 +83,7 @@ Always enabled. Provides essential Frappe operations.
 Over MCP, this tool result is nested under the `result` key in the response, and the top-level `error_type` is `ToolReportedError`.
 
 - **Dry runs.** `create_document` with `validate_only: true` runs the same create-permission check as a real create, so a dry run does not report success for a document the real create would refuse. A dry run does the preparation Frappe does at insert time before validation: defaults, naming, `before_insert`, link validation and `before_validate`. It then runs the document's own validation. Everything is rolled back, whatever the outcome. Naming-series counters are restored, but an autoincrement id is not reclaimed, so a dry run on an autoincrement DocType uses up one id, as a failed real insert does ([`_prepare_for_insert`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L67)). It does **not** check mandatory fields, so a real create can still fail on a missing value. A dry run refused by validation or permissions is the answer the caller asked for, so it writes no Error Log row.
-- **Update dry runs.** `update_document` with `validate_only: true` (FAC 3.3) checks a change to an existing record without saving it, for example to test a Before Save rule that compares old and new values. The change goes through the same pre-checks and field setting as a real update. Then the steps Frappe's save runs before it writes: the write-permission and permlevel checks, the submitted-record rules (only allow-on-submit fields may change), link validation, `before_validate` and `validate` (`before_update_after_submit` on a submitted record), and the set-only-once check ([`_check_update`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L54)). Everything is rolled back, whatever the outcome, including what those rules wrote. Like the create dry run, it does not run `before_save` and does not check mandatory fields or Select values. A pass returns `validation_passed: true`, and a refusal returns the rule's own message.
+- **Update dry runs.** `update_document` with `validate_only: true` (FAC 3.3) checks a change to an existing record without saving it, for example to test a Before Save rule that compares old and new values. The change goes through the same pre-checks and field setting as a real update. Then the steps Frappe's save runs before it writes: the write-permission and permlevel checks, the submitted-record rules (only allow-on-submit fields may change), link validation, `before_validate` and `validate` (`before_update_after_submit` on a submitted record), and the set-only-once check ([`_check_update`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L55)). Everything is rolled back, whatever the outcome, including what those rules wrote. Like the create dry run, it does not run `before_save` and does not check mandatory fields or Select values. A pass returns `validation_passed: true`, and a refusal returns the rule's own message.
 - **Plain-language refusals.** A refused write to a protected customisation DocType returns `error_type: "permission_error"` with a message that says what is missing. Changing a Server Script needs a System Manager who also holds the Script Manager role. A Query or Script Report needs the Script Manager role too.
 
 #### Customisation results
@@ -321,7 +342,7 @@ empty. Markup is stripped from both sources, because Frappe and ERPNext messages
 | Tool | Denial handler |
 |---|---|
 | `create_document` | [create_document.py:491](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/create_document.py#L491) |
-| `update_document` | [update_document.py:621](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L621) |
+| `update_document` | [update_document.py:681](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/update_document.py#L681) |
 | `document_action` (submit) | [document_action.py:241](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L241) |
 | `document_action` (cancel) | [document_action.py:352](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L352) |
 | `document_action` (amend) | [document_action.py:524](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/core/tools/document_action.py#L524) |
