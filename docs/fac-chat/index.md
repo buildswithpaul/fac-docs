@@ -350,6 +350,24 @@ memory is paused until they answer:
 
 You can change this any time in **Settings → Privacy**.
 
+## What FAC Cloud learns about your site
+
+Once your site is registered, FAC Chat checks in with FAC Cloud every six hours. That check-in
+reports your versions (FAC, Frappe, ERPNext and Python) and, from FAC 3.3.x, a short profile of
+the site so FAC Cloud can spot a setup that will struggle and warn you early:
+
+- **Installed apps** and their versions.
+- **How much you have customised**, as counts: custom DocTypes, the Custom Fields people added
+  (not those apps install), Server Scripts and how many are switched on, whether server scripts
+  run on the site at all, Client Scripts and FAC Pages.
+- **Web-server setup**: gunicorn's worker class, workers and threads, and whether they are enough
+  for the people expected to chat at once, plus whether the chat relay queue and its workers are
+  set up. These are the figures the **Registration health** check in FAC Chat's settings shows you.
+
+It sends counts, version numbers and ok/warning verdicts only: never record contents, record
+names, script code or messages. If any part can't be read, it is left out and the check-in still
+goes through ([`site_profile`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/site_profile.py#L53), [`_send_heartbeat`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/billing/sync.py#L102)).
+
 ## Installing FAC Chat
 
 FAC Chat ships inside the same `frappe_assistant_core` app you already install for the
