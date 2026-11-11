@@ -149,7 +149,7 @@ Before the card appears, FAC checks the plan against your site with the hidden `
 
 An approved plan covers only the changes it lists, until the assistant proposes another plan, the conversation ends or 24 hours pass. A record the assistant creates under the plan can also be edited under it, but never deleted. Anything not on the plan still shows its own card, as does a change listed as dormant that would now go live, and a tool set to **Block** or **Ask** is still blocked or asked. A scheduled or unattended run is never covered by a plan you approved in chat.
 
-When the assistant builds a Server Script, it looks up what the script sandbox allows first (`sandbox_reference`) instead of saving trial scripts to find out. It builds the script switched off, so you get no card while it drafts, and asks once to switch it on. If the script then fails, it reads the error (`recent_errors`) rather than asking you to describe it, and it can check who may read or change the records involved (`test_as_user`). None of these checks change anything, so they need no approval.
+When the assistant builds a Server Script, it looks up what the script sandbox allows first (`sandbox_reference`) instead of saving trial scripts to find out, and a script that would fail in the sandbox is refused before it is saved, with the line to fix. It builds the script switched off, so you get no card while it drafts, and asks once to switch it on. If the script then fails, it reads the error (`recent_errors`) rather than asking you to describe it, and it can check who may read or change the records involved (`test_as_user`). None of these checks change anything, so they need no approval.
 
 While the assistant works, the activity trail names what it did: **Created**, **Updated**
 or **Checked** (a dry run) with the record's name, and a step that failed shows a plain
@@ -208,7 +208,7 @@ A page is **personal** ("Only me", the default) or **shared**:
   note when the roles include All or Guest), then shows the HTML, script and style in full. The card appears even when an approved build
   plan lists the page as going live, because the code was written after you approved the plan.
   A page that stays "Only me" never counts as going live.
-  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L392), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L364))
+  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L427), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L399))
 
 ### How a personal page runs
 
