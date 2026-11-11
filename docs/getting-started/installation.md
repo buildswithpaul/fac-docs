@@ -73,6 +73,36 @@ You should see `frappe_assistant_core` listed.
 4. Check **Assistant Enabled** on the user record
 5. Save
 
+## Web server settings
+
+FAC Chat streams every answer over a web request that stays open until the answer is
+finished. Bench starts gunicorn with synchronous workers by default, so each chat holds a
+whole worker for as long as it streams, and a few people chatting at once can leave the rest
+of the site waiting. Run gunicorn with threaded workers so one worker can carry several chats:
+
+```bash
+gunicorn --worker-class gthread --threads 8 --workers 4 --timeout 120 frappe.app:application
+```
+
+Add the same flags to the gunicorn line in your `Procfile` or supervisor config, then restart
+the web process. A setting of 8 threads on 4 workers gives 32 request slots.
+
+FAC checks this for you. It reads the flags the running gunicorn master was started with and
+wants at least twice as many request slots (`workers x threads`) as people you expect to chat
+at the same time: one slot for the stream, one for that person's other requests. Set that
+number in **FAC Chat Settings → Expected Concurrent Chatters** (default 10).
+
+The check shows up in two places:
+
+- **FAC Chat Settings** shows an orange indicator and the reason when the web server cannot
+  carry the number you set.
+- The **Registration health** card in FAC Chat settings has a **Web server** row after you run
+  diagnostics.
+
+The check cannot judge a server it cannot see. If gunicorn was not started directly (for
+example `bench serve` in development) or its command line is hidden from the app, the check
+reports nothing instead of guessing.
+
 ## Next steps
 
 - [Quick Start](./quick-start) — connect Claude Desktop in 5 minutes
