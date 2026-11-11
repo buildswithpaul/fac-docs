@@ -333,7 +333,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
 - **Open Full Assistant mid-turn.** If you move a conversation from the Desk widget to the full-screen chat
   while the assistant is still working, the chat claims the running turn, and its browser calls (such as the
   page screenshot) go to the chat from then on, including any already waiting. A tool that only works in
-  Desk answers at once that the conversation moved. The claim ends with your next message. ([`claim_live_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L314), [`claim_session_for_spa`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L139))
+  Desk answers at once that the conversation moved. The claim ends with your next message. ([`claim_live_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L348), [`claim_session_for_spa`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L139))
 
 ## Memory asks first
 
@@ -453,12 +453,20 @@ re-enable it later — that personal choice is always respected, admins included
 
 ## Retry and interrupted turns
 
-If the server restarts while an answer is being written, the answer stops partway. FAC Chat
-notices within about a minute: the part already shown stays, and the answer is marked
+If the server restarts while an answer is being written, the answer stops partway. A worker
+that shuts down cleanly marks the answer itself. If the worker is killed instead, an open
+conversation notices within about a minute, and a conversation opened later notices when it
+opens. Either way the part already shown stays, and the answer is marked
 **This answer was interrupted by a server restart.** An answer that failed for another
-reason is marked as failed in the same way.
-([`is_stale`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L88),
-[`mark_turn_interrupted`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L272))
+reason is marked as failed in the same way. An answer still waiting for the assistant's first
+reply is given three minutes before it can be marked, so a slow start is not cut short.
+([`is_stale`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L86),
+[`mark_turn_interrupted`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L301))
+
+If you send a message at the moment a server is restarting, the answer shows
+**Server restarting, retrying…** and FAC Chat sends it once more a couple of seconds later.
+If that fails too, you see **The server is restarting. Try again in a moment.** The same
+applies to Continue and to approving an action.
 
 The latest answer, when it failed or was interrupted, shows a **Retry** button. Retry runs your
 last message again, without sending it a second time:
@@ -469,13 +477,17 @@ last message again, without sending it a second time:
 - Your message and the page it was sent from are sent again with your saved model. Images
   pasted into the message are not stored, so they are not sent again. Files attached to the
   conversation still reach the assistant.
-- An answer that finished is never run again, so a completed request is never charged twice.
-  If the answer had in fact finished, Retry just reloads the conversation.
+- **Tools run again.** Anything the failed attempt already did, such as creating or updating a
+  record, may be done a second time. Actions that need your approval ask again unless you trusted them; others do
+  not. Check the records the failed answer touched before you press Retry.
+- An answer that finished, in words or only in tool results, is never run again, so a
+  completed request is never charged twice. If the answer had in fact finished, or is still
+  running, Retry just reloads the conversation. Pressing Retry in two tabs runs it once.
 - Credits used by the failed attempt are not refunded.
 
 Only the latest message can be retried, and only messages sent after this release: earlier
 ones have no saved starting point.
-([`retry_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L609),
+([`retry_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L611),
 [`snapshot_pre_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_session_state/fac_chat_session_state.py#L119))
 
 ## Troubleshooting
