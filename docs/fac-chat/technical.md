@@ -199,6 +199,17 @@ The relay watches the stream from the assistant. It ends the turn with a `stream
 
 Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L366)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
 
+## When the assistant is busy
+
+The assistant answers HTTP 503 with a `Retry-After` header when it has no room for another turn. SDK 1.14.0 turns that into a `stream_error` coded `AR_BUSY` that carries `retry_after`, before any event that could cost credits. The relay re-opens the stream through [`stream_with_busy_retry`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/busy_retry.py#L52) instead of failing the turn:
+
+- Up to `MAX_BUSY_RETRIES` (3) retries, so four attempts in all. Before each wait it emits `{"event": "stream_status", "status": "busy_retrying", "attempt": n, "retry_after": s}`, and the chat shows "FAC Cloud is busy, retrying…" and restarts its activity timer.
+- Each wait is `retry_after` seconds, capped at `MAX_WAIT_SECONDS` (30), slept in 0.5 s slices. A Stop during the wait ends the turn without re-opening the stream.
+- After the last refusal the turn ends with a `stream_error` coded `AR_BUSY` and the message "FAC Cloud is busy. Try again in a minute."
+- Only an attempt whose first event is the `AR_BUSY` refusal is retried. A stream that has started is never re-opened.
+
+Both relay loops use it: a new message and the resume after an approval.
+
 ## Reading the stored code (`get_current_code`)
 
 The approval card compares the stored code with the proposed code on an update. It reads the stored code with `GET frappe_assistant_core.chat.api.current_code.get_current_code?doctype=…&name=…&fields=[…]` ([`get_current_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/current_code.py#L131)).
