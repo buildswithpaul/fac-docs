@@ -121,7 +121,7 @@ reports nothing instead of guessing.
 
 By default the web worker that takes a chat message also carries the answer from FAC Cloud, in
 a relay thread. A web deploy or restart then cuts the answers that are being written. With
-**Relay in a Background Job** on, the relay runs in a separate worker process instead, so a
+**Relay Chat Answers in a Background Job** on, the relay runs in a separate worker process instead, so a
 web deploy no longer interrupts answers. It is off by default and needs relay workers (below).
 
 **Turn it on** in FAC Admin → Settings → Chat & Widget → **Relay Chat Answers in a Background Job**,
