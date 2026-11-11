@@ -210,6 +210,21 @@ The assistant answers HTTP 503 with a `Retry-After` header when it has no room f
 
 Both relay loops use it: a new message and the resume after an approval.
 
+## When FAC Cloud is slow or unreachable
+
+The short, non-streaming calls (credit status, notifications, the model list, the membership check) wait at most 3 seconds and share one circuit breaker ([`ar_breaker`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/ar_breaker.py#L16)). Chat streams never use it.
+
+- **The breaker.** Three consecutive timeouts or connection failures open it for 60 seconds, during which these calls skip FAC Cloud. When the 60 seconds lapse, the next call is the probe: a success closes it, a failure reopens it. A 4xx answer is not a transport failure and never counts. Opening and closing each write one log line to `faco.ar_breaker`; a timeout writes no Error Log row.
+- **Credit status.** [`get_my_credit_status`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/users.py#L423) serves a per-user copy for 45 seconds. When FAC Cloud cannot answer, it returns the last figure with `stale: true`, or `unavailable: true` if there is none. The credit meter shows "May be out of date" next to a stale figure and nothing for `unavailable`. A turn that completes ends the copy's freshness but keeps its value for stale serving.
+- **Model list.** [`_model_list`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L86) is one copy per site: trusted for 300 seconds, and an outage is remembered for 30 seconds, during which the last good list is served with `stale: true`.
+- **Membership.** The status (`Active`, `Pending`, `none`, `unknown`) is cached per user. The last definite answer is kept for 24 hours, so a user FAC Cloud has already refused stays refused while it is unreachable. Only a user it has never answered for gets in on a short 5-second guess.
+
+## Users without a seat
+
+[`has_seat`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/access.py#L87) is true only for an `Active` member. For anyone else (`Pending` or none), credit status answers `{"no_seat": true}` and notifications answer `{"notifications": [], "no_seat": true}` before any call to FAC Cloud, and a 404 from the credit-status call reads the same way. A `Pending` user can still chat; they only have no personal figure to show.
+
+The chat and the Desk widget ask for credit status and notifications only once the access check reports ready, and the notification poll stops on `no_seat`.
+
 ## Reading the stored code (`get_current_code`)
 
 The approval card compares the stored code with the proposed code on an update. It reads the stored code with `GET frappe_assistant_core.chat.api.current_code.get_current_code?doctype=…&name=…&fields=[…]` ([`get_current_code`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/current_code.py#L131)).
