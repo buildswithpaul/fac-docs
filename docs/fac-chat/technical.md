@@ -120,13 +120,13 @@ it up on mobile) is done with short-lived handoff keys in the tab's `sessionStor
   across page loads.
 
 The widget header's **New chat** button
-([WidgetPanel.vue:245](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L245))
+([WidgetPanel.vue:6](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L6))
 asks the server for a new `session_id` through `chatStore.createSession()`, the call the
 SPA's own **New chat** uses, then reloads the session list so the welcome screen offers
 the conversation just left. The widget's watch on the current session writes the new id
 to `faco_widget_persistent_session`, so it survives a reload. The button is disabled
 while the chat is empty, while a reply streams, and while an approved card resumes
-([WidgetPanel.vue:239](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L239)).
+([WidgetPanel.vue:276](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L276)).
 
 Because all three surfaces share the same `session_id` namespace, messages and
 history stay consistent no matter where you continue the conversation.
@@ -172,14 +172,14 @@ The model a user picks is saved on the server, so it follows them to another bro
 
 - **Storage.** The choice lives in the hidden `selected_model` field of **FAC Chat User Preferences**: `auto`, a model id, or empty for none. The browser's local storage is only a cache. A browser that holds a choice the server has never seen uploads it once.
 - **Reading it.** `GET frappe_assistant_core.chat.api.models.get_available_models` returns `selected_model` beside the model list, empty when the user has not chosen. It reads empty on a site that has not been migrated.
-- **Saving it.** `POST frappe_assistant_core.chat.api.models.set_selected_model` with `model_id` saves the choice for the session user, and returns `{success, selected_model}`. An empty `model_id` clears it, and an id over 140 characters is refused ([`set_selected_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L193)). The picker saves in the background and a failed save is retried on the next change or load.
-- **A turn that names no model.** When a client sends no model for a turn (the Desk widget's first turn in a fresh browser, or the Raven bot), FAC runs it on the saved model if the user can still use it, and otherwise on the default. An explicit `auto` or an explicit model id is always honoured ([`_effective_model_id`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L114), [`usable_saved_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L67)).
+- **Saving it.** `POST frappe_assistant_core.chat.api.models.set_selected_model` with `model_id` saves the choice for the session user, and returns `{success, selected_model}`. An empty `model_id` clears it, and an id over 140 characters is refused ([`set_selected_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L238)). The picker saves in the background and a failed save is retried on the next change or load.
+- **A turn that names no model.** When a client sends no model for a turn (the Desk widget's first turn in a fresh browser, or the Raven bot), FAC runs it on the saved model if the user can still use it, and otherwise on the default. An explicit `auto` or an explicit model id is always honoured ([`_effective_model_id`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L186), [`usable_saved_model`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/models.py#L68)).
 - **The widget.** It keeps the choice in memory only and never writes the server value back.
 - **A choice that is no longer usable** (the model left the list, or auto mode is off) is dropped locally for that browser. The server value is left alone, so a short gap in the model list does not wipe every browser's choice.
 
 ## Routing notice
 
-When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L257)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
+When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L354)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
 
 | `reason` | Line shown |
 |---|---|
@@ -197,7 +197,7 @@ The relay watches the stream from the assistant. It ends the turn with a `stream
 - no non-heartbeat event has arrived for `RELAY_NO_PROGRESS_SECONDS` (420 s), or
 - the turn has run for `RELAY_MAX_TURN_SECONDS` (1800 s).
 
-Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L366)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
+Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L466)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
 
 ## When the assistant is busy
 
@@ -221,7 +221,7 @@ The short, non-streaming calls (credit status, notifications, the model list, th
 
 ## Users without a seat
 
-[`has_seat`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/access.py#L87) is true only for an `Active` member. For anyone else (`Pending` or none), credit status answers `{"no_seat": true}` and notifications answer `{"notifications": [], "no_seat": true}` before any call to FAC Cloud, and a 404 from the credit-status call reads the same way. A `Pending` user can still chat; they only have no personal figure to show.
+[`has_seat`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/access.py#L88) is true only for an `Active` member. For anyone else (`Pending` or none), credit status answers `{"no_seat": true}` and notifications answer `{"notifications": [], "no_seat": true}` before any call to FAC Cloud, and a 404 from the credit-status call reads the same way. A `Pending` user can still chat; they only have no personal figure to show.
 
 The chat and the Desk widget ask for credit status and notifications only once the access check reports ready, and the notification poll stops on `no_seat`.
 
@@ -239,12 +239,12 @@ The approval card compares the stored code with the proposed code on an update. 
 The approval card of a DocType update that sets `permissions` or `istable`, of a Property Setter on a DocType's `istable`, `issingle` or `is_virtual`, or of a Custom DocPerm write, lists the code on that DocType which the write would put live. It reads it with `GET frappe_assistant_core.chat.api.doctype_code.get_code_going_live?target=…`, or `?custom_docperm=…` for a Custom DocPerm update that leaves its parent out ([`get_code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/doctype_code.py#L19)).
 
 - The caller needs **read** permission on the DocType, and on the Custom DocPerm when one is named.
-- The result is a list of `{source, name, field, key, code}`: each `eval:` condition and HTML field's options on the DocType's own fields, its Custom Fields and its Property Setters, as the form would run them ([`code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L629)). Entries from a Custom Field or Property Setter are left out when the caller cannot read that kind of record.
+- The result is a list of `{source, name, field, key, code}`: each `eval:` condition and HTML field's options on the DocType's own fields, its Custom Fields and its Property Setters, as the form would run them ([`code_going_live`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L630)). Entries from a Custom Field or Property Setter are left out when the caller cannot read that kind of record.
 - It is `[]` when the DocType is already reachable by other people, since its code went live, with its card, when it was opened.
 
 ## Field placement (`get_field_placement`)
 
-The approval card shows where a new Custom Field will appear before anything is saved. It asks `GET frappe_assistant_core.chat.api.field_placement.get_field_placement?doctype=…&insert_after=…&fieldtype=…` ([`get_field_placement`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/field_placement.py#L37)).
+The approval card shows where a new Custom Field will appear before anything is saved. It asks `GET frappe_assistant_core.chat.api.field_placement.get_field_placement?doctype=…&insert_after=…&fieldtype=…` ([`get_field_placement`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/field_placement.py#L38)).
 
 - The caller needs **read** permission on the doctype. A child table is allowed when the caller can read a parent that embeds it.
 - The result is `{tab, section, collapsed, first_tab, sentence, warning}`, or `{}` when the location cannot be predicted. `sentence` is the plain description, and `warning` is true when the field would be collapsed or not on the first tab, which the card shows in a warning style. Nothing is written.
