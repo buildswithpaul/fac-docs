@@ -460,8 +460,13 @@ opens. Either way the part already shown stays, and the answer is marked
 **This answer was interrupted by a server restart.** An answer that failed for another
 reason is marked as failed in the same way. An answer still waiting for the assistant's first
 reply is given three minutes before it can be marked, so a slow start is not cut short.
-([`is_stale`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L86),
-[`mark_turn_interrupted`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L301))
+([`is_stale`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L97),
+[`mark_turn_interrupted`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L332))
+
+When the site runs chat answers in background jobs, a web deploy no longer cuts an answer. A
+deploy that stops the relay workers can still interrupt one: the answer is saved as
+**This answer was interrupted before it finished. Retry to run it again.** See
+[Chat relay workers](../getting-started/installation#chat-relay-workers).
 
 If you send a message at the moment a server is restarting, the answer shows
 **Server restarting, retrying…** and FAC Chat sends it once more a couple of seconds later.

@@ -117,6 +117,70 @@ The check cannot judge a server it cannot see. If gunicorn was not started direc
 example `bench serve` in development) or its command line is hidden from the app, the check
 reports nothing instead of guessing.
 
+## Chat relay workers
+
+By default the web worker that takes a chat message also carries the answer from FAC Cloud, in
+a relay thread. A web deploy or restart then cuts the answers that are being written. With
+**Relay in a Background Job** on, the relay runs in a separate worker process instead, so a
+web deploy no longer interrupts answers. It is off by default and needs relay workers (below).
+
+**Turn it on** in FAC Admin → Settings → Chat & Widget → **Relay Chat Answers in a Background Job**,
+or in the Desk **FAC Chat Settings** form. The setting is read for each new message, so changing
+it never moves an answer that is already running or queued.
+
+**Bench.** Declare the queue in `sites/common_site_config.json`, then run `bench setup supervisor`
+(production) or `bench setup procfile` (development) and restart. Restart the web workers too, so
+they read the new queue list. The timeout of 2100 seconds covers the longest answer (1800
+seconds) plus time for busy retries and saving. Bench uses it as supervisor's stop wait.
+
+```json
+"workers": {"faco_relay": {"timeout": 2100, "background_workers": 10}}
+```
+
+**Never share the queue.** A relay worker listens on `faco_relay` only. A worker that also served
+`long` would make answers wait behind reports and imports, and starve them in turn.
+
+**Docker.** Add a service like this, and set the same `workers` entry with
+`bench set-config -g workers '{"faco_relay": {"timeout": 2100}}' --parse`:
+
+```yaml
+queue-faco-relay:
+  image: <same image as the other queue services>
+  command: bench worker --queue faco_relay
+  deploy: { replicas: 10 }
+  stop_grace_period: 330s
+```
+
+**Sizing.** One relay worker carries one chat at a time, so run as many workers as **Expected
+Concurrent Chatters**. Each worker is a full Frappe process, so budget its memory like any
+background worker. The web workers' request slots (see [Web server settings](#web-server-settings))
+still matter: FAC Cloud's tool callbacks and page loads still reach them.
+
+**Without workers.** Chat keeps working and relays in the web workers, and the server-setup check
+warns. If the dispatch decision itself fails (for example new code is served before
+`bench migrate` has added the setting), the answer also relays in the web worker. Users with
+GDPR restricted processing always relay in the web worker, so their answers never enter the
+queue. An answer that waits in the queue for more than 3 minutes, or whose worker dies, is shown
+as interrupted with **Retry**.
+
+**Deploys.** A relay worker that is told to stop lets a running answer finish for up to
+`faco_relay_job_shutdown_grace` seconds (default 300, set in site config), then saves it as
+interrupted. A worker that has been told to stop no longer counts as available, so new chats
+relay in the web workers while the relay workers restart. A chat already queued behind such a
+worker is shown as interrupted with **Retry** after about 10 seconds.
+
+**Server-setup check.** With the setting on, **FAC Chat Settings** and the **Registration health**
+card warn when the queue is not declared, no worker listens on it, or there are fewer relay
+workers than **Expected Concurrent Chatters**.
+
+### Data in the queue
+
+A queued relay job holds the user's message, attachments and page context in the queue's Redis.
+A job that finishes is removed at once. A job that fails keeps a failed record with the turn's
+content stripped. A worker that is hard-killed (SIGKILL or out of memory) runs no callback, so
+its job keeps its content in Redis for Frappe's failed-job TTL, 7 days. Set
+`rq_job_failure_ttl` in site config to shorten it.
+
 ## Next steps
 
 - [Quick Start](./quick-start) — connect Claude Desktop in 5 minutes

@@ -109,7 +109,7 @@ Every FAC setting in one place, grouped by what it controls. Pick a group on the
 
 | Group | What it holds |
 |-------|---------------|
-| **Chat & Widget** | Context size, page-content sharing, browser diagnostics, and chat message retention |
+| **Chat & Widget** | Context size, page-content sharing, browser diagnostics, chat message retention, and **Relay Chat Answers in a Background Job** (see [Chat relay workers](/getting-started/installation#chat-relay-workers)) |
 | **Other Frappe apps** | Which standalone Frappe apps (Helpdesk, Insights, CRM…) show the FACO widget, and **FAC Bot in Raven**. See [Use the widget in other Frappe apps](/fac-chat/other-apps) |
 | **MCP Server** | The MCP and OAuth discovery URLs, the server name and protocol, and how skills are offered |
 | **OAuth** | Dynamic client registration, allowed public client origins, and discovery metadata. Frappe v15 only: on v16, FAC reads OAuth from Frappe's own **OAuth Settings**, so the group is not shown |

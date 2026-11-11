@@ -210,6 +210,48 @@ The assistant answers HTTP 503 with a `Retry-After` header when it has no room f
 
 Both relay loops use it: a new message and the resume after an approval.
 
+## Relay in a background job
+
+With **Relay Chat Answers in a Background Job** on, the relay of a turn runs as an RQ job on the
+dedicated `faco_relay` queue instead of in the web worker's pool. For operators, see
+[Chat relay workers](../getting-started/installation#chat-relay-workers).
+
+- **Deciding.** `_relay_in_job` ([`_relay_in_job`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L117)) answers once per turn, before
+  the draining check. A turn runs as a job only when the setting is on, the queue is declared in
+  `workers`, and the cached probe sees at least one relay worker that has not been asked to stop
+  ([`use_job_relay`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L105), [`_probe_workers`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L56)).
+  The probe result is cached per process for 15 s, and 30 s after a failed probe, which reads as no workers.
+- **Fallback, not refusal.** Any failure to decide, or to enqueue, relays the turn in the web
+  worker's pool and clears the job-marked live entry ([`_start_relay`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L148)). Busy but present workers do not trigger the fallback: the job waits its turn.
+  Raven turns always relay in-process (`start_turn(in_process=True)`), because their turn observers are process-local and the Raven bot already runs in an RQ job.
+  Users under a processing restriction never run as a job, so their content is never in the queue's Redis.
+- **Job id.** `faco_relay|<turn>`, enqueued with `deduplicate=True`
+  ([`enqueue_relay`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L113), [`relay_job_id`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L109)). The newer live entry
+  supersedes an older one, and the older job returns without calling FAC Cloud (`holds()` is false),
+  so no queued job is cancelled by hand.
+- **Timeout.** 2100 s, passed on every enqueue, so it does not depend on the operator's
+  `workers.faco_relay.timeout` ([`RELAY_JOB_TIMEOUT_SECONDS`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L24)): `RELAY_MAX_TURN_SECONDS` (1800) plus 300 for busy retries, saving and margin.
+  The relay runs in the job's main thread ([`run`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_job.py#L13)), so RQ's timeout lands inside the relay's own
+  error handling. That handler saves the partial answer as errored, and the job ends as finished,
+  not failed.
+- **Job state and staleness.** An entry for a job turn is also stale once its job is gone, failed
+  or finished while the entry lives, or queued with no live worker, but only once the entry is 10 s old
+  ([`is_stale`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L97), [`relay_job_lost`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L159)).
+  A starting entry still waits up to 180 s. A failure reading RQ never makes a turn stale. A stale job turn is ended by
+  [`mark_turn_interrupted`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L332) with the copy "This answer was interrupted before it finished. Retry to run it again."
+  An interrupted turn refreshes the user's cached credit balance.
+- **Data in the queue.** The job's kwargs hold the message, attachments and context. A success
+  callback sets `result_ttl` to 0 so RQ deletes the job, and a failure callback keeps the failed
+  record with the content stripped ([`relay_job_succeeded`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L146), [`relay_job_failed`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_dispatch.py#L151)). A
+  hard-killed worker runs no callback, so its job keeps its content for Frappe's failed-job TTL.
+- **Draining.** A relay worker has no signal when it is told to stop, so the job polls the
+  worker's `shutdown_requested_date` in Redis every 5 s ([`watch_rq_worker`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_shutdown.py#L137)). Once it is set, the turn
+  has `faco_relay_job_shutdown_grace` seconds (300 by default, less a 12 s margin) before
+  `should_give_up()` makes it save as interrupted ([`should_give_up`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay_shutdown.py#L68)). Nothing is re-queued: FAC Cloud stops a turn when its stream drops,
+  so Retry is the honest path. A "FAC Cloud is busy" wait stops once the grace is over, too, and saves the turn as interrupted.
+- **Check.** `relay_report` compares live and busy relay workers with **Expected Concurrent
+  Chatters** and reports the queue length ([`relay_report`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/server_setup.py#L169)). It counts only workers not asked to stop.
+
 ## When FAC Cloud is slow or unreachable
 
 The short, non-streaming calls (credit status, notifications, the model list, the membership check) wait at most 3 seconds and share one circuit breaker ([`ar_breaker`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/ar_breaker.py#L16)). Chat streams never use it.
