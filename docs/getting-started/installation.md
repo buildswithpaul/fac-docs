@@ -75,10 +75,13 @@ You should see `frappe_assistant_core` listed.
 
 ## Web server settings
 
-FAC Chat streams every answer over a web request that stays open until the answer is
-finished. Bench starts gunicorn with synchronous workers by default, so each chat holds a
-whole worker for as long as it streams, and a few people chatting at once can leave the rest
-of the site waiting. Run gunicorn with threaded workers so one worker can carry several chats:
+When someone sends a chat message, the browser's request returns at once and a relay thread
+inside the web process carries the answer from FAC Cloud. The turn still brings a stream of
+short requests to the site: the chat's own polling, FAC Cloud's MCP callbacks for every tool
+it runs, and the person's page loads. Bench starts gunicorn with synchronous workers by
+default, and a sync worker serves one request at a time, so with a few people chatting those
+requests queue behind each other and the rest of the site waits. Run gunicorn with threaded
+workers so each worker serves several requests at once:
 
 ```bash
 gunicorn --worker-class gthread --threads 8 --workers 4 --timeout 120 frappe.app:application
@@ -87,10 +90,11 @@ gunicorn --worker-class gthread --threads 8 --workers 4 --timeout 120 frappe.app
 Add the same flags to the gunicorn line in your `Procfile` or supervisor config, then restart
 the web process. A setting of 8 threads on 4 workers gives 32 request slots.
 
-FAC checks this for you. It reads the flags the running gunicorn master was started with and
-wants at least twice as many request slots (`workers x threads`) as people you expect to chat
-at the same time: one slot for the stream, one for that person's other requests. Set that
-number in **FAC Chat Settings → Expected Concurrent Chatters** (default 10).
+FAC checks this for you. It reads the flags the running gunicorn master was started with,
+including any in its `GUNICORN_CMD_ARGS` environment variable, and wants at least twice as many
+request slots (`workers x threads`) as people you expect to chat at the same time: one slot for
+FAC Cloud's callbacks, one for that person's other requests. Set that number in **FAC Chat
+Settings → Expected Concurrent Chatters** (default 10).
 
 The check shows up in two places:
 
@@ -98,6 +102,16 @@ The check shows up in two places:
   carry the number you set.
 - The **Registration health** card in FAC Chat settings has a **Web server** row after you run
   diagnostics.
+
+What the check reports:
+
+| Web server | Result |
+|---|---|
+| `sync` workers | A warning, whatever the worker count |
+| `gthread` workers with fewer than twice the expected chatters in slots | A warning |
+| `gthread` workers with enough slots | OK |
+| Async workers (`gevent`, `eventlet`, `uvicorn`) | OK: they multiplex requests inside a worker, so no slot limit applies |
+| Settings in a config file (`-c` or `--config`) | Unknown: the file can set anything, so the check does not guess. Flags on the command line still count, so `-k gthread -w 4 --threads 8` next to `-c` is judged as usual |
 
 The check cannot judge a server it cannot see. If gunicorn was not started directly (for
 example `bench serve` in development) or its command line is hidden from the app, the check
