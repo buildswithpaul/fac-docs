@@ -24,9 +24,12 @@ its own.
 | Approvals waiting for you | everyone | Documents with an open workflow action for you that still have a step other than Cancel |
 | Tasks due | everyone | Your open ToDos due today or overdue |
 | Workflows that failed overnight | everyone with workflows enabled | Failed workflow runs from the last 24 hours (see below) |
+| Unread mentions | everyone | Comments where someone @mentioned you, not yet read |
+| Drafts never submitted | everyone | Drafts you own, untouched for 7 days, of common submittable documents (quotations, orders, invoices, delivery notes, receipts, payment and journal entries, stock entries, material requests). A document type under an active workflow is left out, because its draft may be waiting on someone else. The question it asks names the document types it counted |
 | Overdue invoices | Accounts roles | Submitted sales invoices with an outstanding amount, more than 60 days past due |
 | Bills due soon | Accounts roles | Submitted purchase invoices with an outstanding amount, due in the next 7 days |
 | Unreconciled bank lines | Accounts roles | Submitted bank transactions with status Unreconciled |
+| Delivered but not billed | Accounts and Sales roles | Submitted delivery notes not fully billed (To Bill or Partially Billed), leaving out returns and internal transfers |
 | Quotations expiring | Sales roles | Open submitted quotations whose validity ends in the next 7 days |
 | Late sales orders | Sales roles | Submitted orders past their delivery date and not fully delivered (not closed, completed or on hold) |
 | Quiet leads and opportunities | Sales roles | Leads and opportunities you own with no change for 14 days (open ones only; CRM leads and deals too when the CRM app is installed) |
@@ -35,10 +38,15 @@ its own.
 | Pending material requests | Stock and Purchase roles | Submitted material requests with status Pending |
 | Leave to approve | HR roles, when HRMS is installed | Open leave applications where you are the approver |
 | Expense claims to approve | HR roles, when HRMS is installed | Draft expense claims where you are the approver |
+| Tickets near or past their SLA | Support roles, when Helpdesk is installed | Open Helpdesk tickets assigned to you whose resolution deadline, or first-response deadline if not yet answered, is past or within 4 hours |
+| Emails that failed to send | System Managers | Outgoing emails from the last 7 days that ended in an error |
+| Failing scheduled jobs | System Managers | Scheduled jobs with a failed run in the last 24 hours, each job counted once |
 
 "Accounts roles" means Accounts Manager or Accounts User; Sales is Sales Manager or
 Sales User; Stock and Purchase is Stock, Purchase or Item Manager roles; HR is HR Manager
-or HR User. A user with several of these sees signals from all of them.
+or HR User; Support is Support Team, or Agent or Agent Manager from Helpdesk. The two System Manager cards appear
+only to users who can read the Email Queue and Scheduled Job Log, which by default means
+System Managers. A user with several of these sees signals from all of them.
 
 Money amounts appear on the invoice cards only when every invoice counted is in the
 same currency, so the card never adds up unlike currencies.
@@ -58,7 +66,7 @@ Every count is made with your own permissions, the same way a Desk list view cou
 - "Items below reorder level" counts only warehouses you can read. A user with no read
   access to Warehouse does not get the card at all, because they could not see per-warehouse
   stock in Desk either.
-- Company-based signals (invoices, bank lines, orders, stock) follow your default company
+- Company-based signals (invoices, bank lines, orders, deliveries, stock, drafts) follow your default company
   when you have one, and the question a card asks FACO names that company, so the answer
   matches the number. Approval queues for leave and expense claims do not: they are your
   own work whatever your default company is.
