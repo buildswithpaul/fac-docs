@@ -321,7 +321,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   the chat and send the assistant a picture of it and the text it shows." It captures only that page, never the
   chat. The picture is drawn inside the page's own frame, so nothing the page contains is drawn or loaded
   outside it. With the picture come `page_text` (the page's visible text, figures and table cells, marked as
-  untrusted page content) and `page_errors` (script errors and calls that failed), even when the picture can't
+  untrusted page content) and `page_errors` (script errors, and calls that failed with their method and HTTP status), even when the picture can't
   be taken. The card offers **Allow on this page in this chat**, never a wider trust. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L168))
 - **The assistant tests a page before it says it's done.** After every save it looks at the page and checks
   the figures and `page_errors`. When it can't take a picture (a phone, the Desk widget, another page open),
