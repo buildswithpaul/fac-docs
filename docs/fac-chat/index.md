@@ -268,7 +268,10 @@ browser. A shared page is served as approved.
 
 A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
 to the page itself, next to `url`, the link to its form. To link a page from a Workspace, add
-a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;name&gt;</code> address.
+a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;name&gt;</code> address, and a
+shortcut block with the same label to the Workspace's layout: a Workspace shows only the shortcuts its
+layout has a block for. When the assistant builds a shared page, its plan includes this Workspace
+change, and any new doctype or Workspace goes in a module installed on your site.
 
 ### Pages beside the chat
 
