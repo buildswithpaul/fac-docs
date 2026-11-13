@@ -325,7 +325,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   else changed the record since you opened the page, the save is refused rather than undoing
   their change, and you reload to see it. If a save is refused, what you typed stays and the
   reason shows below it, with no dialog over the page. On a personal page each save asks you first, listing the
-  fields and rows it changes. Needs FAC 3.3.1 or later.
+  fields and rows it changes. Needs FAC 3.4.0 or later.
   ([`makeBlocks`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageBlocks.js#L52), [the save](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageEditList.js#L110))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
