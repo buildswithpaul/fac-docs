@@ -317,6 +317,12 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   ([`page_format_settings`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L141), [`fac_page_frappe`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_frappe.js#L16), [`formatValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFormat.js#L411))
 - **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
   takes an ECharts option and draws SVG, in the panel and in Desk alike.
+- **Present.** A published page has a **Present** button, beside the chat and in Desk. It shows the
+  page full screen, one section at a time, with the section's title and "2 / 5" in a bar at the
+  bottom. The arrow keys, Page Up and Page Down move between sections, and Esc leaves. Edit buttons
+  are hidden while presenting, so you can run a meeting from the page. A page without sections
+  presents as one screen. On a phone it presents inside the panel. Needs FAC 3.3.1 or later.
+  ([`makePresenter`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L44), [`mountPresentControls`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L95))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
 - **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
