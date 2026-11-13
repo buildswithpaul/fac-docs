@@ -353,6 +353,16 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   and a Prepared Report with no result for the page's filters says it can't be shown yet. On a shared
   page, give viewers the report roles they need (for example Accounts User for P&L). Needs FAC 3.4.0 or later.
   ([`report`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReport.js#L50), [`report_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L241))
+- **Pages people type into.** A page can let people type into records, such as each business
+  unit's risks and priorities for a review meeting, with `fac.editList` (a record's child rows,
+  with HIGH, MED and LOW badges), `fac.editText` (one text field) and `fac.periodPicker`. They
+  work in Desk, beside the chat and on a personal page. The Edit button shows only to people who
+  may change the record, and the server checks every save. A save keeps every field the page does not show. If someone
+  else changed the record since you opened the page, the save is refused rather than undoing
+  their change, and you reload to see it. If a save is refused, what you typed stays and the
+  reason shows below it, with no dialog over the page. On a personal page each save asks you first, listing the
+  fields and rows it changes. Needs FAC 3.4.0 or later.
+  ([`makeBlocks`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageBlocks.js#L52), [the save](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageEditList.js#L110))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
 - **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
