@@ -210,6 +210,33 @@ A page is **personal** ("Only me", the default) or **shared**:
   A page that stays "Only me" never counts as going live.
   ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L427), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L399))
 
+### The Pages list in Desk
+
+**Pages** in the Desk sidebar (<code v-pre>/app/fac-pages</code>) lists every page you can open,
+as a gallery. You can find a page shared with you there even without FAC Chat.
+
+- **Each card** shows a preview of the page, its title, a one-line description, who it is shared
+  with, and when it changed. The preview is the page's layout without its script: it runs
+  nothing and loads nothing, so it never shows figures. A page whose script builds all of its
+  content shows its first letter instead. ([`fac_page_card`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_card.js#L16), [`_preview`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L334))
+- **Search** finds pages by title and description. **All**, **Mine**, **Shared** and **Drafts**
+  filter the list; **Drafts** appears only for System Managers, who are the only ones who see
+  drafts.
+- **New page** (in the header and at the end of the list) opens FAC Chat with "Build me a page
+  that" ready to finish. It shows only if you can use FAC Chat.
+- **The ⋯ menu** on a card offers only what you may do with that page. The server still checks
+  each action. ([`list_pages`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L188))
+  - **Edit with FACO** opens FAC Chat with a request to change the page and the page open beside
+    the chat. It shows on your own personal pages, and on shared pages for System Managers, if
+    you can use FAC Chat.
+  - **Rename** changes the title; the slug and the page's address stay the same.
+  - **Share** asks FACO to share one of your personal pages with your team, through an approval
+    card. It shows only for System Managers.
+  - **Delete** removes the page after you confirm. It shows on your own personal pages, and on
+    shared pages for System Managers.
+
+Needs FAC 3.3.1 or later.
+
 ### How a personal page runs
 
 A personal page loads and runs as soon as it opens, and again after every change the assistant
