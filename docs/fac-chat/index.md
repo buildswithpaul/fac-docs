@@ -227,7 +227,7 @@ shared page's plan:
 - **The page lists the doctypes it uses**, so a later change reuses them. Deleting the page leaves
   those doctypes and their records.
 
-Needs FAC 3.3.1 or later.
+Needs FAC 3.4.0 or later.
 
 ### How a personal page runs
 
