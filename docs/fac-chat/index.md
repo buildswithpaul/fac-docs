@@ -390,9 +390,9 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   ([`makePresenter`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L44), [`mountPresentControls`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L95))
 - **Light and dark.** A page follows Desk's light or dark theme, beside the chat, in Desk, in the
   Pages gallery's previews and in Present mode, and switches when you change the theme. Its charts
-  switch too. A page that sets its own colours keeps them, so the assistant writes pages with the
-  kit's colours; ask it to switch an older page over. A page always prints light. Needs FAC 3.4.0 or
-  later.
+  switch too. A page that sets any colour of its own stays light, as it was written, so nothing you
+  already have changes. The assistant writes new pages with the kit's colours; ask it to switch an
+  older page over. A page always prints light, charts included. Needs FAC 3.4.0 or later.
   ([kit dark theme](../../../apps/frappe_assistant_core/frappe_assistant_core/public/css/mockup_kit.css#L29), [`mirrorDeskTheme`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/deskTheme.js#L20), [`isDarkPage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageCharts.js#L33))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
