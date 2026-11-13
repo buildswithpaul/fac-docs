@@ -382,6 +382,12 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   reason shows below it, with no dialog over the page. On a personal page each save asks you first, listing the
   fields and rows it changes. Needs FAC 3.4.0 or later.
   ([`makeBlocks`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageBlocks.js#L52), [the save](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageEditList.js#L110))
+- **Present.** A published page has a **Present** button, beside the chat and in Desk. It shows the
+  page full screen, one section at a time, with the section's title and "2 / 5" in a bar at the
+  bottom. The arrow keys, Page Up and Page Down move between sections, and Esc leaves. Edit buttons
+  are hidden while presenting, so you can run a meeting from the page. A page without sections
+  presents as one screen. On a phone it presents inside the panel. Needs FAC 3.4.0 or later.
+  ([`makePresenter`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L44), [`mountPresentControls`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L95))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
 - **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
