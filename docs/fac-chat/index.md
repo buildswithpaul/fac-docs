@@ -210,6 +210,25 @@ A page is **personal** ("Only me", the default) or **shared**:
   A page that stays "Only me" never counts as going live.
   ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L427), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L399))
 
+### Pages your teams fill in
+
+A page can hold what your teams write as well as live figures, such as a fortnightly review where
+each business unit keeps its own risks, priorities and achievements. The assistant builds it on a
+shared page's plan:
+
+- **One record per team and period**, in doctypes the plan creates, with Track Changes on, so
+  every past period stays as it was and each change shows who made it.
+- **Each team edits only its own part.** Each unit has an editor role, and a Server Script on the
+  plan refuses a save from anyone outside that unit's team. Edit shows only to the team
+  (`fac.hasRole`, which reads only your own roles). Everyone the page is shared with can read
+  every part. ([`my_roles`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L302))
+- **Figures follow your own access.** Report figures show only to people whose roles allow the
+  report; the plan lists the roles each team needs.
+- **The page lists the doctypes it uses**, so a later change reuses them. Deleting the page leaves
+  those doctypes and their records.
+
+Needs FAC 3.3.1 or later.
+
 ### How a personal page runs
 
 A personal page loads and runs as soon as it opens, and again after every change the assistant
