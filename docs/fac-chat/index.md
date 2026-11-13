@@ -323,7 +323,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   viewing the page: a report their roles don't allow shows "You don't have access to this report"
   instead of figures, a refused filter (such as a company they can't read) shows the server's reason,
   and a Prepared Report with no result for the page's filters says it can't be shown yet. On a shared
-  page, give viewers the report roles they need (for example Accounts User for P&L). Needs FAC 3.3.1 or later.
+  page, give viewers the report roles they need (for example Accounts User for P&L). Needs FAC 3.4.0 or later.
   ([`report`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReport.js#L50), [`report_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L241))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
