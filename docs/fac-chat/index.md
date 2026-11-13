@@ -216,9 +216,10 @@ A page is **personal** ("Only me", the default) or **shared**:
 as a gallery. You can find a page shared with you there even without FAC Chat.
 
 - **Each card** shows a preview of the page, its title, a one-line description, who it is shared
-  with, and when it changed. The preview is the page's layout without its script: it runs
-  nothing and loads nothing, so it never shows figures. A page whose script builds all of its
-  content shows its first letter instead. ([`fac_page_card`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_card.js#L16), [`_preview`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L334))
+  with, and when it changed. The preview is the page's static layout without its script: it
+  runs nothing and loads nothing, so it never shows live data, only what is written into the
+  page itself. A page whose script fills in all of its content, or a very large page, shows its
+  first letter instead. ([`fac_page_card`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_card.js#L16), [`_preview`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L334))
 - **Search** finds pages by title and description. **All**, **Mine**, **Shared** and **Drafts**
   filter the list; **Drafts** appears only for System Managers, who are the only ones who see
   drafts.
@@ -226,8 +227,8 @@ as a gallery. You can find a page shared with you there even without FAC Chat.
   that" ready to finish. It shows only if you can use FAC Chat.
 - **The ⋯ menu** on a card offers only what you may do with that page. The server still checks
   each action. ([`list_pages`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L188))
-  - **Edit with FACO** opens FAC Chat with a request to change the page and the page open beside
-    the chat. It shows on your own personal pages, and on shared pages for System Managers, if
+  - **Edit with FACO** opens FAC Chat with a request to change the page, and the page open beside
+    the chat (on a phone the page stays closed, so it doesn't cover the request). It shows on your own personal pages, and on shared pages for System Managers, if
     you can use FAC Chat.
   - **Rename** changes the title; the slug and the page's address stay the same.
   - **Share** asks FACO to share one of your personal pages with your team, through an approval
