@@ -210,6 +210,53 @@ A page is **personal** ("Only me", the default) or **shared**:
   A page that stays "Only me" never counts as going live.
   ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L427), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L399))
 
+### The Pages list in Desk
+
+**Pages** in the Desk sidebar (<code v-pre>/app/fac-pages</code>) lists every page you can open,
+as a gallery. You can find a page shared with you there even without FAC Chat.
+
+- **Each card** shows a preview of the page, its title, a one-line description, who it is shared
+  with, and when it changed. The preview is the page's static layout without its script: it
+  runs nothing and loads nothing, so it never shows live data, only what is written into the
+  page itself. A page whose script fills in all of its content, or a very large page, shows its
+  first letter instead. ([`fac_page_card`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_card.js#L16), [`_preview`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L334))
+- **Search** finds pages by title and description. **All**, **Mine**, **Shared** and **Drafts**
+  filter the list; **Drafts** appears only for System Managers, who are the only ones who see
+  drafts.
+- **New page** (in the header and at the end of the list) opens FAC Chat with "Build me a page
+  that" ready to finish. It shows only if you can use FAC Chat.
+- **The ⋯ menu** on a card offers only what you may do with that page. The server still checks
+  each action. ([`list_pages`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L188))
+  - **Edit with FACO** opens FAC Chat with a request to change the page, and the page open beside
+    the chat (on a phone the page stays closed, so it doesn't cover the request). It shows on your own personal pages, and on shared pages for System Managers, if
+    you can use FAC Chat.
+  - **Rename** changes the title; the slug and the page's address stay the same.
+  - **Share** asks FACO to share one of your personal pages with your team, through an approval
+    card. It shows only for System Managers.
+  - **Delete** removes the page after you confirm. It shows on your own personal pages, and on
+    shared pages for System Managers.
+
+Needs FAC 3.4.0 or later.
+
+### Pages your teams fill in
+
+A page can hold what your teams write as well as live figures, such as a fortnightly review where
+each business unit keeps its own risks, priorities and achievements. The assistant builds it on a
+shared page's plan:
+
+- **One record per team and period**, in doctypes the plan creates, with Track Changes on, so
+  every past period stays as it was and each change shows who made it.
+- **Each team edits only its own part.** Each unit has an editor role, and a Server Script on the
+  plan refuses a save from anyone outside that unit's team. Edit shows only to the team
+  (`fac.hasRole`, which reads only your own roles). Everyone the page is shared with can read
+  every part. ([`my_roles`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L302))
+- **Figures follow your own access.** Report figures show only to people whose roles allow the
+  report; the plan lists the roles each team needs.
+- **The page lists the doctypes it uses**, so a later change reuses them. Deleting the page leaves
+  those doctypes and their records.
+
+Needs FAC 3.4.0 or later.
+
 ### How a personal page runs
 
 A personal page loads and runs as soon as it opens, and again after every change the assistant
@@ -317,6 +364,24 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   ([`page_format_settings`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L141), [`fac_page_frappe`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_frappe.js#L16), [`formatValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFormat.js#L411))
 - **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
   takes an ECharts option and draws SVG, in the panel and in Desk alike.
+- **Figures from reports.** A page script reads a report with `fac.report(name, filters)`, such
+  as the Profit and Loss Statement, Accounts Receivable or a custom report, and draws the report's
+  own rows, totals and summary, so the page matches the report in Desk. It reads as the person
+  viewing the page: a report their roles don't allow shows "You don't have access to this report"
+  instead of figures, a refused filter (such as a company they can't read) shows the server's reason,
+  and a Prepared Report with no result for the page's filters says it can't be shown yet. On a shared
+  page, give viewers the report roles they need (for example Accounts User for P&L). Needs FAC 3.4.0 or later.
+  ([`report`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReport.js#L50), [`report_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L241))
+- **Pages people type into.** A page can let people type into records, such as each business
+  unit's risks and priorities for a review meeting, with `fac.editList` (a record's child rows,
+  with HIGH, MED and LOW badges), `fac.editText` (one text field) and `fac.periodPicker`. They
+  work in Desk, beside the chat and on a personal page. The Edit button shows only to people who
+  may change the record, and the server checks every save. A save keeps every field the page does not show. If someone
+  else changed the record since you opened the page, the save is refused rather than undoing
+  their change, and you reload to see it. If a save is refused, what you typed stays and the
+  reason shows below it, with no dialog over the page. On a personal page each save asks you first, listing the
+  fields and rows it changes. Needs FAC 3.4.0 or later.
+  ([`makeBlocks`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageBlocks.js#L52), [the save](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageEditList.js#L110))
 - **Present.** A published page has a **Present** button, beside the chat and in Desk. It shows the
   page full screen, one section at a time, with the section's title and "2 / 5" in a bar at the
   bottom. The arrow keys, Page Up and Page Down move between sections, and Esc leaves. Edit buttons
