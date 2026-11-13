@@ -321,7 +321,8 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   as the Profit and Loss Statement, Accounts Receivable or a custom report, and draws the report's
   own rows, totals and summary, so the page matches the report in Desk. It reads as the person
   viewing the page: a report their roles don't allow shows "You don't have access to this report"
-  instead of figures, and a Prepared Report with no result yet says it is being prepared. On a shared
+  instead of figures, a refused filter (such as a company they can't read) shows the server's reason,
+  and a Prepared Report with no result for the page's filters says it can't be shown yet. On a shared
   page, give viewers the report roles they need (for example Accounts User for P&L). Needs FAC 3.3.1 or later.
   ([`report`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReport.js#L50), [`report_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L241))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
