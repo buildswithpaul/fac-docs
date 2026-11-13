@@ -321,9 +321,10 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   unit's risks and priorities for a review meeting, with `fac.editList` (a record's child rows,
   with HIGH, MED and LOW badges), `fac.editText` (one text field) and `fac.periodPicker`. They
   work in Desk, beside the chat and on a personal page. The Edit button shows only to people who
-  may change the record, and the server checks every save. A save keeps any change someone else
-  made meanwhile and every field the page does not show. If the save is refused, what you typed
-  stays and the reason shows below it. On a personal page each save asks you first, listing the
+  may change the record, and the server checks every save. A save keeps every field the page does not show. If someone
+  else changed the record since you opened the page, the save is refused rather than undoing
+  their change, and you reload to see it. If a save is refused, what you typed stays and the
+  reason shows below it, with no dialog over the page. On a personal page each save asks you first, listing the
   fields and rows it changes. Needs FAC 3.3.1 or later.
   ([`makeBlocks`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageBlocks.js#L51), [the save](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageEditList.js#L103))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
