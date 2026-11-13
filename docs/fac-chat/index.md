@@ -236,7 +236,7 @@ as a gallery. You can find a page shared with you there even without FAC Chat.
   - **Delete** removes the page after you confirm. It shows on your own personal pages, and on
     shared pages for System Managers.
 
-Needs FAC 3.3.1 or later.
+Needs FAC 3.4.0 or later.
 
 ### How a personal page runs
 
