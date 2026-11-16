@@ -222,7 +222,7 @@ For what this looks like to use, see
 the guards, the search algorithm, and how a compacted conversation is
 reassembled — all of it local FAC code, registered on the `faco` MCP plugin
 alongside the browser and document tools
-([plugin.py:82](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/plugin.py#L82)).
+([plugin.py:83](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/plugin.py#L83)).
 The tool is classified **read-only**
 ([tool_category_detector.py:85](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/tool_category_detector.py#L85)),
 so it defaults to "Always allow" rather than sitting behind an approval card.

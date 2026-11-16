@@ -261,6 +261,37 @@ Optional. Requires `pandas`, `numpy`, and a charting backend.
 
 The `custom_tools` plugin discovers tools registered by other installed Frappe apps via the `assistant_tools` hook. It ships with no tools of its own — see your installed apps' documentation for what they expose.
 
+## Tool packs in `tools/list`
+
+A plugin can group some of its tools into a **tool pack**: a named set of tools that are used together, with a one-line description of when they are needed. A tool that is in no pack is part of the base set. Packs change nothing about which tools exist, who may call them or how they behave.
+
+`tools/list` marks the pack of each tool in its `_meta`, under the key `fac/pack` ([server.py:367](../../../apps/frappe_assistant_core/frappe_assistant_core/mcp/server.py#L367)):
+
+```json
+{ "name": "run_database_query", "description": "...", "inputSchema": {...}, "_meta": { "fac/pack": "analysis" } }
+```
+
+A tool with no pack has no `_meta`. The packs are:
+
+| Pack | Plugin | Tools |
+|---|---|---|
+| `analysis` | `data_science` | `run_python_code`, `run_database_query` |
+| `builder` | `core` | `test_as_user`, `sandbox_reference`, `recent_errors` |
+| `dashboards` | `visualization` | `create_dashboard`, `create_dashboard_chart`, `list_user_dashboards` |
+| `migration` | `migration` | the Migration plugin's tools (import sessions, migration plans, opening entries) |
+| `crm`, `helpdesk`, `insights`, `browser` | `faco` | the FACO plugin's CRM, Helpdesk, Insights and browser tools. FAC Cloud only |
+
+A pack is listed only while its plugin is enabled, and only with the tools the caller can see.
+
+**For a FAC Cloud caller**, `tools/list` also puts two things in the `_meta` of the result itself ([server.py:378](../../../apps/frappe_assistant_core/frappe_assistant_core/mcp/server.py#L378)):
+
+- `fac/packs`: the pack catalogue. Each entry has `id`, `title`, `description`, the `tools` the caller is listed, the attachment types (`file_types`) that call for the pack, and its `skills`.
+- `fac/wanted_packs`: the ids of the packs that the files attached to the conversation call for. A spreadsheet or CSV in the conversation, for example, names the `migration` pack ([tool_pack_listing.py:50](../../../apps/frappe_assistant_core/frappe_assistant_core/core/tool_pack_listing.py#L50)).
+
+Neither is ever a reason for `tools/list` to fail. If FAC cannot read its packs, it lists every tool with no `_meta`.
+
+**Other MCP clients** (Claude Desktop, ChatGPT, Cursor, and anything you connect yourself) still get every tool they are allowed. They can ignore `_meta`. Only the key `fac/pack` is added to their listing.
+
 ## Permission denials
 
 Frappe signals a document-level permission denial by raising a bare `frappe.PermissionError`

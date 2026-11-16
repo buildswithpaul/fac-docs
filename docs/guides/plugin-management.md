@@ -32,9 +32,10 @@ Each plugin has an individual configuration record:
 | **Data Science** | Optional | Python execution, SQL, file extraction | 3 |
 | **FACO Tools** | Optional | Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. **FAC Cloud only** — these act inside FAC Chat, so other MCP clients are not offered them | 16 |
 | **Visualization** | Optional | Dashboards and charts | 3 |
+| **Migration** | Optional | Imports a client's data from their old system: import sessions, migration plans and opening entries. A fresh install switches it on; an existing site keeps its current setting | 14 |
 | **Custom Tools** | Always Enabled | Discovers tools registered by other apps via the `assistant_tools` hook | — |
 
-41 tools ship in total across these plugins. See [Tool Reference](../api/tool-reference) for the full per-tool list.
+41 tools ship across the first five plugins, and the Migration plugin adds 14. See [Tool Reference](../api/tool-reference) for the full per-tool list.
 
 ### 3. Plugin Architecture
 
@@ -159,6 +160,8 @@ Plugin states are stored in the **FAC Plugin Configuration** DocType with indivi
 │ last_toggled_at: 2025-01-14 08:00:00            │
 └─────────────────────────────────────────────────┘
 ```
+
+These records are what FAC reads to decide which plugins are on ([plugin_manager.py:211](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/plugin_manager.py#L211)). The core plugin is on whatever its record says. The legacy `enabled_plugins_list` field is read only when the table does not exist yet. See [Migration from Legacy JSON](#migration-from-legacy-json).
 
 **Benefits of this architecture:**
 - **Atomic updates** - Single row UPDATE instead of read-modify-write JSON
@@ -384,7 +387,7 @@ When you run `bench migrate`, the system automatically syncs plugin and tool con
 
 | Action | Behavior |
 |--------|----------|
-| **New plugin discovered** | Creates FAC Plugin Configuration (enabled by default) |
+| **New plugin discovered** | Creates FAC Plugin Configuration, enabled only if the legacy plugin list names it (core is always enabled) |
 | **Plugin removed** | Deletes orphan FAC Plugin Configuration record |
 | **Existing configs** | Preserved (user changes are NOT overwritten) |
 | **New tools in plugin** | Creates FAC Tool Configuration for each tool |
@@ -420,13 +423,17 @@ When plugins or tools are removed from the codebase:
 
 ## Migration from Legacy JSON
 
-If you're upgrading from a version that used JSON storage in `Assistant Core Settings`, the migration is automatic:
+Before 3.4.0, FAC read which plugins were on from the legacy field `Assistant Core Settings.enabled_plugins_list`, not from the FAC Plugin Configuration records. The check for the records' table never succeeded (#34662). The FAC Admin toggle wrote only the records, so the toggle and the list FAC acted on could disagree, and some sites had no records at all.
 
-1. **Run `bench migrate`** - This triggers the migration patch
-2. **Verify records** - Check `/app/fac-plugin-configuration` for plugin records
-3. **Legacy field preserved** - The old JSON field remains for rollback safety
+From 3.4.0, FAC reads the records. The legacy list is what your site was running on, so it is used to bring the records into line first, and **no site changes which plugins are on**:
 
-The migration patch reads the legacy `enabled_plugins_list` JSON and creates individual FAC Plugin Configuration records.
+1. **Run `bench migrate`** - This runs the patch `v3_4.reconcile_plugin_configuration`
+2. **Plugins in the legacy list** get an enabled record, and every other plugin gets a disabled one. The core plugin is always enabled ([reconcile_plugin_configuration.py:36](../../../apps/frappe_assistant_core/frappe_assistant_core/patches/v3_4/reconcile_plugin_configuration.py#L36))
+3. **An empty or unreadable list** means core only, as it always did when read
+4. **Verify records** - Check `/app/fac-plugin-configuration`. From now on the toggle there is the source of truth
+5. **Legacy field preserved** - The old JSON field remains for rollback safety. The patch is safe to run twice
+
+A fresh install switches the Migration plugin on, so a new site starts with the same plugins as an upgraded one.
 
 ---
 
@@ -467,6 +474,10 @@ Plugin Management works in conjunction with the Tool Management System:
 
 | Version | Changes |
 |---------|---------|
+| **3.4.0** | Plugin on/off is read from FAC Plugin Configuration again |
+| | - The legacy list is migrated into the records first |
+| | - Fresh installs offer the Migration plugin |
+| | - Plugins can declare [tool packs](../api/tool-reference#tool-packs-in-tools-list) |
 | **2.2.0** | Migrated from JSON to FAC Plugin Configuration DocType |
 | | - Atomic plugin state updates |
 | | - Multi-worker consistency |

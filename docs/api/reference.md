@@ -61,7 +61,7 @@ Returns server `serverInfo`, supported `capabilities`, and the negotiated `proto
 
 ### `tools/list`
 
-Returns the catalogue of tools available to the authenticated user, with each tool's `name`, `description`, and `inputSchema`. The list is filtered by the user's role and the enable-state of each tool (see [Tool Management](../guides/tool-management)).
+Returns the catalogue of tools available to the authenticated user, with each tool's `name`, `description`, and `inputSchema`. The list is filtered by the user's role and the enable-state of each tool (see [Tool Management](../guides/tool-management)). A tool that belongs to a tool pack carries its pack in `_meta` (`fac/pack`); see [Tool packs in `tools/list`](./tool-reference#tool-packs-in-tools-list).
 
 ### `tools/call`
 
