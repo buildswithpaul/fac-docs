@@ -330,7 +330,8 @@ FAC Tool Configuration
 ├── source_app: Data (read-only)
 ├── module_path: Data (read-only)
 ├── role_access_mode: Select (Allow All, Restrict to Listed Roles)
-└── role_access: Table (FAC Tool Role Access)
+├── role_access: Table (FAC Tool Role Access)
+└── user_access: Table (FAC Tool User Access)
 ```
 
 **Tool Categories:**
@@ -345,12 +346,12 @@ FAC Tool Configuration
 **Role-Based Access Control:**
 
 - **Allow All** - All users can access the tool
-- **Restrict to Listed Roles** - Only specified roles can access
+- **Restrict to Listed Roles** (shown in FAC Admin as "Restrict to Listed Roles and Users") - Only users with a listed role, users listed by name, and System Managers can access
 
 **Key Features:**
 - **Automatic Category Detection** - AST-based code analysis detects tool operations
 - **Individual Tool Toggle** - Enable/disable specific tools
-- **Role-Based Access** - Restrict sensitive tools to specific roles
+- **Role- and User-Based Access** - Restrict sensitive tools to specific roles or named users
 - **Cache Invalidation** - Changes propagate immediately
 
 ### 6. Tool Development Methods

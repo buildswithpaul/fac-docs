@@ -5,14 +5,14 @@
 Tool Management lets an administrator control **which AI tools the MCP server exposes, and to whom** — without touching code. From the **FAC Admin** page you can:
 
 - **Enable or disable individual tools** — hide a tool from `tools/list` so no client can call it
-- **Restrict a tool to specific roles** — e.g. only let `Sales Manager` and `System Manager` use a tool
+- **Restrict a tool to specific roles or users** — e.g. only let `Sales Manager` and one named analyst use a tool
 - **Categorize tools** — understand at a glance what each tool does (read-only, write, privileged)
 - **Bulk-toggle by category or plugin** — disable every `privileged` tool in one click
 
-This is the recommended way to run FAC with **least-privilege access**: keep the MCP integration user on a low-privilege role and open up exactly the tools they need, role by role.
+This is the recommended way to run FAC with **least-privilege access**: keep the MCP integration user on a low-privilege role and open up exactly the tools they need, role by role or user by user.
 
 ::: tip Two layers of control
-Tool Management sits **on top of** [Plugin Management](./plugin-management). A tool is only reachable if its **plugin is enabled**, then its **tool toggle is on**, then the **role access** check passes, and finally the user has the underlying **Frappe DocType permission**. All four must hold. See [How access is decided](#how-access-is-decided).
+Tool Management sits **on top of** [Plugin Management](./plugin-management). A tool is only reachable if its **plugin is enabled**, then its **tool toggle is on**, then the **role and user access** check passes, and finally the user has the underlying **Frappe DocType permission**. All four must hold. See [How access is decided](#how-access-is-decided).
 :::
 
 ---
@@ -35,7 +35,7 @@ The page has:
 The **Tools** tab has a view switch:
 
 - **Plugins** (default) — a simple on/off switch per plugin. Turning a plugin off hides *all* of its tools at once.
-- **Individual Tools** — the detailed view where per-tool enable/disable, categories, and **role access** live.
+- **Individual Tools** — the detailed view where per-tool enable/disable, categories, and **role and user access** live.
 
 Switch to **Individual Tools** to configure access:
 
@@ -45,15 +45,18 @@ Each tool card shows its name, a **category badge**, its description, and its so
 
 ---
 
-## Restricting a tool to specific roles
+## Restricting a tool to specific roles or users
 
-This is the core answer to *"can I give a tool to just one role?"* — **yes.**
+This is the core answer to *"can I give a tool to just one role, or just one person?"* — **yes.**
 
 1. Open **FAC Admin → Tools → Individual Tools**.
 2. Find the tool (use search) and click its **⚙️** button to open the config panel.
-3. Set **Role Access Mode** to **Restrict to Listed Roles**.
+3. Set **Role Access Mode** to **Restrict to Listed Roles and Users**.
 4. Under **Allowed Roles**, click **+ Add Role** and pick a role. Add as many as you need.
-5. Click **Save Changes**.
+5. Under **Allowed Users**, click **+ Add User** and pick a user. Add as many as you need.
+6. Click **Save Changes**.
+
+You can list roles, users, or both. A restricted tool needs at least one of either; saving with both lists empty shows an error.
 
 ![Delete Document restricted to System Manager and Assistant Admin](/img/tool-management/03-role-access-card.png)
 
@@ -61,14 +64,24 @@ The **Add Role** picker lists **every role on your site** — not just FAC's own
 
 ![The Add Role dialog lets you pick any Frappe role](/img/tool-management/04-add-role-dialog.png)
 
-Once at least one role is listed, only users holding one of those roles (plus `System Manager`, who is always allowed) will see or be able to call the tool. Everyone else gets it filtered out of `tools/list` entirely.
+The **Add User** picker lists enabled desk users (System Users), leaving out `Administrator`, `Guest` and anyone already listed. Each user you add appears as a tag; click its **×** to remove it.
+
+Once the tool is restricted, a user can see and call it when **any** of these is true:
+
+- they hold one of the listed roles, **or**
+- they are listed themselves, **or**
+- they are a `System Manager` (always allowed).
+
+Everyone else gets it filtered out of `tools/list` entirely, and a direct call is refused.
+
+Listing a user is the way to hand one person a tool without giving their whole role access to it.
 
 ### Allowing everyone again
 
-Set **Role Access Mode** back to **Allow All**. The Allowed Roles list is hidden and every user can reach the tool — still subject to the tool's enable toggle, its plugin, and normal Frappe permissions.
+Set **Role Access Mode** back to **Allow All**. The Allowed Roles and Allowed Users lists are hidden and ignored, and every user can reach the tool — still subject to the tool's enable toggle, its plugin, and normal Frappe permissions.
 
 ::: info "Restrict" tightens, it never loosens
-Role restriction can only **reduce** who can use a tool. It cannot grant a user access they wouldn't otherwise have — the underlying Frappe DocType permission is still checked (see below), and a few tools have their own [hardcoded role gates](#hardcoded-role-limits) that role access cannot override.
+Role and user restriction can only **reduce** who can use a tool. Listing a user cannot grant them access they wouldn't otherwise have — the underlying Frappe DocType permission is still checked (see below), and a few tools have their own [hardcoded role gates](#hardcoded-role-limits) that role access cannot override.
 :::
 
 ---
@@ -81,7 +94,7 @@ The fastest way, entirely from the UI:
 
 1. In **Individual Tools**, set the **Category** filter to **Privileged** and click **Disable matching**. This turns off `delete_document`, `run_python_code`, `query_and_analyze`, and any other privileged tool in one action.
 2. Repeat for **Write** if you want a strictly read-only assistant.
-3. Optionally, for the tools you *do* keep, set **Restrict to Listed Roles** and list only the role your MCP user holds.
+3. Optionally, for the tools you *do* keep, set **Restrict to Listed Roles and Users** and list only the role your MCP user holds, or the MCP user itself.
 
 Because access is enforced at the MCP layer (`tools/list` and every `execute`), the disabled/restricted tools simply don't exist for that user — you don't need to hand them `System Manager` to make anything work.
 
@@ -115,13 +128,13 @@ For a given user and tool, FAC checks, in order:
 ```
 1. Plugin enabled?          (FAC Plugin Configuration)   — else hidden
 2. Tool enabled?            (FAC Tool Configuration)      — else hidden
-3. Role access passes?      (FAC Tool Configuration)      — else hidden
+3. Role/user access passes? (FAC Tool Configuration)      — else hidden
 4. Frappe permission?       (frappe.has_permission / tool's requires_permission)
 ```
 
 - If a **plugin is disabled**, all its tools disappear regardless of tool settings.
 - If a **tool is disabled**, it's hidden even when its plugin is on.
-- **Role access** (step 3) is the configurable layer this guide is about. `System Manager` always passes it.
+- **Role and user access** (step 3) is the configurable layer this guide is about. A restricted tool passes for a listed role or a listed user ([`_check_role_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/tool_registry.py#L143)). `System Manager` always passes it ([tool_registry.py:171](../../../apps/frappe_assistant_core/frappe_assistant_core/core/tool_registry.py#L171)).
 - Step 4 is standard Frappe security and is **never** bypassed by FAC — a user still needs real DocType permissions on the data the tool touches.
 
 This ordering is enforced centrally in the tool registry, so it applies identically to `tools/list` (what the client sees) and to every tool `execute` (what actually runs).
@@ -162,8 +175,13 @@ One record per tool (`/app/fac-tool-configuration`):
 | **Plugin Name** | Providing plugin (`core`, `data_science`, …) |
 | **Enabled** | Show/hide from `tools/list` |
 | **Tool Category** | `read_only` / `write` / `read_write` / `privileged` |
-| **Role Access Mode** | `Allow All` or `Restrict to Listed Roles` |
-| **Role Access** | Child table of roles (when restricted) |
+| **Role Access Mode** | `Allow All` or `Restrict to Listed Roles` (the stored value; FAC Admin labels it "Restrict to Listed Roles and Users") |
+| **Role Access** | Child table **FAC Tool Role Access** (`role`, `allow_access`), used when restricted |
+| **User Access** | Child table **FAC Tool User Access** (`user`, `allow_access`), used when restricted |
+
+The User Access table and the FAC Tool User Access DocType arrive with a schema change: run `bench --site <site> migrate` after updating FAC, before you open the Tools tab.
+
+The stored mode value did not change when users were added, so existing configurations and scripts that set `"Restrict to Listed Roles"` keep working. Validation requires at least one role **or** user in restricted mode ([`_validate_role_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/doctype/fac_tool_configuration/fac_tool_configuration.py#L48)).
 
 ### Restrict a tool to a role in a script
 
@@ -174,6 +192,38 @@ config.role_access = []
 config.append("role_access", {"role": "System Manager", "allow_access": 1})
 config.save()
 ```
+
+### Give one user a tool in a script
+
+```python
+config = frappe.get_doc("FAC Tool Configuration", "run_python_code")
+config.role_access_mode = "Restrict to Listed Roles"
+config.append("user_access", {"user": "analyst@example.com", "allow_access": 1})
+config.save()
+```
+
+### Set roles and users through the API
+
+`frappe_assistant_core.api.admin_api.update_tool_role_access` (POST, `System Manager` or `Assistant Admin`) is what the FAC Admin card calls on **Save Changes** ([admin/tools.py:402](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L402)):
+
+```python
+from frappe_assistant_core.api.admin_api import update_tool_role_access
+
+update_tool_role_access(
+    tool_name="delete_document",
+    role_access_mode="Restrict to Listed Roles",
+    roles=[{"role": "Accounts Manager", "allow_access": 1}],
+    users=[{"user": "analyst@example.com", "allow_access": 1}],
+)
+```
+
+- `roles` and `users` are lists of `{role, allow_access}` and `{user, allow_access}`; over HTTP you can send them as JSON strings.
+- A list you send **replaces** the stored list, so sending `roles=[]` removes every role ([admin/tools.py:466](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L466), [L477](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L477)).
+- A list you leave out (`None`) keeps what is stored.
+- The lists are only written in restricted mode. Switching to `Allow All` leaves them in place, unused.
+- It returns `{"success": true, ...}` on save, or `{"success": false, "message": ...}` when the mode is invalid or validation fails (for example, restricted mode with no role and no user).
+
+`get_tool_configurations` returns each tool's `user_access` beside `role_access`, which is how the card shows its Allowed Users ([admin/tools.py:114](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L114)).
 
 ### Grant every read-only tool to a new role
 
@@ -210,7 +260,7 @@ from frappe_assistant_core.assistant_core.doctype.fac_tool_configuration.fac_too
     get_tool_access_status,
 )
 
-get_tool_access_status("delete_document", user="analyst@example.com")
+get_tool_access_status("delete_document", user="analyst@example.com")  # listed role OR listed user
 # {'tool_name': 'delete_document', 'has_access': False, 'enabled': True,
 #  'role_access_mode': 'Restrict to Listed Roles', 'tool_category': 'privileged'}
 ```
@@ -237,7 +287,7 @@ External tools from other apps (registered via the `assistant_tools` hook) are d
 **A tool isn't in `tools/list`**
 1. Is its **plugin** enabled? (Plugins view)
 2. Is the **tool** enabled? (Individual Tools → toggle)
-3. If restricted, is your role in the **Allowed Roles**?
+3. If restricted, is your role in **Allowed Roles**, or are you in **Allowed Users**?
 4. Do you have the underlying **Frappe permission** for the DocType it touches?
 5. Try `bench --site <site> clear-cache` (config changes clear caches automatically, but this forces it).
 
