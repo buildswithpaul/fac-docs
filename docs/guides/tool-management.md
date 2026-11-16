@@ -66,6 +66,16 @@ The **Add Role** picker lists **every role on your site** — not just FAC's own
 
 The **Add User** picker lists enabled desk users (System Users), leaving out `Administrator`, `Guest` and anyone already listed. Each user you add appears as a tag; click its **×** to remove it.
 
+The server checks the list again when you save, so a script or API call gets the same rules as the picker ([`_validate_users`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/doctype/fac_tool_configuration/fac_tool_configuration.py#L55)):
+
+- A user can be listed only once.
+- A user you newly add must be an enabled System User, and cannot be `Administrator` or `Guest`.
+- A user who was already listed stays listed even if their account is later disabled or changed, so the tool's other settings can still be saved.
+
+If a save is refused, the card shows the reason once, as a red alert, and the panel stays open.
+
+**Cancel** puts back the roles and users the card had when you opened it. If a save stored the roles and users but then failed to update the category, Cancel goes back to the stored roles and users instead ([fac_admin_tools.js:900](../../../apps/frappe_assistant_core/frappe_assistant_core/public/js/fac_admin_tools.js#L900)).
+
 Once the tool is restricted, a user can see and call it when **any** of these is true:
 
 - they hold one of the listed roles, **or**
@@ -78,7 +88,7 @@ Listing a user is the way to hand one person a tool without giving their whole r
 
 ### Allowing everyone again
 
-Set **Role Access Mode** back to **Allow All**. The Allowed Roles and Allowed Users lists are hidden and ignored, and every user can reach the tool — still subject to the tool's enable toggle, its plugin, and normal Frappe permissions.
+Set **Role Access Mode** back to **Allow All Users** (stored as `Allow All`). The Allowed Roles and Allowed Users lists are hidden and ignored, and every user can reach the tool — still subject to the tool's enable toggle, its plugin, and normal Frappe permissions.
 
 ::: info "Restrict" tightens, it never loosens
 Role and user restriction can only **reduce** who can use a tool. Listing a user cannot grant them access they wouldn't otherwise have — the underlying Frappe DocType permission is still checked (see below), and a few tools have their own [hardcoded role gates](#hardcoded-role-limits) that role access cannot override.
@@ -175,13 +185,13 @@ One record per tool (`/app/fac-tool-configuration`):
 | **Plugin Name** | Providing plugin (`core`, `data_science`, …) |
 | **Enabled** | Show/hide from `tools/list` |
 | **Tool Category** | `read_only` / `write` / `read_write` / `privileged` |
-| **Role Access Mode** | `Allow All` or `Restrict to Listed Roles` (the stored value; FAC Admin labels it "Restrict to Listed Roles and Users") |
+| **Role Access Mode** | `Allow All` or `Restrict to Listed Roles` (the stored values; FAC Admin labels them "Allow All Users" and "Restrict to Listed Roles and Users") |
 | **Role Access** | Child table **FAC Tool Role Access** (`role`, `allow_access`), used when restricted |
 | **User Access** | Child table **FAC Tool User Access** (`user`, `allow_access`), used when restricted |
 
-The User Access table and the FAC Tool User Access DocType arrive with a schema change: run `bench --site <site> migrate` after updating FAC, before you open the Tools tab.
+The User Access table and the FAC Tool User Access DocType arrive with a schema change: run `bench --site <site> migrate` after updating FAC. Until you do, the Tools tab still loads and shows no users ([admin/tools.py:89](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L89)), and saving a tool with users listed returns `Run bench migrate before listing users on a tool` ([admin/tools.py:440](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L440)).
 
-The stored mode value did not change when users were added, so existing configurations and scripts that set `"Restrict to Listed Roles"` keep working. Validation requires at least one role **or** user in restricted mode ([`_validate_role_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/doctype/fac_tool_configuration/fac_tool_configuration.py#L48)).
+The stored mode value did not change when users were added, so existing configurations and scripts that set `"Restrict to Listed Roles"` keep working. Validation requires at least one role **or** user in restricted mode ([`_validate_role_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/doctype/fac_tool_configuration/fac_tool_configuration.py#L48)). Listed users are checked as described [above](#restricting-a-tool-to-specific-roles-or-users).
 
 ### Restrict a tool to a role in a script
 
@@ -204,7 +214,7 @@ config.save()
 
 ### Set roles and users through the API
 
-`frappe_assistant_core.api.admin_api.update_tool_role_access` (POST, `System Manager` or `Assistant Admin`) is what the FAC Admin card calls on **Save Changes** ([admin/tools.py:402](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L402)):
+`frappe_assistant_core.api.admin_api.update_tool_role_access` (POST, `System Manager` or `Assistant Admin`) is what the FAC Admin card calls on **Save Changes** ([admin/tools.py:406](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L406)):
 
 ```python
 from frappe_assistant_core.api.admin_api import update_tool_role_access
@@ -217,13 +227,14 @@ update_tool_role_access(
 )
 ```
 
-- `roles` and `users` are lists of `{role, allow_access}` and `{user, allow_access}`; over HTTP you can send them as JSON strings.
-- A list you send **replaces** the stored list, so sending `roles=[]` removes every role ([admin/tools.py:466](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L466), [L477](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L477)).
+- Each entry in `roles` or `users` is a plain name (`"Accounts Manager"`, `"analyst@example.com"`) or a dict (`{role, allow_access}` / `{user, allow_access}`). Over HTTP you can send the lists as JSON strings. Any other entry, such as a dict without the `role` or `user` key, is refused with a message naming that entry ([`_access_rows`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L499)).
+- A list you send **replaces** the stored list, so sending `roles=[]` removes every role ([admin/tools.py:478](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L478), [L480](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L480)).
 - A list you leave out (`None`) keeps what is stored.
 - The lists are only written in restricted mode. Switching to `Allow All` leaves them in place, unused.
-- It returns `{"success": true, ...}` on save, or `{"success": false, "message": ...}` when the mode is invalid or validation fails (for example, restricted mode with no role and no user).
+- It returns `{"success": true, ...}` on save, or `{"success": false, "message": ...}` when the mode is invalid, an entry is malformed, the users table needs `bench migrate`, or validation fails (for example, restricted mode with no role and no user, or a user who cannot be listed). A validation error comes back once in `message`, not also as a dialog ([admin/tools.py:492](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L492)).
+- It does not commit inside the endpoint; the change is committed with the request.
 
-`get_tool_configurations` returns each tool's `user_access` beside `role_access`, which is how the card shows its Allowed Users ([admin/tools.py:114](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L114)).
+`get_tool_configurations` returns each tool's `user_access` beside `role_access`, which is how the card shows its Allowed Users ([admin/tools.py:118](../../../apps/frappe_assistant_core/frappe_assistant_core/api/admin/tools.py#L118)).
 
 ### Grant every read-only tool to a new role
 
