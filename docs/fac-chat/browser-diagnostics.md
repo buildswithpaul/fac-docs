@@ -80,6 +80,10 @@ console errors and 1 failed request recently". Counts only; no text, no URLs. Th
 wording of that hint is composed on your server, not by your browser, so the page cannot
 inject text into the assistant's prompt through this route.
 
+That server-written sentence is stored on your message, so if the turn pauses for an
+approval, stops at the length limit or fails, its resume, **Continue** or **Retry** sends
+the assistant the same hint the turn started with.
+
 If your message suggests something is broken, the assistant then asks to run
 **`browser_capture_diagnostics`**, which is what actually drains the buffers. That call
 surfaces as an **approval card** you have to accept — and the card says plainly that the
