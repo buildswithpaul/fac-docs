@@ -177,6 +177,16 @@ The model a user picks is saved on the server, so it follows them to another bro
 - **The widget.** It keeps the choice in memory only and never writes the server value back.
 - **A choice that is no longer usable** (the model left the list, or auto mode is off) is dropped locally for that browser. The server value is left alone, so a short gap in the model list does not wipe every browser's choice.
 
+## Tool loading follows the user
+
+Each user decides whether FACO loads only the tools a conversation needs. It is on by default.
+
+- **Where.** **Settings, Tools**, the toggle **Load tools as needed (recommended)** ([`ToolsSettings.vue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/settings/ToolsSettings.vue#L12)). On gives FACO the tools a conversation needs. Off gives it every tool on every message, which costs more and can make answers slower.
+- **Storage.** The `load_tools_as_needed` Check on **FAC Chat User Preferences**, default on. A user with no preferences row, an unset value, or a site that has not been migrated reads as on. Only an explicit off means every tool ([`load_tools_as_needed`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/tool_loading.py#L19)).
+- **Reading it.** `GET frappe_assistant_core.chat.api.tool_loading.get_tool_loading` returns `{load_tools_as_needed}` for the session user ([`get_tool_loading`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/tool_loading.py#L15)).
+- **Saving it.** `POST frappe_assistant_core.chat.api.tool_loading.set_tool_loading` with `load_as_needed` saves the choice for the session user and returns `{load_tools_as_needed}` ([`set_tool_loading`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/tool_loading.py#L21)). The toggle saves at once and shows the saved value, and the latest save wins.
+- **How FAC Cloud learns it.** On every `tools/list` for FAC Cloud, FAC adds `fac/tool_loading` (`dynamic` or `all`) to the listing `_meta` ([`tool_loading_mode`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/tool_loading.py#L27)). See [Tool packs in `tools/list`](../api/tool-reference#tool-packs-in-tools-list). The change applies from the user's next new message.
+
 ## Routing notice
 
 When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L257)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:

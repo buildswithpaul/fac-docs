@@ -67,6 +67,10 @@ automation. Conversations are mirrored into your own Frappe database; the assist
 authenticates as a real Frappe user, so it only touches data that user can already
 see, and every action stays inside your existing permissions and audit trail.
 
+### Load tools as needed
+
+FAC Chat gives the assistant only the tools a conversation needs, which keeps answers faster and cheaper. This is on for every user. To turn it off for yourself, open **Settings, Tools** and switch off **Load tools as needed (recommended)**. The assistant then gets every tool on every message. The change applies from your next new message. How FAC stores and sends the choice: [Tool loading follows the user](./technical#tool-loading-follows-the-user).
+
 ## Writes pause for approval — a FAC Chat-only gate
 
 Over the plain MCP server, a write runs the instant the model calls it, inside the

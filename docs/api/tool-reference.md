@@ -283,14 +283,16 @@ A tool with no pack has no `_meta`. The packs are:
 
 A pack is listed only while its plugin is enabled, and only with the tools the caller can see.
 
-**For a FAC Cloud caller**, `tools/list` also puts two things in the `_meta` of the result itself ([server.py:378](../../../apps/frappe_assistant_core/frappe_assistant_core/mcp/server.py#L378)):
+**For a FAC Cloud caller**, `tools/list` also puts three things in the `_meta` of the result itself ([server.py:378](../../../apps/frappe_assistant_core/frappe_assistant_core/mcp/server.py#L378)):
 
 - `fac/packs`: the pack catalogue. Each entry has `id`, `title`, `description`, the `tools` the caller is listed, the attachment types (`file_types`) that call for the pack, and its `skills`.
 - `fac/wanted_packs`: the ids of the packs that the files attached to the conversation call for. A spreadsheet or CSV in the conversation, for example, names the `migration` pack ([tool_pack_listing.py:50](../../../apps/frappe_assistant_core/frappe_assistant_core/core/tool_pack_listing.py#L50)).
 
-Neither is ever a reason for `tools/list` to fail. If FAC cannot read its packs, it lists every tool with no `_meta`.
+- `fac/tool_loading`: `"dynamic"` or `"all"`, the session user's **Load tools as needed** choice ([server.py:422](../../../apps/frappe_assistant_core/frappe_assistant_core/mcp/server.py#L422)). `dynamic` is the default. `all` means the user wants every tool on every message, and FAC Cloud then ignores the packs for that user. A missing value means `dynamic`. See [Tool loading follows the user](../fac-chat/technical#tool-loading-follows-the-user).
 
-**Other MCP clients** (Claude Desktop, ChatGPT, Cursor, and anything you connect yourself) still get every tool they are allowed. They can ignore `_meta`. Only the key `fac/pack` is added to their listing.
+None of them is ever a reason for `tools/list` to fail. If FAC cannot read its packs, it lists every tool with no `_meta`.
+
+**Other MCP clients** (Claude Desktop, ChatGPT, Cursor, and anything you connect yourself) still get every tool they are allowed. They can ignore `_meta`. Only the key `fac/pack` is added to their listing. They never see `fac/tool_loading`.
 
 ## Permission denials
 
