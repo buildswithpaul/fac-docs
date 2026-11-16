@@ -117,6 +117,7 @@ export default defineConfig({
 						{ text: 'Files & Attachments', link: '/fac-chat/attachments' },
 						{ text: 'Projects & Chat History', link: '/fac-chat/projects' },
 						{ text: 'Home Page & Suggestions', link: '/fac-chat/suggestions' },
+						{ text: 'Your FAC', link: '/fac-chat/your-fac' },
 						{ text: 'Browser Diagnostics', link: '/fac-chat/browser-diagnostics' },
 						{ text: 'Conversation Recall', link: '/fac-chat/conversation-recall' },
 						{ text: 'Agents, Templates & Triggers', link: '/fac-chat/agents' },

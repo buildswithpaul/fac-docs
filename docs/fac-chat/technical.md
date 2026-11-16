@@ -427,6 +427,168 @@ server or nginx change.
 
 The Desk widget is built separately and has no service worker.
 
+## Your FAC
+
+The ring, panel, explain cards, guides and tour described in [Your FAC](./your-fac). All
+of it runs in the full-screen SPA. `App.vue` starts the
+[discovery store](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L78)
+once the user can chat; the Desk widget never starts it.
+
+### Where the powers come from
+
+The powers travel in `capabilities.discovery`, as `{progress_enabled, powers: [{id, label,
+description, try_route}]}`. On a self-hosted FAC they come from FAC's built-in defaults,
+[`default_discovery_capability`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/discovery_defaults.py#L26),
+in this order: `setup`, `ask`, `templates`, `knowledge`, `pages`, `agents`. Labels are
+translated with `_()`. If the backend your site connects to sends its own list in
+capabilities, that list is used instead.
+
+[`with_default_discovery`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/discovery_defaults.py#L15)
+adds the defaults when no `discovery` block is present. Both capabilities responses go
+through it: boot
+([init.py:143](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/init.py#L143))
+and `get_capabilities`, including its offline fallback
+([capabilities.py:51](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/capabilities.py#L51),
+[L54](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/capabilities.py#L54)).
+
+The client filters the list in
+[`availablePowers`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/discoveryRules.js#L48):
+
+- only the six known ids are kept
+  ([`POWER_IDS`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/discoveryRules.js#L9)),
+  each once, in the order given;
+- `knowledge` needs the memory feature and `agents` needs workflows
+  ([`POWER_CAPABILITY`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/discoveryRules.js#L12));
+- `progress_enabled: false` hides the ring;
+- a `try_route` is kept only if it is a path inside the SPA (one leading `/`, no
+  whitespace).
+
+Each power's colour comes from its place in the list (`--ql-power-1` … `--ql-power-6`).
+`setup` always counts as used
+([`isPowerUsed`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/discoveryRules.js#L64)).
+
+### What ticks a power
+
+[`watchUsage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L162)
+watches data the SPA already loads:
+
+| Power | Signal |
+|---|---|
+| `ask` | The chat store has at least one session |
+| `pages` | A Page in the pages store has `owner_is_me` |
+| `agents` | `agentsCreated` went up in this tab: blank, from a template, a copy, or made in chat ([usageSignals.js](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/usageSignals.js#L12)) |
+| `templates` | A pinned template, or `templatesUsed` went up when a template was rendered into the ask box ([useTemplateExecution.js:64](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/useTemplateExecution.js#L64)) |
+| `knowledge` | The Knowledge page loaded a document with `is_owner` ([`reportKnowledge`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L173)) |
+
+Agents use a counter, not a list, because the agent list is the whole site's and carries
+no creator. Opening the panel runs
+[`checkUnused`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L179)
+once per unticked power (Knowledge, Pages, Templates), so a power used elsewhere ticks
+without visiting its page.
+[`markUsed`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L146)
+shows the "Unlocked" toast only for ticks found more than 4 seconds after start-up, so
+work done before the page loaded is not celebrated again.
+
+### Try, explain cards and guides
+
+[`tryPower`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L226)
+opens the explain card for `ask` and `pages`
+([`EXPLAINED_POWERS`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/powerExplain.js#L9),
+[`explainContent`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/powerExplain.js#L15)).
+Otherwise it follows the power's `try_route`, or the feature's own Try target (Knowledge
+page, the agents marketplace tab, or the template browser).
+
+- The card's primary button,
+  [`tryExplained`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L248),
+  creates a session and queues the question as its first message.
+  [`questionFor`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/powerExplain.js#L55)
+  picks one of the user's Home starters (a "find" one first, then a "see" one), with a
+  fixed fallback question.
+- The secondary button,
+  [`askOwn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L267),
+  creates an empty session; for Pages it puts the question in the composer as a draft
+  instead of sending it.
+
+Guides are one line each in
+[`GUIDES`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/powerGuides.js#L8):
+`knowledge` on `/knowledge`, `agents` on `/agents`, and `templates` when Try opens the
+template browser. The store's
+[`guide`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L131)
+hides a guide when the ring is off, the power is not offered, it is used, or its id is in
+`guides_dismissed`.
+
+### The tour
+
+The stops are
+[`COACH_STOPS`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/discover/featureCatalog.js#L127):
+composer, Needs you, rail, ring. A stop whose element has no size on screen is dropped.
+[`maybeStartCoach`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L295)
+starts it on Home when the user has no chats yet and `coach_done` is false, and not over
+the welcome reel or a Spotlight. Settings → Help → **Show me around** calls
+[`requestCoach`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L301)
+and goes to Home, which starts it regardless
+([SettingsSidebar.vue:223](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/settings/layout/SettingsSidebar.vue#L223)).
+Finishing or skipping sets `coach_done`.
+
+### Storage and endpoints
+
+Two fields on **FAC Chat User Preferences** (one row per user;
+[doctype JSON](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_user_preferences/fac_chat_user_preferences.json#L116)).
+Run `bench migrate` to add them.
+
+| Field | Type | Holds |
+|---|---|---|
+| `show_progress` | Check, default 1 | The Settings → Home switch. Read as on when the value is missing |
+| `discovery_state` | Long Text (JSON), hidden | `seen`, `used`, `celebrated`, `guides_dismissed` (lists of ids) and `coach_done` |
+
+[`parse_discovery_state`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/home_preferences.py#L71)
+keeps only those keys. Each list keeps strings of 1 to 140 characters, without
+duplicates, and at most the last 50
+([home_preferences.py:31](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/home_preferences.py#L31)).
+Anything else is dropped, and malformed JSON reads as empty. The client applies the same
+rules (`parseState` in `discoveryRules.js`).
+
+| Endpoint | Method | Does |
+|---|---|---|
+| [`can_use_faco`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/access.py#L152) | GET | Returns `preferences.discovery = {show_progress, state}` on boot ([`_discovery_preferences`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/settings/access.py#L131)) |
+| [`save_discovery_state`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/home.py#L124) | POST | Takes `state` (dict or JSON string), cleans it, stores it, returns what was stored |
+| [`update_home_preferences`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/home.py#L76) | POST | Takes `show_progress` beside the other Home switches ([L102](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/home.py#L102)) |
+
+All three are `frappe_assistant_core.chat.api.*` and act on the session user only. The
+client saves state 800 ms after the last change
+([`save`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L59)).
+`save_discovery_state` writes the column with `frappe.db.set_value(...,
+update_modified=False)` instead of a full save, because a full save runs `on_update`,
+which clears the cached Needs you cards, and this state is saved far more often.
+
+### Admin banner and other changes
+
+- **Desk banner.** Eligibility is unchanged
+  ([`should_show_banner`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/discovery.py#L44):
+  chat off, write access to Assistant Core Settings, not dismissed). **Switch on FAC
+  Chat** calls
+  [`toggle_chat`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/discovery.py#L200)
+  with `enabled=1` and then opens `/copilot`
+  ([chat_banner.js:18](../../../apps/frappe_assistant_core/frappe_assistant_core/public/js/chat_banner.js#L18)).
+  When the banner renders it calls
+  [`banner_shown`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/discovery.py#L75)
+  (POST), which leaves one **Notification Log** alert per user linking to
+  `/app/fac-admin`. It is sent here rather than at install, because Frappe sends no
+  notifications while an app installs.
+- **Rail dots.** Knowledge and Agents show a dot until their id is in `seen` or `used`
+  ([`showDot`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/stores/discoveryStore.js#L114)),
+  and never while the tour is open.
+- **Knowledge.** The page reports its documents to the store
+  ([KnowledgeBase.vue:338](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/views/KnowledgeBase.vue#L338)).
+  The second Upload button and the "Add document" card in the grid are gone; Upload
+  lives in the top bar (`KnowledgeTopBar`), and an empty page also offers its own
+  upload prompt beside the "how it works" steps.
+- **Launcher tip.** For the first
+  [7 days](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/launcher/tooltips.js#L14)
+  after the launcher first shows in a browser (stamped in `localStorage` per user), its
+  tip names the current form, list or report
+  ([`pageMessage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/launcher/tooltips.js#L40)).
+
 ## What lives on the backend (not here)
 
 The following are handled by the managed FAC Cloud backend and are

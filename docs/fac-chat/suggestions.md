@@ -128,6 +128,7 @@ home**. It hides that one signal for you, and a short note in its place links to
   any you do not want; the failed-workflows card is in this list too.
 - **Suggested questions** on or off (the starter tiles and first-visit cards).
 - **Personalised suggestions** on or off (the ✦ tiles; see below).
+- **Your FAC progress** on or off (the ring on the FAC bot; see [Your FAC](./your-fac)).
 
 Changes save as you make them.
 

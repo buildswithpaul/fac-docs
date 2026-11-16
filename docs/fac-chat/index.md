@@ -474,8 +474,9 @@ That is the whole change — **no `bench restart` is required**. The chat hooks 
 registered and check the setting at runtime, so other workers pick up the new state on
 their next request.
 
-A discovery banner on the Desk landing page also walks admins through enabling
-chat — it appears once per admin and can be dismissed.
+Admins also see a banner on Desk while FAC Chat is off. **Switch on FAC Chat** turns it
+on and opens FAC Chat in one click; the first time the banner shows, a bell notification
+linking to FAC Admin is left as well. The banner appears until each admin dismisses it.
 
 After enabling:
 
@@ -621,6 +622,8 @@ happening on the same request, try a smaller request.
   limits, where the bytes are stored, and how attached files reach the model.
 - **[Home page and suggestions](./suggestions)** — what the landing screen shows: the
   "Needs you" list, role-aware starters, the widget's page asks, and how to turn suggestions off.
+- **[Your FAC](./your-fac)** — the ring on the FAC bot that shows which powers you have
+  tried, the first-login tour, and how to turn it off.
 - **[Browser diagnostics](./browser-diagnostics)** — how the widget helps debug a
   broken page, exactly what it records, what is redacted, and the admin kill switch.
 - **[Continuing a previous conversation](./conversation-recall)** — how the assistant

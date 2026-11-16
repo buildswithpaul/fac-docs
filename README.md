@@ -33,7 +33,7 @@ docs/
 ├── guides/
 ├── guide-me/              Step-by-step walkthroughs with screenshots
 ├── api/
-├── fac-chat/              FAC Chat: overview, attachments, suggestions,
+├── fac-chat/              FAC Chat: overview, attachments, suggestions, Your FAC,
 │                          browser diagnostics, conversation recall, technical
 ├── internals/
 └── reference/
