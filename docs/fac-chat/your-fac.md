@@ -123,7 +123,8 @@ skipped. You can skip the tour, and it shows only once. To see it again, open
 - **Admins, before FAC Chat is on.** The banner on Desk reads "FAC Chat is installed",
   and **Switch on FAC Chat** turns it on and opens FAC Chat in one click. The first time
   the banner shows, you also get a bell notification that links to FAC Admin, so the
-  link stays after you dismiss the banner.
+  link stays after you dismiss the banner. Each admin gets it only once, and it is
+  removed once FAC Chat is switched on.
 
 ### Turning it off
 
@@ -132,7 +133,12 @@ and the guides go away at once, without a reload. The switch is per user and is 
 default. The panel's own footer, **Turn this off in Settings → Home**, takes you there.
 
 What you have used, opened and closed is kept on your user preferences, so the ring looks
-the same in every browser you sign in from.
+the same in every browser you sign in from, and two open tabs never undo each other. It
+is included when you download your data (**Settings → Your Privacy → Download your data**).
+
+The first time you open FAC Chat with Your FAC, it checks what you have already done, for
+example chats and Pages from before an upgrade, and ticks those powers without a message
+for each.
 
 ## Why we built it
 

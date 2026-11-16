@@ -476,7 +476,7 @@ their next request.
 
 Admins also see a banner on Desk while FAC Chat is off. **Switch on FAC Chat** turns it
 on and opens FAC Chat in one click; the first time the banner shows, a bell notification
-linking to FAC Admin is left as well. The banner appears until each admin dismisses it.
+linking to FAC Admin is left as well (once per admin, removed when chat is switched on). The banner appears until each admin dismisses it.
 
 After enabling:
 
