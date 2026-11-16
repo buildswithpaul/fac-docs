@@ -399,7 +399,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
 - **It looks at your personal page without asking, unless the page shows what FAC hides from it.** From FAC
   3.4.0 the assistant takes the screenshot without a card while everything the page has shown is data its own
   tools could read. A page's script reads as you, outside the masking FAC's tools apply, so FAC watches every
-  call the page makes: the fields it asks for and the answer it gets. A card asks first, and names what it
+  call the page makes: the fields it asks for, filters on and sorts by, and the answer it gets. A card asks first, and names what it
   found, when the page has shown a field FAC hides from the assistant for your role (such as `iban`,
   `bank_account_no` or `api_key`), data from a method other than Frappe's own reads and writes, or a field
   renamed by an alias or an expression. The card offers **Allow on this page in this chat**, never a wider
@@ -408,7 +408,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   script runs in the chat's own page, where FAC can't watch every call. Screenshots from the Desk widget always
   ask.
   ([`withheld_from_assistant`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/field_access.py#L70),
-  [`createPageReach`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReach.js#L64),
+  [`createPageReach`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReach.js#L94),
   [`needsConfirm`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/useSpaBrowserTools.js#L211),
   [shared pages ask](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/pages/PageView.vue#L146))
 - **The assistant tests a page before it says it's done.** After every save it looks at the page and checks
