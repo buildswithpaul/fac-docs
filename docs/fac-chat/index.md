@@ -391,12 +391,26 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
 - **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
-  screenshot of the page open in the panel, after a card asks you: "FACO wants to look at the page open beside
-  the chat and send the assistant a picture of it and the text it shows." It captures only that page, never the
-  chat. The picture is drawn inside the page's own frame, so nothing the page contains is drawn or loaded
-  outside it. With the picture come `page_text` (the page's visible text, figures and table cells, marked as
-  untrusted page content) and `page_errors` (script errors, and calls that failed with their method and HTTP status), even when the picture can't
-  be taken. The card offers **Allow on this page in this chat**, never a wider trust. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L168))
+  screenshot of the page open in the panel. It captures only that page, never the chat. The picture is drawn
+  inside the page's own frame, so nothing the page contains is drawn or loaded outside it. With the picture come
+  `page_text` (the page's visible text, figures and table cells, marked as untrusted page content) and
+  `page_errors` (script errors, and calls that failed with their method and HTTP status), even when the picture
+  can't be taken. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L172))
+- **It looks at your personal page without asking, unless the page shows what FAC hides from it.** From FAC
+  3.4.0 the assistant takes the screenshot without a card while everything the page has shown is data its own
+  tools could read. A page's script reads as you, outside the masking FAC's tools apply, so FAC watches every
+  call the page makes: the fields it asks for and the answer it gets. A card asks first, and names what it
+  found, when the page has shown a field FAC hides from the assistant for your role (such as `iban`,
+  `bank_account_no` or `api_key`), data from a method other than Frappe's own reads and writes, or a field
+  renamed by an alias or an expression. The card offers **Allow on this page in this chat**, never a wider
+  trust. FAC hides nothing from a System Manager, so they are never asked. If the page shows such data while
+  the assistant is looking, the picture is thrown away and the next try asks. A shared page always asks: its
+  script runs in the chat's own page, where FAC can't watch every call. Screenshots from the Desk widget always
+  ask.
+  ([`withheld_from_assistant`](../../../apps/frappe_assistant_core/frappe_assistant_core/core/field_access.py#L70),
+  [`createPageReach`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReach.js#L64),
+  [`needsConfirm`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/composables/useSpaBrowserTools.js#L211),
+  [shared pages ask](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/pages/PageView.vue#L146))
 - **The assistant tests a page before it says it's done.** After every save it looks at the page and checks
   the figures and `page_errors`. When it can't take a picture (a phone, the Desk widget, another page open),
   it runs the page's queries itself and tells you what it checked. To look at your data while building, it
