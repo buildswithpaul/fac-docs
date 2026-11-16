@@ -15,7 +15,7 @@ where the file goes, and how the assistant actually reads it.
 |---|---|
 | Maximum file size | **50 MB** |
 | Uploads per minute | 10 per user |
-| Allowed types | `.pdf` `.txt` `.md` `.csv` `.json` `.xml` `.png` `.jpg` `.jpeg` `.gif` `.webp` |
+| Allowed types | `.pdf` `.txt` `.md` `.csv` `.json` `.xml` `.xlsx` `.xls` `.png` `.jpg` `.jpeg` `.gif` `.webp` |
 
 Anything outside that list is rejected outright. Uploads are validated on more than the
 file name — the extension, the declared MIME type, and (for binary formats) the file's
