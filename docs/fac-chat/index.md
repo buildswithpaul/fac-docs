@@ -75,6 +75,14 @@ human-in-the-loop step on top of that: by default, `create_document`, `update_do
 `delete_document`, and `document_action` calls pause and show you an approval card
 before they land, and nothing changes in your books until you approve or reject it.
 
+When a write carries code, the card shows the code in full, not just a field name. On an
+update it shows a line diff against the stored version. This covers scripts, report and
+print templates (including a raw print's commands and a print designer layout), a
+Workflow transition's condition, a Notification recipient's condition, cc and bcc, a
+field's `eval:` display condition, which also gets a plain-English reading, and an HTML
+field's content, which the form renders as markup. A field counts whether it is a Custom
+Field, a Property Setter or a row of a DocType's own fields.
+
 The card's title says what will happen in your words, built from the call's arguments: "Create
 ToDo “Call Blue Harbor Cafés about the renewal”", "Submit Sales Order SO-0042", "Publish the
 work-planner page" or "Switch on the Work Plan Rules script". Fields show by their labels, a
@@ -82,7 +90,7 @@ check field reads **Yes** or **No**, and a value that is only a date reads as a 
 2026"); anything else, including a date followed by more text, shows exactly as sent. A card
 waiting for you carries a quiet **Waiting for you** mark, **Approve** reads **Approving…** while
 it is sent, and once you decide, the card folds to one line saying what you approved or
-rejected. ([`approvalHeadline`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/approvalHeadline.js#L61), [`displayValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/helpers.js#L212))
+rejected. ([`approvalHeadline`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/approvalHeadline.js#L61), [`displayValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/components/chat/interactions/helpers.js#L254))
 
 When the write changes how the site behaves (a Server Script, Client Script, Custom
 Field, Property Setter, Workflow, Report, Print Format, Notification, FAC Page, and similar), the
@@ -93,7 +101,15 @@ card is built for someone who has to approve it without reading code:
   scrolls, and **Show all N lines** opens the rest. Lines wrap, so nothing is cut off at the
   edge. For a FAC Page, its HTML, script and style all show as code.
 - **Old versus new.** On an update, the card compares the stored code with the new code
-  and shows what changed.
+  and shows what changed. Code in a table row (a transition's condition, a recipient's cc,
+  a DocType field's condition or HTML) is compared with the stored row it replaces, matched
+  by the row's name or, for a table sent whole, by what identifies the row (the move a
+  transition makes, a recipient, a fieldname); a new row shows as all added.
+- **Code that goes live when a DocType opens.** A custom DocType that only System Managers can
+  open takes Custom Fields and Property Setters without a card. When a write opens it to other
+  people (a permission for another role, or making it a child table), the card lists every
+  `eval:` condition and HTML field on it, each labelled with the Custom Field, Property Setter or
+  field that sets it, and Approve waits until that list has loaded.
 - **Child tables.** Rows in a table field are shown as a table, not as raw data.
 - **What this changes.** One plain sentence says what the write does, for example "This
   code will run every time someone submits a Sales Invoice".
@@ -107,7 +123,7 @@ card is built for someone who has to approve it without reading code:
 - **No "Don't ask again".** The card never offers it for a customisation, so every such
   change asks every time.
 
-One kind of customisation change shows no card: one that nobody but you can feel yet. That is a script or notification that is switched off, a FAC Page that is not published, or a brand-new custom DocType that only System Manager can use, that has no records yet and that no other form uses (plus its fields and permissions). Creating a new table that is not used by any other form yet needs no card either, but once it exists, changing or deleting it asks, because it can sit inside other forms; the same goes for a DocType another form links to. It still appears in the activity trail. Switching it on, publishing a FAC Page or changing a published one, giving another role access, or touching a DocType that other people use or that already has records asks as usual, and so does every other kind of customisation. When a change switches a script or notification on, the card shows the code that will go live, so you see what you are turning on and not just the switch. If the assistant cannot tell, or you set the tool to **Ask**, you get the card. This needs FAC 3.3 and an up-to-date FAC Cloud. If an administrator switches off the `customisation_impact` tool or the FAC Cloud plugin, every customisation change asks for approval again.
+One kind of customisation change shows no card: one that nobody but you can feel yet. That is a script or notification that is switched off, a FAC Page that is not published, or a brand-new custom DocType that only System Manager can use, that has no records yet and that nothing else uses (plus its fields and permissions). Creating a new table that is not used by any other form yet needs no card either, but once it exists, changing or deleting it asks, because it can sit inside other forms. The same goes for a DocType that something else points at: a link field or a Connections link on another form, a Web Form, a Report, a workspace link, shortcut or quick list, a dashboard chart or number card, a notification, a workflow, a print format, a script, a webhook, a kanban board, an assignment rule, an auto repeat or a user permission. If the assistant changes two scripts, two notifications or two FAC Pages in one step, such as a script's code and switching that script on, both changes show a card, so the card never shows code that the other change then replaces. It still appears in the activity trail. The hidden checks that decide this (`customisation_impact`, and `check_build_plan` for build plans) save nothing and write no audit-log row of their own. Switching it on, publishing a FAC Page or changing a published one, giving another role access, or touching a DocType that other people use or that already has records asks as usual, and so does every other kind of customisation. When a change switches a script or notification on, the card shows the code that will go live, so you see what you are turning on and not just the switch. If the assistant cannot tell, or you set the tool to **Ask**, you get the card. This needs FAC 3.3 and an up-to-date FAC Cloud. If an administrator switches off the `customisation_impact` tool or the FAC Cloud plugin, every customisation change asks for approval again.
 
 On a card for an ordinary record, **Don't ask again when FACO creates records** (or updates,
 deletes, or submits, cancels or amends records) switches that tool to **Always Allow** for you.
@@ -117,6 +133,15 @@ Each user can change this default per tool from their own approval preferences �
 workflow doesn't have to click through a card every time. This gate is specific to
 FAC Chat; it has no effect on MCP clients like Claude Desktop or Cursor.
 
+A `create_document` call with `validate_only` set saves nothing, and its card says so:
+"Checks this record against your rules without saving it. Rules that run before save
+still run." A batch says "these records" instead. An `update_document` dry run reads
+"Check changes to ToDo TD-1" and "Checks this change against your rules without saving
+it. Rules that run before save still run." ("these changes" for a batch). The card still appears, because the
+check runs the doctype's validate hooks and any Before Save server script, and those
+can have effects outside the database (an API call, an email, a file) that the rollback
+does not undo.
+
 When the assistant is about to build something that takes several records, such as a page, a workspace or a set of fields and scripts, it can show one **Build plan** card first instead of asking for each write. This needs FAC 3.3 and an up-to-date FAC Cloud that offers build plans; without one you get the per-write cards above. The card lists every change with its action and groups them under **Goes live** and **Stays dormant**, so you see which ones take effect for your users at once. When the build includes a screen, the card shows a static mockup of it. A personal ("Only me") FAC Page needs no plan: the assistant builds and changes it directly,
 and it runs in a [walled-off frame](#how-a-personal-page-runs) that asks you before it changes anything. Press **Approve plan** to approve all of it. To change something, press **Ask for changes** or type what you want in the composer. The assistant then revises the plan and shows a new card.
 
@@ -124,7 +149,7 @@ Before the card appears, FAC checks the plan against your site with the hidden `
 
 An approved plan covers only the changes it lists, until the assistant proposes another plan, the conversation ends or 24 hours pass. A record the assistant creates under the plan can also be edited under it, but never deleted. Anything not on the plan still shows its own card, as does a change listed as dormant that would now go live, and a tool set to **Block** or **Ask** is still blocked or asked. A scheduled or unattended run is never covered by a plan you approved in chat.
 
-When the assistant builds a Server Script, it looks up what the script sandbox allows first (`sandbox_reference`) instead of saving trial scripts to find out. It builds the script switched off, so you get no card while it drafts, and asks once to switch it on. If the script then fails, it reads the error (`recent_errors`) rather than asking you to describe it, and it can check who may read or change the records involved (`test_as_user`). None of these checks change anything, so they need no approval.
+When the assistant builds a Server Script, it looks up what the script sandbox allows first (`sandbox_reference`) instead of saving trial scripts to find out, and a script that would fail in the sandbox is refused before it is saved, with the line to fix. It builds the script switched off, so you get no card while it drafts, and asks once to switch it on. If the script then fails, it reads the error (`recent_errors`) rather than asking you to describe it, and it can check who may read or change the records involved (`test_as_user`). None of these checks change anything, so they need no approval.
 
 While the assistant works, the activity trail names what it did: **Created**, **Updated**
 or **Checked** (a dry run) with the record's name, and a step that failed shows a plain
@@ -183,7 +208,54 @@ A page is **personal** ("Only me", the default) or **shared**:
   note when the roles include All or Guest), then shows the HTML, script and style in full. The card appears even when an approved build
   plan lists the page as going live, because the code was written after you approved the plan.
   A page that stays "Only me" never counts as going live.
-  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L313), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L285))
+  ([`customisation_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L427), [`_personal_page_impact`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/customisation.py#L399))
+
+### The Pages list in Desk
+
+**Pages** in the Desk sidebar (<code v-pre>/app/fac-pages</code>) lists every page you can open,
+as a gallery. You can find a page shared with you there even without FAC Chat.
+
+- **Each card** shows a preview of the page, its title, a one-line description, who it is shared
+  with, and when it changed. The preview is the page's static layout without its script: it
+  runs nothing and loads nothing, so it never shows live data, only what is written into the
+  page itself. A page whose script fills in all of its content, or a very large page, shows its
+  first letter instead. ([`fac_page_card`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_card.js#L16), [`_preview`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L334))
+- **Search** finds pages by title and description. **All**, **Mine**, **Shared** and **Drafts**
+  filter the list; **Drafts** appears only for System Managers, who are the only ones who see
+  drafts.
+- **New page** (in the header and at the end of the list) opens FAC Chat with "Build me a page
+  that" ready to finish. It shows only if you can use FAC Chat.
+- **The ⋯ menu** on a card offers only what you may do with that page. The server still checks
+  each action. ([`list_pages`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L188))
+  - **Edit with FACO** opens FAC Chat with a request to change the page, and the page open beside
+    the chat (on a phone the page stays closed, so it doesn't cover the request). It shows on your own personal pages, and on shared pages for System Managers, if
+    you can use FAC Chat.
+  - **Rename** changes the title; the slug and the page's address stay the same.
+  - **Share** asks FACO to share one of your personal pages with your team, through an approval
+    card. It shows only for System Managers.
+  - **Delete** removes the page after you confirm. It shows on your own personal pages, and on
+    shared pages for System Managers.
+
+Needs FAC 3.4.0 or later.
+
+### Pages your teams fill in
+
+A page can hold what your teams write as well as live figures, such as a fortnightly review where
+each business unit keeps its own risks, priorities and achievements. The assistant builds it on a
+shared page's plan:
+
+- **One record per team and period**, in doctypes the plan creates, with Track Changes on, so
+  every past period stays as it was and each change shows who made it.
+- **Each team edits only its own part.** Each unit has an editor role, and a Server Script on the
+  plan refuses a save from anyone outside that unit's team. Edit shows only to the team
+  (`fac.hasRole`, which reads only your own roles). Everyone the page is shared with can read
+  every part. ([`my_roles`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L302))
+- **Figures follow your own access.** Report figures show only to people whose roles allow the
+  report; the plan lists the roles each team needs.
+- **The page lists the doctypes it uses**, so a later change reuses them. Deleting the page leaves
+  those doctypes and their records.
+
+Needs FAC 3.4.0 or later.
 
 ### How a personal page runs
 
@@ -203,7 +275,7 @@ keeps this safe is where it runs.
   for this page** or **Don't allow**. **Allow for this page** is offered only for a Server Script
   API method (the kind of endpoint the assistant writes), and only after the server confirms
   that the name really is one and is not remapped; it covers that method on this version of the
-  page, and a new version starts afresh. ([`mayTrustForPage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageRequestPrompt.js#L302), [`is_page_api_method`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L126))
+  page, and a new version starts afresh. ([`mayTrustForPage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageRequestPrompt.js#L302), [`is_page_api_method`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L219))
 - **Record changes ask every time.** Creating, changing, submitting, cancelling or deleting a
   record is allowed one at a time, never for the page. The prompt lists every field it sets, in
   full, and for a change reads the current record first and shows each field before → after.
@@ -230,12 +302,12 @@ browser. A shared page is served as approved.
   `<base>` and SVG animation are removed. Forms, inputs and buttons stay. Code can live only in
   the script. The blocked tags are taken out before Frappe's
   sanitiser runs, so Frappe 15 (whose sanitiser would otherwise show them as text) and Frappe 16
-  give the same page. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L199), [`_without_tags`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L244), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
+  give the same page. ([`_personal_html`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L292), [`_without_tags`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L337), [`PERSONAL_DISALLOWED_TAGS`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L51))
 - **Style is parsed, not pattern-matched.** The stylesheet is parsed with tinycss2 and written
   back from what survives. `@import`, any at-rule other than `@media`, `@supports`,
   `@keyframes` and `@font-face`, and any `url()`, `image-set()` or similar that does not point at
   a `/files/` or `/assets/` path on your site are stripped. Inline `style` attributes follow the
-  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L261))
+  same rule. A stylesheet that does not parse cleanly is served empty. ([`_personal_style`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L354))
 - **Paint stays in the page's frame.** Nothing the page draws can cover Desk, the chat or a
   prompt.
 - **Escape record values.** A script should not write record text back as HTML. Escape it with
@@ -243,7 +315,10 @@ browser. A shared page is served as approved.
 
 A `create_document` or `update_document` result for a FAC Page includes `page_url`, the link
 to the page itself, next to `url`, the link to its form. To link a page from a Workspace, add
-a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;name&gt;</code> address.
+a shortcut of type **URL** that points to its <code v-pre>/app/fac-pages/&lt;name&gt;</code> address, and a
+shortcut block with the same label to the Workspace's layout: a Workspace shows only the shortcuts its
+layout has a block for. When the assistant builds a shared page, its plan includes this Workspace
+change, and any new doctype or Workspace goes in a module installed on your site.
 
 ### Pages beside the chat
 
@@ -271,8 +346,48 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   `set_value` and `delete_doc`, `frappe.session.user`, `frappe.datetime.get_today` and
   `str_to_user`, `frappe.format`, `frappe.utils.escape_html`, and `__`). A page that needs more of Desk shows **Open in
   Desk** instead.
+- **Figures read the same in the panel and in Desk.** For a number, an amount, a date or a
+  duration (`Currency`, `Float`, `Int`, `Percent`, `Date`, `Datetime`, `Time`, `Duration`),
+  `frappe.format` returns plain text everywhere a page runs: in the panel, in a personal page's
+  frame, and on a Shared page in Desk. It shows what Desk's own formatter shows, with the site's
+  number format, currency symbol and precision, and date format, so a page that escapes it shows
+  `₹ 79,360.00`, never markup. On a Shared page Desk hands the script its own `frappe`, with only
+  `format` changed to return that text. Any other fieldtype comes back exactly as Desk's formatter
+  gives it, never unescaped, because a record's text is stored html-escaped and unescaping it
+  could turn it into live markup. So a page shows text and links from the record's own value,
+  escaped with `frappe.utils.escape_html`, not through `frappe.format`. Outside Desk the settings
+  arrive with the page: the site's defaults and its enabled currencies, never a user's own
+  defaults. For an amount in a record's own currency, a page sets `options` to the record's
+  currency field and passes the record:
+  `frappe.format(r.grand_total, { fieldtype: "Currency", options: "currency" }, null, r)`.
+  `options` names a field, as in Desk; a currency code there is ignored.
+  ([`page_format_settings`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L141), [`fac_page_frappe`](../../../apps/frappe_assistant_core/frappe_assistant_core/assistant_core/page/fac_pages/fac_page_frappe.js#L16), [`formatValue`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageFormat.js#L411))
 - **Charts.** A page script draws bar, line and pie charts with `fac.chart(el, option)`, which
   takes an ECharts option and draws SVG, in the panel and in Desk alike.
+- **Figures from reports.** A page script reads a report with `fac.report(name, filters)`, such
+  as the Profit and Loss Statement, Accounts Receivable or a custom report, and draws the report's
+  own rows, totals and summary, so the page matches the report in Desk. It reads as the person
+  viewing the page: a report their roles don't allow shows "You don't have access to this report"
+  instead of figures, a refused filter (such as a company they can't read) shows the server's reason,
+  and a Prepared Report with no result for the page's filters says it can't be shown yet. On a shared
+  page, give viewers the report roles they need (for example Accounts User for P&L). Needs FAC 3.4.0 or later.
+  ([`report`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageReport.js#L50), [`report_access`](../../../apps/frappe_assistant_core/frappe_assistant_core/api/fac_page.py#L241))
+- **Pages people type into.** A page can let people type into records, such as each business
+  unit's risks and priorities for a review meeting, with `fac.editList` (a record's child rows,
+  with HIGH, MED and LOW badges), `fac.editText` (one text field) and `fac.periodPicker`. They
+  work in Desk, beside the chat and on a personal page. The Edit button shows only to people who
+  may change the record, and the server checks every save. A save keeps every field the page does not show. If someone
+  else changed the record since you opened the page, the save is refused rather than undoing
+  their change, and you reload to see it. If a save is refused, what you typed stays and the
+  reason shows below it, with no dialog over the page. On a personal page each save asks you first, listing the
+  fields and rows it changes. Needs FAC 3.4.0 or later.
+  ([`makeBlocks`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageBlocks.js#L52), [the save](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pageEditList.js#L110))
+- **Present.** A published page has a **Present** button, beside the chat and in Desk. It shows the
+  page full screen, one section at a time, with the section's title and "2 / 5" in a bar at the
+  bottom. The arrow keys, Page Up and Page Down move between sections, and Esc leaves. Edit buttons
+  are hidden while presenting, so you can run a meeting from the page. A page without sections
+  presents as one screen. On a phone it presents inside the panel. Needs FAC 3.4.0 or later.
+  ([`makePresenter`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L44), [`mountPresentControls`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/utils/pagePresent.js#L95))
 - **Download PDF** prints a snapshot of the page through your browser's print dialog: A4, in
   landscape when the page is wide, with the suggested file name "title date".
 - **The assistant can look at the page.** With FAC Cloud and FAC 3.3.0 or later, the assistant can take a
@@ -280,7 +395,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
   the chat and send the assistant a picture of it and the text it shows." It captures only that page, never the
   chat. The picture is drawn inside the page's own frame, so nothing the page contains is drawn or loaded
   outside it. With the picture come `page_text` (the page's visible text, figures and table cells, marked as
-  untrusted page content) and `page_errors` (script errors and calls that failed), even when the picture can't
+  untrusted page content) and `page_errors` (script errors, and calls that failed with their method and HTTP status), even when the picture can't
   be taken. The card offers **Allow on this page in this chat**, never a wider trust. ([`capturePage`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/pageFrame/capture.js#L168))
 - **The assistant tests a page before it says it's done.** After every save it looks at the page and checks
   the figures and `page_errors`. When it can't take a picture (a phone, the Desk widget, another page open),
@@ -292,7 +407,7 @@ writes, such as a proposal. Each page it writes shows as a chip in its reply.
 - **Open Full Assistant mid-turn.** If you move a conversation from the Desk widget to the full-screen chat
   while the assistant is still working, the chat claims the running turn, and its browser calls (such as the
   page screenshot) go to the chat from then on, including any already waiting. A tool that only works in
-  Desk answers at once that the conversation moved. The claim ends with your next message. ([`claim_live_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L230), [`claim_session_for_spa`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L139))
+  Desk answers at once that the conversation moved. The claim ends with your next message. ([`claim_live_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L348), [`claim_session_for_spa`](../../../apps/frappe_assistant_core/frappe_assistant_core/plugins/faco/tools/browser_bridge.py#L139))
 
 ## Memory asks first
 
@@ -308,6 +423,24 @@ memory is paused until they answer:
 - **Decide later** closes the question for now. Memory stays paused, and you are asked again the next time you open FAC Chat.
 
 You can change this any time in **Settings → Privacy**.
+
+## What FAC Cloud learns about your site
+
+Once your site is registered, FAC Chat checks in with FAC Cloud every six hours. That check-in
+reports your versions (FAC, Frappe, ERPNext and Python) and, from FAC 3.3.x, a short profile of
+the site so FAC Cloud can spot a setup that will struggle and warn you early:
+
+- **Installed apps** and their versions.
+- **How much you have customised**, as counts: custom DocTypes, the Custom Fields people added
+  (not those apps install), Server Scripts and how many are switched on, whether server scripts
+  run on the site at all, Client Scripts and FAC Pages.
+- **Web-server setup**: gunicorn's worker class, workers and threads, and whether they are enough
+  for the people expected to chat at once, plus whether the chat relay queue and its workers are
+  set up. These are the figures the **Registration health** check in FAC Chat's settings shows you.
+
+It sends counts, version numbers and ok/warning verdicts only: never record contents, record
+names, script code or messages. If any part can't be read, it is left out and the check-in still
+goes through ([`site_profile`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/site_profile.py#L53), [`_send_heartbeat`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/billing/sync.py#L102)).
 
 ## Installing FAC Chat
 
@@ -409,6 +542,50 @@ to staff who haven't been given access, and turns it on the moment they are.
 
 Each user can also hide the launcher for themselves from their own preferences, and
 re-enable it later — that personal choice is always respected, admins included.
+
+## Retry and interrupted turns
+
+If the server restarts while an answer is being written, the answer stops partway. A worker
+that shuts down cleanly marks the answer itself. If the worker is killed instead, an open
+conversation notices within about a minute, and a conversation opened later notices when it
+opens. Either way the part already shown stays, and the answer is marked
+**This answer was interrupted by a server restart.** An answer that failed for another
+reason is marked as failed in the same way. An answer still waiting for the assistant's first
+reply is given three minutes before it can be marked, so a slow start is not cut short.
+([`is_stale`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L97),
+[`mark_turn_interrupted`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/live_turn.py#L332))
+
+When the site runs chat answers in background jobs, a web deploy no longer cuts an answer. A
+deploy that stops the relay workers can still interrupt one: the answer is saved as
+**This answer was interrupted before it finished. Retry to run it again.** See
+[Chat relay workers](../getting-started/installation#chat-relay-workers).
+
+If you send a message at the moment a server is restarting, the answer shows
+**Server restarting, retrying…** and FAC Chat sends it once more a couple of seconds later.
+If that fails too, you see **The server is restarting. Try again in a moment.** The same
+applies to Continue and to approving an action.
+
+The latest answer, when it failed or was interrupted, shows a **Retry** button. Retry runs your
+last message again, without sending it a second time:
+
+- The partial answer is replaced by the new one. It is not kept beside it.
+- The assistant starts from where the conversation stood before that message, so it does not
+  see the failed attempt.
+- Your message and the page it was sent from are sent again with your saved model. Images
+  pasted into the message are not stored, so they are not sent again. Files attached to the
+  conversation still reach the assistant.
+- **Tools run again.** Anything the failed attempt already did, such as creating or updating a
+  record, may be done a second time. Actions that need your approval ask again unless you trusted them; others do
+  not. Check the records the failed answer touched before you press Retry.
+- An answer that finished, in words or only in tool results, is never run again, so a
+  completed request is never charged twice. If the answer had in fact finished, or is still
+  running, Retry just reloads the conversation. Pressing Retry in two tabs runs it once.
+- Credits used by the failed attempt are not refunded.
+
+Only the latest message can be retried, and only messages sent after this release: earlier
+ones have no saved starting point.
+([`retry_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/messages.py#L611),
+[`snapshot_pre_turn`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_session_state/fac_chat_session_state.py#L119))
 
 ## Troubleshooting
 

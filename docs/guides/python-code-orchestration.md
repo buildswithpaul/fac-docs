@@ -224,6 +224,30 @@ if result["success"]:
     print(top_customers)
 ```
 
+#### Other read helpers
+
+| Call | Returns |
+|------|---------|
+| `tools.list_reports(module=None, report_type=None)` | `{success, reports, count}` |
+| `tools.get_report_info(report_name)` | `{success, columns, filter_guidance}` |
+| `tools.get_doctype_info(doctype)` | `{success, fields, links}` |
+| `tools.search(query, doctype=None, limit=20)` | `{success, results, count}` |
+
+#### MCP tool names
+
+The model knows the MCP tool names, so these also work on `tools`. Each one runs the
+MCP tool itself, with the same arguments and the same result:
+
+| Call | MCP tool |
+|------|----------|
+| `tools.list_documents(doctype, filters, fields, limit, offset, order_by, group_by, aggregate)` | `list_documents` |
+| `tools.report_list(query, limit, module, report_type)` | `report_list` |
+| `tools.report_requirements(report_name)` | `report_requirements` |
+| `tools.search_documents(query, doctype, purpose, filters, limit)` | `search_documents` |
+
+`tools.get_document`, `tools.get_doctype_info` and `tools.generate_report` share their
+name with an MCP tool and take its main arguments.
+
 ## Usage Patterns
 
 ### Pattern 1: Data Fetching + Analysis
