@@ -26,4 +26,14 @@ If an answer stops part-way, the chat says so and offers **Retry** and **Report 
 
 ![The report form with the error filled in](/img/guide-me/feedback-report.webp)
 
+## Use cases
+
+Each of these was done on the demo site.
+
+| Situation | Do this | What happened |
+|---|---|---|
+| The answer was right but took too long | 👎, then **Too slow** | The rating was sent with no need to type anything |
+| You are asked how FACO is doing | Click a number | The card thanked you and closed |
+| An answer stopped part-way | **Report this** | The report form opened with the error code and time filled in |
+
 **More:** [FAC Chat overview](/fac-chat/)

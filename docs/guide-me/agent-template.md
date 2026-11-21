@@ -44,4 +44,20 @@ Click **Full screen** to read the result. You can also copy or download it.
 
 When the result looks right, click **Activate**. That one switch turns on the schedule and any document events.
 
+## Use cases
+
+| Template | What it does | What happened on the demo site |
+|---|---|---|
+| **CFO Weekly Snapshot** | Reads the Profit and Loss Statement, Balance Sheet and Cash Flow, and writes a one-page brief | Ran by hand in 8.5 seconds for 4.9 credits. Only the briefing step used AI; the three reports ran without it |
+
+More templates in the marketplace, by the job they do:
+
+| Area | Templates |
+|---|---|
+| Finance | Weekly Collections Brief, Supplier Payment Planner, Month-End Close Blockers, Budget Overrun Alert, Margin Leak Watch, GSTR-3B Pre-Filing Check |
+| Sales | Big Order Credit Check, Expiring Quotation Follow-Up, Dormant Customer Win-Back, Delivery Risk Radar, Sales Team Scorecard |
+| Procurement and stock | Reorder Planner, Late Supplier Chaser, Quote Comparison Advisor, Slow & Dead Stock Review, Batch Expiry Watch |
+| Manufacturing | Production Shortage Check, Shop-Floor Delay Digest, Subcontract Material Tracker |
+| People, projects and support | Attendance & Leave Anomalies, Project Health Weekly, SLA Breach Early Warning |
+
 **Next:** [Build a page by asking](./build-a-page) · **More:** [Agents, Templates & Triggers](/fac-chat/agents)

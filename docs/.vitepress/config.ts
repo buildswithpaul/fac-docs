@@ -90,6 +90,7 @@ export default defineConfig({
 
 		nav: [
 			{ text: 'Getting Started', link: '/getting-started/installation' },
+			{ text: 'Features', link: '/features' },
 			{ text: 'Guides', link: '/guides/fac-admin' },
 			{ text: 'Guide me', link: '/guide-me/' },
 			{ text: 'FAC Chat', link: '/fac-chat/' },
@@ -196,6 +197,12 @@ export default defineConfig({
 						{ text: 'Choose what your home shows', link: '/guide-me/home-page' },
 						{ text: 'Email a CRM lead', link: '/guide-me/crm-email' },
 						{ text: 'Install FAC Chat as an app', link: '/guide-me/install-app' },
+						{ text: 'Use a prompt template', link: '/guide-me/prompt-templates' },
+						{ text: 'Answer from your documents', link: '/guide-me/knowledge-base' },
+						{ text: 'Manage what FACO remembers', link: '/guide-me/memory' },
+						{ text: 'Choose which model answers', link: '/guide-me/model-routing' },
+						{ text: 'Credits and usage', link: '/guide-me/credits-and-usage' },
+						{ text: 'Get help and track tickets', link: '/guide-me/get-support' },
 						{ text: 'Rate or report an answer', link: '/guide-me/rate-answers' },
 						{ text: 'Choose how tools load', link: '/guide-me/tool-loading' },
 					],

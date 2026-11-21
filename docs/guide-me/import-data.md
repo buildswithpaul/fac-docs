@@ -40,4 +40,12 @@ The import runs through ERPNext's own Data Import. FACO reports what was created
 
 ![The import result](/img/guide-me/import-done.webp)
 
+## Use cases
+
+| File | What happened on the demo site |
+|---|---|
+| A customer list exported from Tally, 48 rows | FACO asked four questions in one card, created 20 missing territories on approval, imported 47 customers and left out one duplicate row, as answered |
+
+The same steps bring in suppliers, items, opening stock, opening invoices, account balances and a chart of accounts. See the full guide below.
+
 **More:** [Bringing your data in](/guides/data-migration) covers several files at once, opening stock, opening invoices, account balances and the chart of accounts.

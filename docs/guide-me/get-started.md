@@ -62,4 +62,16 @@ Type a question in plain words and press **Enter**. Here, a question about the s
 
 The line under the answer shows the credits it used, and the bar at the top shows how much of your month's allowance is gone.
 
+## Use cases
+
+Good first questions. Each one was asked on a demo site and answered from live data.
+
+| Ask | What you get |
+|---|---|
+| "Which users are on this site, and what roles does each one have?" | A table of users and roles. This is the answer in the screenshot above, from a brand-new site |
+| "How many customers do we have, and which customer group has the most?" | A count and the largest group |
+| "Which 5 customers have the highest outstanding receivables right now?" | A ranked table with amounts |
+| "How many sales invoices were submitted this year and what is their total?" | The count and the total |
+| "What are the mandatory fields I need to fill to create a Sales Order?" | The required fields, read from your site's own setup |
+
 **Next:** [Run an agent from a template](./agent-template) · [Build a page by asking](./build-a-page) · [Bring your data in](./import-data) · **More:** [FAC Chat overview](/fac-chat/)

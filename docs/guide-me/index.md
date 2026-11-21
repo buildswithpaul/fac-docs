@@ -4,6 +4,8 @@ Short, step-by-step walkthroughs with a screenshot for each step. Each one shows
 
 The screenshots come from a demo site, **Northwind Demo Co**, so the names and numbers in them are made up.
 
+Looking for a feature? [Everything FAC does](/features) lists them all.
+
 ## Start here
 
 | Guide | You will |
@@ -32,5 +34,11 @@ The screenshots come from a demo site, **Northwind Demo Co**, so the names and n
 | [Choose what your home page shows](./home-page) | Hide a card you do not need and pick what **Needs you** lists |
 | [Email a CRM lead](./crm-email) | Have FACO write an email to a lead and approve it before it is sent |
 | [Install FAC Chat as an app](./install-app) | Give FAC Chat its own window and icon |
+| [Use a prompt template](./prompt-templates) | Pick a saved question, fill in its blanks and send |
+| [Answer from your own documents](./knowledge-base) | Upload documents, choose who can search them and add team notes |
+| [See and manage what FACO remembers](./memory) | Switch memory on or off, and read, correct, share or delete memories |
+| [Choose which model answers](./model-routing) | Pick a model, and write rules for which grade of model Auto uses |
+| [See your credits and usage](./credits-and-usage) | Learn what a credit is, see your usage and find plans and invoices |
+| [Get help and track your tickets](./get-support) | Raise a ticket from FAC Chat, follow it and reply to support |
 | [Rate an answer or report a failed one](./rate-answers) | Give a thumbs up or down, and report an answer that did not finish |
 | [Choose how FACO loads its tools](./tool-loading) | Switch loading tools as needed on or off for yourself |

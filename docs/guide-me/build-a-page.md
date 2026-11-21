@@ -48,4 +48,15 @@ Click **Present**. The page fills the screen one section at a time. Arrow keys m
 
 ![The Pages gallery in Desk](/img/guide-me/page-gallery.webp)
 
+## Use cases
+
+Both pages below were built on the demo site by asking, as shown above.
+
+| Ask for | What was built |
+|---|---|
+| "Build our Fortnightly Review page for the management meeting", with live P&L and receivables at the top and a section each region fills in | A shared page with four live figures and a section per region. Each regional lead could edit only their own section, and a lead without access to the P&L saw no profit figures |
+| "Make me a page with this financial year's profit and loss by month" | A personal page with income, expense and net profit cards and a monthly chart, read from the Profit and Loss Statement |
+
+Other pages that fit the same pattern: a sales summary your team checks each morning, receivables by customer for the Monday meeting, or a stock report you download as PDF.
+
 **Next:** [Run an agent from a template](./agent-template) · **More:** [Full-screen pages](/fac-chat/#full-screen-pages-fac-page)

@@ -12,4 +12,11 @@ In FAC Chat, open **Settings → Tools**. **Load tools as needed** is on by defa
 
 The choice is yours alone; other users keep their own.
 
+## Use cases
+
+| Situation | Setting |
+|---|---|
+| Everyday questions and tasks | Leave **Load tools as needed** on |
+| FACO says it has no tool for something you know it can do | Switch it off for that chat, then tell us with [Report this](./rate-answers) |
+
 **More:** [Plugin Management](/guides/plugin-management)
