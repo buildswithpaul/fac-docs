@@ -155,6 +155,7 @@ export default defineConfig({
 						{ text: 'Tool Management', link: '/guides/tool-management' },
 						{ text: 'Skills', link: '/guides/skills-user-guide' },
 						{ text: 'Setting Up ERPNext by Conversation', link: '/guides/setup-skills' },
+						{ text: 'Bringing Your Data In', link: '/guides/data-migration' },
 						{ text: 'Prompt Templates', link: '/guides/prompt-templates' },
 						{ text: 'Python Code Orchestration', link: '/guides/python-code-orchestration' },
 						{ text: 'Code Execution Security', link: '/guides/code-execution-security' },
@@ -167,6 +168,15 @@ export default defineConfig({
 					text: 'Guide me',
 					items: [
 						{ text: 'All guides', link: '/guide-me/' },
+					],
+				},
+				{
+					text: 'Start here',
+					items: [
+						{ text: 'Get started with FAC Chat', link: '/guide-me/get-started' },
+						{ text: 'Run an agent from a template', link: '/guide-me/agent-template' },
+						{ text: 'Build a page by asking', link: '/guide-me/build-a-page' },
+						{ text: 'Bring your data in', link: '/guide-me/import-data' },
 					],
 				},
 				{
@@ -186,6 +196,8 @@ export default defineConfig({
 						{ text: 'Choose what your home shows', link: '/guide-me/home-page' },
 						{ text: 'Email a CRM lead', link: '/guide-me/crm-email' },
 						{ text: 'Install FAC Chat as an app', link: '/guide-me/install-app' },
+						{ text: 'Rate or report an answer', link: '/guide-me/rate-answers' },
+						{ text: 'Choose how tools load', link: '/guide-me/tool-loading' },
 					],
 				},
 			],
