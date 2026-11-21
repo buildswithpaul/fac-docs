@@ -1,4 +1,4 @@
-# Guide me: teach FACO a skill by asking
+# How to teach FACO a skill by asking
 
 A skill is written know-how that FACO reads before a task, so it works the way you do. You do not write the file yourself: describe the procedure in chat and FACO creates the skill.
 

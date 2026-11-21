@@ -1,4 +1,4 @@
-# Guide me: answer from your own documents
+# How to answer from your own documents
 
 Upload price lists, policies or procedures to the Knowledge Base. FACO answers from them and shows the page it used. Team Notes hold short facts everyone's FACO should know.
 

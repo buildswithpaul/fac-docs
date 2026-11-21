@@ -1,4 +1,4 @@
-# Guide me: organise your chats
+# How to organise your chats
 
 Find an older chat, give it a clear name, put it in the right project, and archive what you are done with.
 

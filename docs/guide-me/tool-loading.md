@@ -1,4 +1,4 @@
-# Guide me: choose how FACO loads its tools
+# How to choose how FACO loads its tools
 
 FACO has many tools. By default it loads only the ones a conversation needs and adds more as the conversation calls for them, for example the import tools when you attach a spreadsheet. You can switch that off for yourself.
 

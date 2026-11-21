@@ -1,4 +1,4 @@
-# Guide me: choose what your home page shows
+# How to choose what your home page shows
 
 A new chat opens on your home page. Its **Needs you** cards come from your own ERPNext: approvals waiting for you, invoices overdue, orders running late. Each card counts only what you can open, and it is built for your role.
 

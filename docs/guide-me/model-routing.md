@@ -1,4 +1,4 @@
-# Guide me: choose which model answers
+# How to choose which model answers
 
 FACO can use several AI models, grouped into **Economy**, **Standard** and **Premium**. **Auto** picks the lightest one that can do the job. Routing rules let an administrator steer Auto for your workspace.
 

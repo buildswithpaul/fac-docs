@@ -1,4 +1,4 @@
-# Guide me
+# How-to guides
 
 Short, step-by-step walkthroughs with a screenshot for each step. Each one shows a single task from start to finish. When you want the full detail behind a feature, the page links to it.
 

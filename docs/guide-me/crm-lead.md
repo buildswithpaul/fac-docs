@@ -1,4 +1,4 @@
-# Guide me: work a CRM lead with FACO
+# How to work a CRM lead with FACO
 
 Inside Frappe CRM, FACO works on the lead or deal you have open. It can brief you, log what happened after a call, and convert the lead, each with your approval.
 

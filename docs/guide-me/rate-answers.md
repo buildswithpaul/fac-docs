@@ -1,4 +1,4 @@
-# Guide me: rate an answer or report a failed one
+# How to rate an answer or report a failed one
 
 Tell us when FACO gets something wrong. A rating takes one click and is linked to the answer's usage record (model, time and credits), not to what you wrote.
 

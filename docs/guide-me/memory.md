@@ -1,4 +1,4 @@
-# Guide me: see and manage what FACO remembers
+# How to see and manage what FACO remembers
 
 With memory on, FACO learns your preferences and standing facts from your conversations, so you do not repeat yourself. You can read, correct, share or delete every item.
 

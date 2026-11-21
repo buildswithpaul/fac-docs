@@ -1,4 +1,4 @@
-# Guide me: use a prompt template
+# How to use a prompt template
 
 A prompt template is a saved question with blanks. Pick one, fill in the blanks and send. It saves you writing a long, careful request each time.
 

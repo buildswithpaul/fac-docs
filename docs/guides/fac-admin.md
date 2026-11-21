@@ -105,7 +105,7 @@ Every FAC setting in one place, grouped by what it controls. Pick a group on the
 
 ![The Settings tab, Chat & Widget group](/img/fac-admin/settings-chat-widget.png)
 
-➡️ Step by step, with a screenshot of each group: **[Guide me: change a FAC setting](/guide-me/fac-admin-settings)**.
+➡️ Step by step, with a screenshot of each group: **[How to change a FAC setting](/guide-me/fac-admin-settings)**.
 
 | Group | What it holds |
 |-------|---------------|

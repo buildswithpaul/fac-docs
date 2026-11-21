@@ -1,4 +1,4 @@
-# Guide me: ask FAC Bot in Raven
+# How to ask FAC Bot in Raven
 
 In Raven, FACO answers as **FAC Bot**: message it like a colleague, or @mention it in a channel.
 

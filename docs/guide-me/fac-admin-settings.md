@@ -1,4 +1,4 @@
-# Guide me: change a FAC setting
+# How to change a FAC setting
 
 Every FAC setting lives on one tab in **FAC Admin**, grouped by what it controls.
 

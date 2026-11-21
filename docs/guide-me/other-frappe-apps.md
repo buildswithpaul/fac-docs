@@ -1,4 +1,4 @@
-# Guide me: use FACO in Helpdesk, CRM and Insights
+# How to use FACO in Helpdesk, CRM and Insights
 
 The FACO widget can sit inside Frappe's other apps, so your team asks FACO without leaving the app they work in.
 

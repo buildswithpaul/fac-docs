@@ -1,4 +1,4 @@
-# Guide me: bring your data in
+# How to bring your data in
 
 Moving to ERPNext? Attach an export from your old system and FACO maps it, checks every row, asks about what does not fit, and imports once you approve. Here, a customer list exported from Tally.
 

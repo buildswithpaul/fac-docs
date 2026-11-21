@@ -1,4 +1,4 @@
-# Guide me: get started with FAC Chat
+# How to get started with FAC Chat
 
 From a fresh install to your first answer. You do not create an API key, add a provider or pick a model: you confirm one email address and FAC Cloud does the rest.
 

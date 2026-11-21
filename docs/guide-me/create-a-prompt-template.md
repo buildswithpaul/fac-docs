@@ -1,4 +1,4 @@
-# Guide me: save your own prompt template by asking
+# How to save your own prompt template by asking
 
 When you find yourself asking the same careful question again and again, save it as a template with blanks. Ask FACO to save it; you do not fill in a form.
 

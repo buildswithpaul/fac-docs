@@ -1,4 +1,4 @@
-# Guide me: email a CRM lead
+# How to email a CRM lead
 
 FACO writes the email from the lead's history, shows you all of it, and sends it only when you approve.
 

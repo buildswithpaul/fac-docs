@@ -33,7 +33,7 @@ Open a lead or deal in Frappe CRM and FACO works on that record with you:
 
 ![FACO in Frappe CRM showing the full email in an approval card before sending](/img/guide-me/crm-email-card.webp)
 
-Step by step: [Guide me: email a CRM lead](/guide-me/crm-email).
+Step by step: [How to email a CRM lead](/guide-me/crm-email).
 
 ## Replying on Helpdesk tickets
 

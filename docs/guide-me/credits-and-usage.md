@@ -1,4 +1,4 @@
-# Guide me: see your credits and usage
+# How to see your credits and usage
 
 FAC Chat is paid for in credits. This page shows what a credit is, where to see how many you have used, and where plans and invoices live.
 

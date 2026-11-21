@@ -1,4 +1,4 @@
-# Guide me: start a project
+# How to start a project
 
 A project keeps one piece of work together: its chats, the instructions FACO follows there, the documents it should know, and what it remembers. Here, a project for renewing a customer's supply contract.
 

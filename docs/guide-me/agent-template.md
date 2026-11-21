@@ -1,4 +1,4 @@
-# Guide me: run an agent from a template
+# How to run an agent from a template
 
 An agent does a piece of work on its own: on a schedule, when a document changes, or when you click **Run**. Templates are ready-made agents for common jobs. Here, the **CFO Weekly Snapshot**, which reads three financial reports and writes a one-page brief.
 

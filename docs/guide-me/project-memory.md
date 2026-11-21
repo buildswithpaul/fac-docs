@@ -1,4 +1,4 @@
-# Guide me: review a project's memory
+# How to review a project's memory
 
 As you work in a project, FACO keeps facts that matter to it, such as a customer's contact or a promise made on a call. They stay with that project, apart from your other work, and you can correct them.
 

@@ -1,4 +1,4 @@
-# Guide me: install FAC Chat as an app
+# How to install FAC Chat as an app
 
 Install FAC Chat and it opens in its own window, with its own icon on your dock, taskbar or home screen.
 

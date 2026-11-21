@@ -1,4 +1,4 @@
-# Guide me: get help and track your tickets
+# How to get help and track your tickets
 
 Raise a question or a bug from inside FAC Chat, then follow it and reply to support without leaving the app.
 

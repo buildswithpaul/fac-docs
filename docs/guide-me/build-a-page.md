@@ -1,4 +1,4 @@
-# Guide me: build a page by asking
+# How to build a page by asking
 
 A FAC Page is a full-screen page inside ERPNext with live figures, charts and sections your teams fill in. You describe it and FACO builds it. Here, a fortnightly review page for a management meeting.
 

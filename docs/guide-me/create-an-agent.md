@@ -1,4 +1,4 @@
-# Guide me: build an agent by asking
+# How to build an agent by asking
 
 An agent does a piece of work on its own. You can start from a [template](./agent-template), draw one on the canvas, or describe it in chat and let FACO build it. This guide shows the last way.
 
