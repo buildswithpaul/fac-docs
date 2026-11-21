@@ -69,7 +69,7 @@ Every feature in one place, with a line on what it is and a link to the guide. F
 
 | Feature | What it does | Guide |
 |---|---|---|
-| Agents | Multi-step work that runs on a schedule, on a document event or by hand | [Agents, templates & triggers](/fac-chat/agents) |
+| Agents | Multi-step work that runs on a schedule, on a document event or by hand. Build one by asking | [Build an agent by asking](/guide-me/create-an-agent) · [Agents, templates & triggers](/fac-chat/agents) |
 | Template marketplace | Ready-made agents for finance, sales, procurement, stock, manufacturing, HR, projects and support | [Run an agent from a template](/guide-me/agent-template) |
 | Visual builder | A canvas of steps: AI tasks, direct tool calls, conditions, decisions, loops and outputs | [Agents, templates & triggers](/fac-chat/agents) |
 | Run history | Every run with each step's input, output, time and credits | [Run an agent from a template](/guide-me/agent-template) |
@@ -87,9 +87,9 @@ Every feature in one place, with a line on what it is and a link to the guide. F
 
 | Feature | What it does | Guide |
 |---|---|---|
-| Skills | Written know-how FACO reads before a task, so it follows your way of working | [Skills](/guides/skills-user-guide) |
+| Skills | Written know-how FACO reads before a task, so it follows your way of working. Create one by asking | [Teach FACO a skill by asking](/guide-me/create-a-skill) · [Skills](/guides/skills-user-guide) |
 | Setup skills | Guided setup of ERPNext areas by conversation | [Setting up ERPNext by conversation](/guides/setup-skills) |
-| Prompt templates | Write and share your own saved questions | [Prompt templates](/guides/prompt-templates) |
+| Prompt templates | Save your own questions with blanks, by asking | [Save your own prompt template](/guide-me/create-a-prompt-template) · [Prompt templates](/guides/prompt-templates) |
 | Industry packs · Cloud | Prompts and skills tailored to an industry, switched on per workspace | Settings → Industry Packs |
 
 ## Models and cost · Cloud

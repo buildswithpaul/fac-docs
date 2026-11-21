@@ -24,6 +24,10 @@ Click **Memories** to see each item, grouped into how you work and things you ha
 
 ![The list of memories](/img/guide-me/memory-list.webp)
 
+**Share to team** asks you to confirm before anything is shared.
+
+![Confirming Share to team](/img/guide-me/memory-share.webp)
+
 **Clear all memories** at the bottom removes everything outside projects.
 
 ## Use cases

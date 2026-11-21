@@ -35,6 +35,9 @@ Looking for a feature? [Everything FAC does](/features) lists them all.
 | [Email a CRM lead](./crm-email) | Have FACO write an email to a lead and approve it before it is sent |
 | [Install FAC Chat as an app](./install-app) | Give FAC Chat its own window and icon |
 | [Use a prompt template](./prompt-templates) | Pick a saved question, fill in its blanks and send |
+| [Teach FACO a skill by asking](./create-a-skill) | Describe a procedure once and have FACO follow it every time |
+| [Save your own prompt template](./create-a-prompt-template) | Turn a question you repeat into a template with blanks |
+| [Build an agent by asking](./create-an-agent) | Describe a recurring job and have FACO build the agent |
 | [Answer from your own documents](./knowledge-base) | Upload documents, choose who can search them and add team notes |
 | [See and manage what FACO remembers](./memory) | Switch memory on or off, and read, correct, share or delete memories |
 | [Choose which model answers](./model-routing) | Pick a model, and write rules for which grade of model Auto uses |
