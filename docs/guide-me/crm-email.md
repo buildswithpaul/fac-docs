@@ -29,4 +29,6 @@ The email is sent the way CRM's own composer sends it, so it appears on the lead
 - *"I just finished a call with Priya. Log the call, add a note and a follow-up task."* FACO adds each one to the lead, after your approval.
 - *"She's qualified. Convert this lead into a deal."* FACO uses CRM's own **Convert to Deal**, so the contact and the history carry over.
 
+**Related:** [Work a CRM lead with FACO](./crm-lead) covers briefing, logging a call and converting the lead.
+
 **More:** [Frappe CRM](/fac-chat/other-apps#frappe-crm)

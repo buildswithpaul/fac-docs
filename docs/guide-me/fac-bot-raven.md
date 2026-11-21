@@ -30,4 +30,19 @@ Everyone in the channel can read the answer. Ask about sensitive figures in a di
 
 If your question would change data, FAC Bot does not act from Raven. It posts a link that opens the conversation in FAC Chat, where you approve or decline.
 
+## Use cases
+
+Each of these was done on the demo site.
+
+| Where | You ask | What happened |
+|---|---|---|
+| A channel, with an @mention | "@FAC Bot how many sales orders are past their delivery date for Northwind Demo Co?" | FAC Bot answered in a thread on the message: 14 orders, a table by delivery date, and the two largest |
+| A direct message | "Which three customers owe Northwind Demo Co the most right now?" | FAC Bot needed to run a query first, so it posted **Review and approve in FAC Chat** |
+
+![FAC Bot answering in a thread in a channel](/img/guide-me/raven-thread-answer.webp)
+
+When FACO needs your approval, the link opens the same conversation in FAC Chat.
+
+![FAC Bot asking for approval through a link](/img/guide-me/raven-dm-approval.webp)
+
 **More:** [FAC Bot in Raven](/fac-chat/other-apps#fac-bot-in-raven)

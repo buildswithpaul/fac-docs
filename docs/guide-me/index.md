@@ -32,6 +32,7 @@ Looking for a feature? [Everything FAC does](/features) lists them all.
 | [Organise your chats](./organise-chats) | Search, rename, move and archive conversations |
 | [Review a project's memory](./project-memory) | See what FACO remembers for a project and correct it |
 | [Choose what your home page shows](./home-page) | Hide a card you do not need and pick what **Needs you** lists |
+| [Work a CRM lead with FACO](./crm-lead) | Get a brief, log a call in one sentence and convert the lead to a deal |
 | [Email a CRM lead](./crm-email) | Have FACO write an email to a lead and approve it before it is sent |
 | [Install FAC Chat as an app](./install-app) | Give FAC Chat its own window and icon |
 | [Use a prompt template](./prompt-templates) | Pick a saved question, fill in its blanks and send |

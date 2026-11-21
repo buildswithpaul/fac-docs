@@ -195,6 +195,7 @@ export default defineConfig({
 						{ text: 'Organise your chats', link: '/guide-me/organise-chats' },
 						{ text: "Review a project's memory", link: '/guide-me/project-memory' },
 						{ text: 'Choose what your home shows', link: '/guide-me/home-page' },
+						{ text: 'Work a CRM lead', link: '/guide-me/crm-lead' },
 						{ text: 'Email a CRM lead', link: '/guide-me/crm-email' },
 						{ text: 'Install FAC Chat as an app', link: '/guide-me/install-app' },
 						{ text: 'Use a prompt template', link: '/guide-me/prompt-templates' },

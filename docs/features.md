@@ -33,7 +33,9 @@ Every feature in one place, with a line on what it is and a link to the guide. F
 | Feedback on answers | Thumbs up or down, a short check-in, and one-click reporting of a failed answer | [Rate an answer or report a failed one](/guide-me/rate-answers) |
 | Interrupted turns | A turn that stops part-way is detected and can be retried | [Overview](/fac-chat/#retry-and-interrupted-turns) |
 | Install as an app | Give FAC Chat its own window and icon, on desktop or phone | [Install FAC Chat as an app](/guide-me/install-app) |
-| Other Frappe apps | The widget inside CRM, Helpdesk and Insights | [FACO in Helpdesk, CRM & Insights](/guide-me/other-frappe-apps) · [Email a CRM lead](/guide-me/crm-email) |
+| Helpdesk | Ask about the open ticket and reply to the customer from it | [FACO in Helpdesk, CRM & Insights](/guide-me/other-frappe-apps) |
+| Frappe CRM | Brief on a lead, log a call, email the lead and convert it to a deal | [Work a CRM lead with FACO](/guide-me/crm-lead) · [Email a CRM lead](/guide-me/crm-email) |
+| Insights | Ask what a dashboard shows; FACO reads the charts' numbers | [FACO in Helpdesk, CRM & Insights](/guide-me/other-frappe-apps) |
 | FAC Bot in Raven | Ask FACO in a direct message or a channel | [Ask FAC Bot in Raven](/guide-me/fac-bot-raven) |
 
 ## Changing things safely
