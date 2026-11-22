@@ -84,8 +84,8 @@ const toolCol2 = computed(() => TOOL_GROUPS.value.slice(2))
 					</h1>
 
 					<p class="sub">
-						FAC is an open-source MCP server for Frappe and ERPNext. Point Claude, Cursor,
-						or ChatGPT at your ERP — {{ totalTools }} tools, OAuth-scoped, every call inside
+						FAC (Frappe Assistant Core) is an open-source MCP server for Frappe and ERPNext.
+						Point Claude, Cursor, or ChatGPT at your ERP — {{ totalTools }} tools, OAuth-scoped, every call inside
 						your Frappe permissions, every action journaled.
 					</p>
 

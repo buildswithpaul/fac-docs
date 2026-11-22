@@ -34,7 +34,7 @@ const JSON_LD = JSON.stringify({
 
 export default defineConfig({
 	title: 'FAC',
-	titleTemplate: ':title — FAC Docs',
+	titleTemplate: ':title — Frappe Assistant Core (FAC) Docs',
 	description: OG_DESCRIPTION,
 	lang: 'en-US',
 	cleanUrls: true,
@@ -70,7 +70,7 @@ export default defineConfig({
 		['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
 		['meta', { name: 'theme-color', content: '#0981E3' }],
 		['meta', { property: 'og:site_name', content: 'FAC — Frappe Assistant Core' }],
-		['meta', { property: 'og:title', content: 'FAC — Talk to your ERP' }],
+		['meta', { property: 'og:title', content: 'Frappe Assistant Core (FAC) — Talk to your ERP' }],
 		['meta', { property: 'og:description', content: OG_DESCRIPTION }],
 		['meta', { property: 'og:type', content: 'website' }],
 		['meta', { property: 'og:url', content: `${SITE}/` }],
@@ -78,7 +78,7 @@ export default defineConfig({
 		['meta', { property: 'og:image:width', content: '1200' }],
 		['meta', { property: 'og:image:height', content: '630' }],
 		['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-		['meta', { name: 'twitter:title', content: 'FAC — Talk to your ERP' }],
+		['meta', { name: 'twitter:title', content: 'Frappe Assistant Core (FAC) — Talk to your ERP' }],
 		['meta', { name: 'twitter:description', content: OG_DESCRIPTION }],
 		['meta', { name: 'twitter:image', content: `${SITE}/og-card.png` }],
 		['script', { type: 'application/ld+json' }, JSON_LD],
