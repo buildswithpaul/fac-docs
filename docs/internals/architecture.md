@@ -38,8 +38,12 @@ graph TB
                 DataScienceTools["run_python_code<br/>run_database_query<br/>extract_file_content"]
             end
 
-            subgraph "FACO Plugin - Optional, FAC Cloud only (16 tools)"
-                FacoTools["generate_document, attach_chat_file<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page<br/>get_crm_activity, send_crm_email<br/>add_crm_activity, convert_crm_lead<br/>reply_to_helpdesk_ticket<br/>list_insights_dashboards, get_insights_dashboard, get_insights_chart"]
+            subgraph "FACO Plugin - Optional, FAC Cloud only (18 tools)"
+                FacoTools["generate_document, attach_chat_file<br/>browser_get_form_data, browser_get_page_context<br/>browser_capture_diagnostics, browser_navigate_to<br/>browser_take_screenshot, browser_wait_for_page<br/>get_crm_activity, send_crm_email<br/>add_crm_activity, convert_crm_lead<br/>reply_to_helpdesk_ticket<br/>list_insights_dashboards, get_insights_dashboard, get_insights_chart<br/>customisation_impact, check_build_plan"]
+            end
+
+            subgraph "Migration Plugin - Optional (16 tools)"
+                MigrationTools["Import sessions (start_import_session, get_import_schema, set_column_mapping, dry_run_import, start_import)<br/>Opening stock, invoices and balances<br/>Migration plans (plan_migration, run_migration_plan, stop_migration_plan)<br/>Chart of accounts (import_chart_of_accounts, replace_chart_of_accounts)"]
             end
 
             subgraph "Visualization Plugin - Optional (3 tools)"
@@ -618,7 +622,7 @@ Layer 6: Audit Trail & Monitoring
 
 **1. Role-Based Access Control**
 
-FAC ships 41 built-in tools across 5 plugins. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
+FAC ships 59 built-in tools across 5 plugins; any MCP client is offered 41 of them, and the 18 FACO tools work only inside FAC Chat. Per-tool role visibility is controlled centrally via the `FAC Tool Configuration` DocType and AST-based category detection (read-only / write / read-write / privileged) — there is no fixed "X tools per role" mapping.
 
 - **System Manager**: All tools, including privileged ones like `run_python_code` and `run_database_query`
 - **Assistant Admin**: Read/write tools across all enabled plugins; privileged tools by configuration

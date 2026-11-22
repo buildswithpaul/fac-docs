@@ -1,12 +1,13 @@
 # Tool Reference
 
-Frappe Assistant Core ships **41 built-in tools across 5 plugins**. All tools are exposed over MCP at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`.
+Frappe Assistant Core ships **59 built-in tools across 5 plugins**. 41 of them are offered to any MCP client at `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp` when every optional plugin is on. The other 18 belong to the `faco` plugin and work only inside FAC Chat.
 
 | Plugin | Tools | Description |
 |---|---|---|
 | `core` | 19 | Always enabled. Document CRUD, search, metadata, reports, workflow, email, builder checks. |
 | `data_science` | 3 | Optional. Python execution, SQL queries, file content extraction. |
-| `faco` | 16 | Optional, **FAC Cloud only**. Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. These act inside FAC Chat, so they are not offered to other MCP clients. |
+| `faco` | 18 | Optional, **FAC Cloud only**. Document generation, browser automation, and tools for Frappe CRM, Helpdesk and Insights. These act inside FAC Chat, so they are not offered to other MCP clients. |
+| `migration` | 16 | Optional. Bringing a client's data in from their old system: file imports, opening stock, invoices and balances, a chart of accounts, and whole migration plans. |
 | `visualization` | 3 | Optional. Dashboards and charts. |
 | `custom_tools` | — | Mechanism for external Frappe apps to register their own tools via the `assistant_tools` hook. No shipped tools. |
 
@@ -197,7 +198,7 @@ Optional. Requires `pandas` and `numpy`.
 
 See [Python Code Orchestration](../guides/python-code-orchestration) and [Code Execution Security](../guides/code-execution-security) for the sandbox details.
 
-## FACO plugin (16 tools)
+## FACO plugin (18 tools)
 
 Optional, and **reachable only from FAC Cloud**. Every tool here needs something no
 other MCP client can provide: the browser tools run inside the FAC Chat page and talk to
@@ -277,6 +278,38 @@ user's own permissions in the app.
 
 Writes such as these pause for approval in FAC Chat, so nothing is sent or changed until the
 user approves it. See [Use the widget in other Frappe apps](../fac-chat/other-apps).
+
+### Internal checks (2)
+
+FAC Cloud calls these two itself. They never write, and the assistant does not use them to answer users.
+
+| Tool | Purpose |
+|---|---|
+| `customisation_impact` | Reports whether a customisation write would change anything beyond what its builder can see yet, so FAC Cloud knows whether to ask for approval |
+| `check_build_plan` | Reports, for each change in a build plan, why it cannot be written as listed and whether it goes live. System Manager only |
+
+## Migration plugin (16 tools)
+
+Optional. Brings a client's data into ERPNext from Excel, CSV, Google Sheets or Tally exports. See [Bringing Your Data In](../guides/data-migration) for how the tools are used together.
+
+| Tool | Purpose |
+|---|---|
+| `start_import_session` | Open an import for one file: a spreadsheet, a Tally XML export or a Google Sheets link |
+| `get_import_schema` | List the fields an import can fill on a DocType, with its child tables |
+| `set_column_mapping` | Save which column of the file goes to which ERPNext field |
+| `dry_run_import` | Check every row the way the real import would, writing nothing |
+| `start_import` | Import a checked file through Frappe's Data Import, once the user approves |
+| `set_opening_stock` | Treat the file as opening stock, to be brought in as a Stock Reconciliation |
+| `import_opening_stock` | Bring checked opening stock in as a submitted Stock Reconciliation |
+| `set_opening_invoices` | Treat the file as opening receivables or payables |
+| `import_opening_invoices` | Bring checked receivables or payables in as opening Sales or Purchase Invoices |
+| `set_opening_balances` | Treat the file as the old system's closing trial balance |
+| `import_opening_balances` | Bring the checked trial balance in as one opening Journal Entry |
+| `plan_migration` | Group several imports into one plan, ordered so each file follows the files it links to |
+| `run_migration_plan` | Run a ready plan in the background, once the user approves |
+| `stop_migration_plan` | Stop a plan when the user asks; what is already imported stays |
+| `import_chart_of_accounts` | Put the client's own chart of accounts on a company |
+| `replace_chart_of_accounts` | Replace a company's chart of accounts, only while nothing has been posted to it |
 
 ## Visualization plugin (3 tools)
 

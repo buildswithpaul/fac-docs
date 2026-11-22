@@ -68,6 +68,7 @@ Pushes to `main` are auto-deployed by `.github/workflows/deploy.yml`:
 
 Corrections made when this site's content disagreed with the shipped app. One line each, newest first.
 
+- **2026-11-22** — FAC 3.4.0. Tool count corrected from 41 to **59 tools across 5 plugins**, 41 of them offered to any MCP client and 18 (`faco`) reachable only from FAC Chat. The `migration` plugin (16 tools) was missing from the tool reference, plugin management and the architecture page; `faco` has 18, not 16 (`customisation_impact` and `check_build_plan` were not listed); the plugin table gave `core` 16 instead of 19. The landing page listed 29 tools, seven of them FAC Chat-only; it now lists the 41 an MCP client is offered.
 - **2026-10-29** — `docs/fac-chat/index.md` anchored `is_page_api_method`, `_personal_html`, `_without_tags` and `_personal_style` in `api/fac_page.py` at lines the functions had left; re-anchored to their current lines.
 - **2026-10-26** — `docs/fac-chat/index.md` said a personal FAC Page is "live as soon as it is saved". Its script is held until the owner clicks Run new version (HTML and style changes show at once, and both are sanitised server-side), and publishing a page, sharing it or switching a rule on always asks, even under an approved build plan. The section now says so.
 - **2026-10-24** — `docs/api/tool-reference.md` anchored `customisation_result` at `utils/customisation.py#L151` and `server_script_guard` at `#L91`; the functions had moved. Re-anchored to their current lines.
