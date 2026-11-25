@@ -21,7 +21,7 @@ Always enabled. Provides essential Frappe operations.
 | Tool | Purpose |
 |---|---|
 | `create_document` | Create a new Frappe document, or several with `records` (see [Many records in one call](#many-records-in-one-call)) |
-| `get_document` | Fetch a single document by name |
+| `get_document` | Fetch a single document by name, with only its filled-in fields; `fields` narrows it further |
 | `update_document` | Update document fields (supports patch and replace modes for child tables), or several documents with `names` or `records` |
 | `document_action` | Submit, cancel or amend a submittable document (`action`: `submit`, `cancel`, `amend`). `submit_document` is still accepted as a hidden alias |
 | `delete_document` | Delete a document (`force=true` to ignore links), or several with `names` |
