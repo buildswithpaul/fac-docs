@@ -27,6 +27,27 @@ The endpoint serves two eras of MCP side by side, so clients on either one work 
 
 A stateless request carries `MCP-Protocol-Version` and `Mcp-Method` headers (plus `Mcp-Name` for `tools/call`, `prompts/get` and `resources/read`) and the protocol version and client capabilities in `params._meta`. A request that names a version the server does not speak gets HTTP 400 with error code `-32022` and the list of supported versions. Stateless-era results carry `resultType`, and list results carry `ttlMs` with `cacheScope: "private"`, because the tool list depends on who is asking. `ping` and `logging/setLevel` do not exist in that era and answer HTTP 404.
 
+## Tasks
+
+A stateless-era client that declares the tasks extension (`io.modelcontextprotocol/tasks` in its capabilities) is not made to wait for long work. When one of these tools has queued its work in the background, `tools/call` answers straight away with `resultType: "task"`:
+
+| Tool | Becomes a task when | The task ends |
+|---|---|---|
+| `generate_report` | A prepared report has to be queued, or is already running for the same filters | `completed` with the report's result; `failed` with the report's error |
+| `start_import` | The import is queued for a background worker | `completed` with the import's result once the import session has left Importing; `failed` if the import stopped before its end (call `start_import` again to continue it) |
+| `run_migration_plan` | The approved plan is running in the background | `completed` with the plan's result for Completed or Partially Completed; `failed` with the plan's last message for Failed or Stopped |
+
+The client then polls `tasks/get` with the `taskId`:
+
+- **Poll interval**: every answer carries `pollIntervalMs: 5000`.
+- **Expiry**: a task lives 24 hours (`ttlMs: 86400000`); after that `tasks/get` answers as for an unknown task.
+- **The result**: a completed task carries the same result the tool would have returned had it waited, with the user's file content fenced the same way. Nothing is stored: each poll reads the report, import session or plan again.
+- **Permissions**: each poll runs as the user who started the task. If they may no longer see the report, session or plan, the task is `failed` and no data is returned. Another user's `taskId` answers as an unknown task.
+- **`tasks/cancel`** marks the task cancelled and stops it being reported. It does not stop the work: the report, import or plan carries on. Stop a plan with `stop_migration_plan`.
+- **`tasks/update`** is not supported (no tool needs input mid-task) and answers method-not-found.
+
+A client without the tasks extension, or a call whose work finished inside the request, gets the tool's normal result, unchanged.
+
 ## Discovery
 
 OAuth metadata is published at:
