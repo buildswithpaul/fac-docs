@@ -16,6 +16,17 @@ Most external integrations should use the MCP endpoint with OAuth — that's wha
 
 All MCP requests require an OAuth 2.0 bearer token. See [OAuth Setup Guide](../getting-started/oauth/setup-guide).
 
+## Supported protocol versions
+
+The endpoint serves two eras of MCP side by side, so clients on either one work without configuration:
+
+| Era | Versions | How a client starts |
+|---|---|---|
+| Handshake | 2024-11-05, 2025-03-26, 2025-06-18 | `initialize` first, then requests |
+| Stateless | 2026-07-28 | Any request; `server/discover` lists what the server supports |
+
+A stateless request carries `MCP-Protocol-Version` and `Mcp-Method` headers (plus `Mcp-Name` for `tools/call`, `prompts/get` and `resources/read`) and the protocol version and client capabilities in `params._meta`. A request that names a version the server does not speak gets HTTP 400 with error code `-32022` and the list of supported versions. Stateless-era results carry `resultType`, and list results carry `ttlMs` with `cacheScope: "private"`, because the tool list depends on who is asking. `ping` and `logging/setLevel` do not exist in that era and answer HTTP 404.
+
 ## Discovery
 
 OAuth metadata is published at:
