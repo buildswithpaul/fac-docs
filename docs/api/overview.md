@@ -34,7 +34,7 @@ A stateless-era client that declares the tasks extension (`io.modelcontextprotoc
 | Tool | Becomes a task when | The task ends |
 |---|---|---|
 | `generate_report` | A prepared report has to be queued, or is already running for the same filters | `completed` with the report's result; `failed` with the report's error |
-| `start_import` | The import is queued for a background worker | `completed` with the import's result once the import session has left Importing; `failed` if the import stopped before its end (call `start_import` again to continue it) |
+| `start_import` | The import is queued for a background worker | `completed` with the import's result once the import session has left Importing or its Data Import has ended, including a file ERPNext refused (the result says why); `failed` if the import stopped before its end (call `start_import` again to continue it). A Data Import saved in the last 2 minutes whose job is not queued yet, such as the next level of a tree, reads `working` |
 | `run_migration_plan` | The approved plan is running in the background | `completed` with the plan's result for Completed or Partially Completed; `failed` with the plan's last message for Failed or Stopped |
 
 The client then polls `tasks/get` with the `taskId`:
