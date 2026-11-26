@@ -89,6 +89,17 @@ Frappe runs Server Scripts only when the site's server-scripts setting is on, an
 - `update_document` never renames a record. A rename sent as `new_name`, `rename`, or a `data.name` that differs from the record is skipped, the other changes are saved, and the result carries a `warning` pointing to Rename in Desk. An update that holds only a rename returns `error_type: "rename_not_supported"`. The skills therefore name records by what they do ("Discount limit on Sales Invoice submit"), never by a value that may change, so changing a value needs no rename.
 - **ToDo.** Frappe decides who may create a ToDo. Before v16.32.0 / v15.119.0, a user without a role that grants ToDo access beyond the automatic roles (on a stock site, System Manager) could create only a ToDo that names them, as `allocated_to` or `assigned_by`. From those releases the ToDo's owner is also accepted, and the creator owns it, so a user may create any ToDo. On the older releases, `create_document` allocates a ToDo that names nobody to the calling user instead of failing; on the newer ones it changes nothing. Administrator and System Managers are unaffected: their ToDo stays unallocated. On the older releases a ToDo allocated to someone else is still refused, and `error` says why. If the ToDo also names a `reference_type` and `reference_name`, allocating it to you also assigns that document to you, exactly as Assign to me does in the Desk: you are added to the document's assignments and an Assigned comment is posted on its timeline.
 
+#### Confirmation before destructive calls
+
+`delete_document`, `document_action` with `cancel`, a `run_workflow` action that moves the document to a cancelled state, and `send_email` ask the user before they run, when the client calling them supports it. That takes a client on the 2026-07-28 protocol that declares form elicitation in its capabilities. The first `tools/call` then changes nothing and returns `resultType: "input_required"` with one form, keyed `confirm`, that asks the question (for example "Delete ToDo abc123? This can't be undone.") and a signed `requestState`. The client shows the form and sends the same call again with `inputResponses.confirm` and the `requestState`:
+
+- **Accepted** (`action: "accept"` with `confirm: true`): the call runs once.
+- **Declined, cancelled, or `confirm: false`**: nothing runs, and the result has `isError: true` with the text "The user did not confirm, so nothing was changed."
+- **No answer** with a valid `requestState`: the form is sent again with a new `requestState`.
+- A `requestState` that is forged, older than 10 minutes, already used, or issued for another user, tool or set of arguments gets JSON-RPC error `-32602` and nothing runs. Each `requestState` is good for one answer.
+
+Clients on the older protocol versions, and clients that do not declare form elicitation, run these calls at once, as before. FAC Chat is one of them: it shows its own approval card, so the user is asked once ([`gate`](../../../apps/frappe_assistant_core/frappe_assistant_core/mcp/confirmation.py#L101)).
+
 ### Search (3)
 
 FAC 3.0 collapsed the four search tools that older versions shipped (`search`,
