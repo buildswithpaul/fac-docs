@@ -214,20 +214,27 @@ This is the safe default: no tool-description changes, no risk of breaking exist
 
 ### Replace
 
-For every tool that has a linked Published skill, the tool's description in `tools/list` is replaced with a short template:
+For FAC Chat only, every tool that has a linked Published skill gets its description in `tools/list` replaced with a short template:
 
 ```
 <tool_name>: <skill description>. Detailed guidance: fac://skills/<skill-id>
 ```
 
-This is a **token-optimization** strategy: the tool listing becomes much shorter, and the LLM is pointed at the skill URI for the details. It's effective when:
-- You have many tools with rich descriptions
-- Token budget in `tools/list` is a measurable problem
-- Your MCP clients reliably follow resource URIs
+This is a **token-optimization** strategy: the tool listing becomes much shorter, and FAC Chat loads the skill through its `get_skill` tool when it needs the details. FAC Chat is recognised by the OAuth client its bearer token belongs to, not by anything a client says about itself.
 
-Tools without a linked Published skill keep their original descriptions under both modes.
+Every other MCP client (Claude Desktop, Claude Code, ChatGPT, MCP Inspector, anything you connect yourself) always gets the full tool descriptions, because those clients have no `get_skill` tool and would lose the guidance if it were shortened. Tools without a linked Published skill keep their original descriptions in both modes.
 
-The implementation lives in [`mcp/server.py:303-334`](../../frappe_assistant_core/mcp/server.py) and pulls the tool → skill map from [`api/handlers/resources.py:215-229`](../../frappe_assistant_core/api/handlers/resources.py).
+The implementation lives in [`mcp/server.py`](../../frappe_assistant_core/mcp/server.py) and pulls the tool → skill map from [`api/handlers/resources.py`](../../frappe_assistant_core/api/handlers/resources.py).
+
+### Skills over MCP for Claude and Claude Code
+
+Clients that speak the 2026-07-28 MCP protocol can use FAC skills through the MCP skills extension. FAC advertises the extension in `server/discover` and serves:
+
+- `skills/list`: the Published **Workflow** skills the user may read, each with a `skill://<skill-id>/SKILL.md` URI.
+- `skills/get`: one entry for any Published skill the user may read, whatever its type.
+- `resources/read` on a `skill://<skill-id>/SKILL.md` URI: the skill as a `SKILL.md` document.
+
+A skill is only listed when its Skill ID is a valid Agent Skills name (lowercase letters, digits and single hyphens, up to 64 characters) and its description is 1 to 1024 characters. Skills that fail either rule are still available over `fac://skills/<skill-id>`. The `fac://skills/` resources are unchanged for every client, so existing setups keep working.
 
 Change modes in **Assistant Core Settings** → **Skill Mode**.
 
