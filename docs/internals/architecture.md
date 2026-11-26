@@ -136,13 +136,35 @@ api/
 
 mcp/
 ├── server.py                    # Custom MCPServer implementation
+├── protocol.py                  # Era routing, header checks, server/discover, result decoration
+├── skills.py                    # skills/list, skills/get and skill:// SKILL.md reads
+├── confirmation.py              # Signed one-time consent for destructive tool calls
+├── tasks.py                     # FAC MCP Task rows, tasks/get and tasks/cancel
+├── task_adapters.py             # Per-tool progress: reports, imports, migration plans
+├── tool_result.py               # One finish step for every tool result (fencing, isError)
 └── tool_adapter.py              # BaseTool to MCP adapter
 ```
 
 **Transport:** StreamableHTTP (HTTP POST requests)
-**Protocol:** MCP 2025-06-18 with JSON-RPC 2.0
+**Protocol:** MCP 2024-11-05 to 2025-06-18 (handshake era) and 2026-07-28 (stateless era), JSON-RPC 2.0
 **Endpoint:** `/api/method/frappe_assistant_core.api.fac_endpoint.handle_mcp`
 **Authentication:** OAuth 2.0 Bearer tokens
+
+**Protocol eras and extensions:**
+
+`mcp/protocol.py` decides each request's era. A handshake-era client starts with `initialize` and
+gets the same behaviour as before 3.4.1. A stateless-era (2026-07-28) request carries its version
+and client capabilities on every request, and the server reads from them what the client can take.
+In that era only, the server also offers three things. `server/discover` advertises the skills and
+tasks extensions, and `mcp/skills.py` serves the Published Workflow skills as `skill://` SKILL.md
+files. For a client that declares form elicitation, `delete_document`, a cancel through
+`document_action` or `run_workflow`, and `send_email` first answer `input_required`; the retry must
+carry the user's answer and a signed, single-use `requestState` from `mcp/confirmation.py`. For a
+client that declares the tasks extension, `generate_report`, `start_import` and `run_migration_plan`
+answer with a task when their work is queued; `mcp/tasks.py` stores a `FAC MCP Task` row that points
+at the Prepared Report, import session or plan, and rebuilds the result from it on each `tasks/get`.
+FAC Chat declares neither capability, so it behaves as before. See
+[API Overview](../api/overview#tasks) for the wire details.
 
 **Why Custom MCP Server?**
 

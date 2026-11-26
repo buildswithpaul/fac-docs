@@ -222,13 +222,13 @@ For FAC Chat only, every tool that has a linked Published skill gets its descrip
 
 This is a **token-optimization** strategy: the tool listing becomes much shorter, and FAC Chat loads the skill through its `get_skill` tool when it needs the details. FAC Chat is recognised by the OAuth client its bearer token belongs to, not by anything a client says about itself.
 
-Every other MCP client (Claude Desktop, Claude Code, ChatGPT, MCP Inspector, anything you connect yourself) always gets the full tool descriptions, because those clients have no `get_skill` tool and would lose the guidance if it were shortened. Tools without a linked Published skill keep their original descriptions in both modes.
+Every other MCP client (Claude Desktop, Claude Code, ChatGPT, MCP Inspector, anything you connect yourself) always gets the full tool descriptions. FAC cannot count on another client to fetch the skill a shortened description points to, so shortening it there could lose the guidance. Tools without a linked Published skill keep their original descriptions in both modes.
 
 The implementation lives in [`mcp/server.py`](../../frappe_assistant_core/mcp/server.py) and pulls the tool → skill map from [`api/handlers/resources.py`](../../frappe_assistant_core/api/handlers/resources.py).
 
-### Skills over MCP for Claude and Claude Code
+### Skills over MCP
 
-Clients that speak the 2026-07-28 MCP protocol can use FAC skills through the MCP skills extension. FAC advertises the extension in `server/discover` and serves:
+MCP clients that support the skills extension can use FAC skills through it. The extension needs the 2026-07-28 MCP protocol; whether a particular client supports it depends on that client and its version. FAC advertises the extension in `server/discover` and serves:
 
 - `skills/list`: the Published **Workflow** skills the user may read, each with a `skill://<skill-id>/SKILL.md` URI.
 - `skills/get`: one entry for any Published skill the user may read, whatever its type.

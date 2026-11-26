@@ -44,6 +44,7 @@ The client then polls `tasks/get` with the `taskId`:
 - **The result**: a completed task carries the same result the tool would have returned had it waited, with the user's file content fenced the same way. Nothing is stored: each poll reads the report, import session or plan again.
 - **Permissions**: each poll runs as the user who started the task. If they may no longer see the report, session or plan, the task is `failed` and no data is returned. Another user's `taskId` answers as an unknown task.
 - **`tasks/cancel`** marks the task cancelled and stops it being reported. It does not stop the work: the report, import or plan carries on. Stop a plan with `stop_migration_plan`.
+- **A plan whose job died**: if the background job running a migration plan dies, the plan can show `working` for up to about 10 minutes, until the scheduled sweep for dead plans (every 10 minutes) marks it ended. The task then reports `failed`.
 - **`tasks/update`** is not supported (no tool needs input mid-task) and answers method-not-found.
 
 A client without the tasks extension, or a call whose work finished inside the request, gets the tool's normal result, unchanged.
