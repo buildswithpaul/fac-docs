@@ -49,6 +49,8 @@ The client then polls `tasks/get` with the `taskId`:
 
 A client without the tasks extension, or a call whose work finished inside the request, gets the tool's normal result, unchanged.
 
+A modern-era `tools/list` marks these three tools (`generate_report`, `start_import` and `run_migration_plan`) with `execution: {"taskSupport": "optional"}`, so a client can tell which tools may answer with a task. Handshake-era listings do not carry it.
+
 Declare the tasks extension only if your client can handle a `resultType: "task"` answer. A client that declares it without that support fails these calls instead of waiting: the official TypeScript SDK client 2.4.0, for example, has no tasks support and rejects a task result.
 
 ## Discovery
