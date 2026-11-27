@@ -34,7 +34,7 @@ A stateless-era client that declares the tasks extension (`io.modelcontextprotoc
 | Tool | Becomes a task when | The task ends |
 |---|---|---|
 | `generate_report` | A prepared report has to be queued, or is already running for the same filters | `completed` with the report's result; `failed` with the report's error |
-| `start_import` | The import is queued for a background worker | `completed` with the import's result once the import session has left Importing or its Data Import has ended, including a file ERPNext refused (the result says why); `failed` if the import stopped before its end (call `start_import` again to continue it). A Data Import saved in the last 2 minutes whose job is not queued yet, such as the next level of a tree, reads `working` |
+| `start_import` | The import is queued for a background worker | `completed` with the import's result once the import session has left Importing or its Data Import has ended. The result's `state` says how: `finished`; `refused` when ERPNext refused the file or some rows (the message says why); or `interrupted` when the Data Import ended in Error before every row was processed (the message says to continue). `failed` only when nothing runs the import any more and its Data Import never ended, because the worker died or the job timed out: call `start_import` again to continue it, and records already imported are skipped. A Data Import saved in the last 2 minutes whose job is not queued yet, such as the next level of a tree, reads `working` |
 | `run_migration_plan` | The approved plan is running in the background | `completed` with the plan's result for Completed or Partially Completed; `failed` with the plan's last message for Failed or Stopped |
 
 The client then polls `tasks/get` with the `taskId`:
@@ -48,6 +48,8 @@ The client then polls `tasks/get` with the `taskId`:
 - **`tasks/update`** is not supported (no tool needs input mid-task) and answers method-not-found.
 
 A client without the tasks extension, or a call whose work finished inside the request, gets the tool's normal result, unchanged.
+
+Declare the tasks extension only if your client can handle a `resultType: "task"` answer. A client that declares it without that support fails these calls instead of waiting: the official TypeScript SDK client 2.4.0, for example, has no tasks support and rejects a task result.
 
 ## Discovery
 
