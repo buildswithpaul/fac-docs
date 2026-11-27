@@ -592,9 +592,10 @@ ones have no saved starting point.
 ### "The assistant stopped waiting for a reply"
 
 FAC Chat stops waiting on the assistant and ends the turn with this message when a reply
-makes no progress for seven minutes (420 seconds), or when one turn has run for 30 minutes
+makes no progress for nine minutes (540 seconds), or when one turn has run for 30 minutes
 (1800 seconds) in total. The assistant's keep-alive signals do not count as progress: only
-real steps, text or approval cards do. Whatever the assistant had already shown stays in the
+real steps, text or approval cards do. A long task such as a report or an import can run
+for up to eight minutes with no step shown, and the wait is set to outlast it. Whatever the assistant had already shown stays in the
 conversation, marked as failed.
 
 What to do: anything after the last step shown may not have finished. Check the record in
