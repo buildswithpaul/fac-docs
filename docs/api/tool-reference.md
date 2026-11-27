@@ -304,6 +304,25 @@ Optional. Requires `pandas`, `numpy`, and a charting backend.
 
 The `custom_tools` plugin discovers tools registered by other installed Frappe apps via the `assistant_tools` hook. It ships with no tools of its own — see your installed apps' documentation for what they expose.
 
+## Output shapes
+
+Seven read tools declare what a successful call returns: `list_documents`, `get_document`, `search_documents`, `get_doctype_info`, `report_list`, `report_requirements` and `generate_report`.
+
+For a client on the 2026-07-28 protocol:
+
+- `tools/list` gives each of these tools an `outputSchema`.
+- A successful `tools/call` returns the result twice: as JSON text in `content`, as before, and as `structuredContent`. The two are the same data. Anything FAC marks as the content of a user's file is fenced in both.
+- A failed call sets `isError` and has no `structuredContent`.
+- A number JSON cannot hold (NaN or an infinity, which a report can compute) is `null` in `structuredContent`. The text is unchanged.
+
+A client on an earlier protocol version is sent neither field, so what it receives is unchanged.
+
+Because a result now arrives as text and as data, a client that keeps tool results in its conversation history should keep one of the two.
+
+The schemas are deliberately loose. Each names the fields a caller relies on, such as `data`, `rows`, `total_count` and `has_more` for `list_documents`, and allows any others. No field is marked required. This lets FAC add a field without a client refusing the result.
+
+What this is for: a client that lets its model write a short program over tool calls needs to tell the model what each call returns. With a declared shape it can, for any server, without knowing FAC.
+
 ## Permission denials
 
 Frappe signals a document-level permission denial by raising a bare `frappe.PermissionError`
