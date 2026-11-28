@@ -89,9 +89,20 @@ call took. Click a step to open it.
   reading, each with a Copy button. Use it when you need a value the summary leaves
   out, or to report a problem.
 
-A step where the assistant ran a short script to read several things at once has two
-tabs of its own. **Code** shows the script with line numbers. **Output** shows what it
-printed: lists of records as tables, anything else as text.
+A step where the assistant ran a short script to read several things at once has tabs
+of its own.
+
+- **What it did** lists each lookup the script made, in the same plain words as an
+  ordinary step ("Listed records → Company"), with how many records it found and how
+  long it took. Click a lookup to see what it asked for and the first few rows that came
+  back. A lookup that failed says why, and one that did not finish says so. The step's
+  line counts them: "Ran a script · 4 lookups". A script that loops over many records
+  lists its first 40 lookups and says how many there were.
+- **Code** shows the script with line numbers.
+- **Output** shows what it printed: lists of records as tables, anything else as text.
+
+"What it did" needs a FAC Cloud release that reports a script's lookups. Without one the
+step opens on Code, and its line reads "Ran a script".
 
 The tab you last chose is remembered in your browser, separately for ordinary steps and
 for scripts, so someone who works from Raw is not sent back to Summary on every step.
@@ -204,7 +215,7 @@ The model a user picks is saved on the server, so it follows them to another bro
 
 ## Routing notice
 
-When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L354)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
+When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L379)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
 
 | `reason` | Line shown |
 |---|---|
@@ -222,7 +233,7 @@ The relay watches the stream from the assistant. It ends the turn with a `stream
 - no non-heartbeat event has arrived for `RELAY_NO_PROGRESS_SECONDS` (420 s), or
 - the turn has run for `RELAY_MAX_TURN_SECONDS` (1800 s).
 
-Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L466)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
+Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L494)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
 
 ## When the assistant is busy
 
