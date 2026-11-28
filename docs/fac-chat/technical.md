@@ -75,6 +75,31 @@ horizontally in a narrow panel, and syntax-highlighted code (Python, JavaScript,
 SQL, bash, HTML/XML, CSS, YAML). Thinking and tool steps appear in the order they
 happened, inside a collapsible "how this ran" card.
 
+### Tool steps
+
+Each tool step in that card is one line saying what the assistant did, such as
+"Listed records → Customer", followed by how many records came back and how long the
+call took. Click a step to open it.
+
+- **Summary** shows what was asked for in plain words (each filter as a sentence, the
+  fields, the order and the limit) and what came back: a table when the result is a list
+  of records, the filled-in fields when it is one record, or the reason when the call
+  failed. A table shows five rows first, with a link to show the rest.
+- **Raw** shows the request and the response as the tool sent them, indented for
+  reading, each with a Copy button. Use it when you need a value the summary leaves
+  out, or to report a problem.
+
+A step where the assistant ran a short script to read several things at once has two
+tabs of its own. **Code** shows the script with line numbers. **Output** shows what it
+printed: lists of records as tables, anything else as text.
+
+The tab you last chose is remembered in your browser, separately for ordinary steps and
+for scripts, so someone who works from Raw is not sent back to Summary on every step.
+
+A very large result is cut short while a reply is still arriving, to keep the connection
+steady. The step then says so and asks you to reload the page, after which the whole
+result is shown.
+
 ## Rendering streamed responses (blocks)
 
 FAC Chat renders assistant replies as a sequence of **blocks** — thinking, text,
