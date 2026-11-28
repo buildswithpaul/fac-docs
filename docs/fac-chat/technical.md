@@ -92,16 +92,18 @@ call took. Click a step to open it.
 A step where the assistant ran a short script to read several things at once has tabs
 of its own.
 
-- **What it did** lists each lookup the script made, in the same plain words as an
+- **What it did** lists each step the script took, in the same plain words as an
   ordinary step ("Listed records → Company"), with how many records it found and how
-  long it took. Click a lookup to see what it asked for and the first few rows that came
-  back. A lookup that failed says why, and one that did not finish says so. The step's
-  line counts them: "Ran a script · 4 lookups". A script that loops over many records
-  lists its first 40 lookups and says how many there were.
+  long it took. Click a step to see what it asked for and the first few rows that came
+  back. A step that failed says why, and one that did not finish says so. The script's
+  line counts them: "Ran a script · 4 steps". A script that loops over many records
+  lists its first 40 steps and says how many there were. Most steps are lookups; with
+  [auto-approve mode](#auto-approve-mode) on, a script can also create and update
+  records, and each of those is a step too.
 - **Code** shows the script with line numbers.
 - **Output** shows what it printed: lists of records as tables, anything else as text.
 
-"What it did" needs a FAC Cloud release that reports a script's lookups. Without one the
+"What it did" needs a FAC Cloud release that reports a script's steps. Without one the
 step opens on Code, and its line reads "Ran a script".
 
 The tab you last chose is remembered in your browser, separately for ordinary steps and
@@ -110,6 +112,36 @@ for scripts, so someone who works from Raw is not sent back to Summary on every 
 A very large result is cut short while a reply is still arriving, to keep the connection
 steady. The step then says so and asks you to reload the page, after which the whole
 result is shown.
+
+## Auto-approve mode
+
+The message box in FAC Chat has an **Auto-approve** switch. With it on, the assistant creates
+and edits ordinary records without an approval card and ends its reply with a **Changes made**
+list. With it off, every change asks first.
+
+- **It needs FAC Cloud to offer the mode.** The switch appears only when the runtime reports
+  the `auto_approve` feature. On a site whose runtime does not, nothing changes.
+- **On by default, after a notice.** The switch is on for a user who has never chosen. The
+  first time, a notice above the message box says what the mode does, with **Got it** and
+  **Turn off**. Until the user chooses **Got it** the switch shows as off and the mode is not
+  sent to the runtime
+  ([`turn_approval_mode`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/approval_mode.py#L50)). The choice is stored per user in
+  **FAC Chat User Preferences** and follows them to every browser.
+- **What still asks.** Submitting or cancelling a document, editing one that is already
+  submitted or cancelled, deleting, sending a message, publishing, changing users, roles,
+  system settings or customisations, moving a document to another workflow state, editing a
+  record that is already public, a batch of records in one call, and any tool the user set to
+  "ask". The runtime holds these rules; they are not configurable.
+- **What FAC tells the runtime.** For each write, FAC reports facts about it
+  ([`change_facts`](../../../apps/frappe_assistant_core/frappe_assistant_core/utils/change_facts.py#L131)). Two of them serve this mode: whether the
+  record being edited is already submitted or cancelled, and whether the record is itself a
+  message going out.
+- **Changes made.** A record the assistant created has **Undo**, which deletes it. A record it
+  updated is listed without Undo, because the earlier values are not kept, and
+  [`undo_change`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/changes.py#L26) refuses an update row
+  ([`find_open_change`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/block_builder.py#L656)).
+- **FAC Chat only.** The Desk widget, the mobile app and Raven send no mode, so they ask as
+  before.
 
 ## Rendering streamed responses (blocks)
 
@@ -215,7 +247,7 @@ The model a user picks is saved on the server, so it follows them to another bro
 
 ## Routing notice
 
-When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L379)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
+When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L383)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
 
 | `reason` | Line shown |
 |---|---|
@@ -233,7 +265,7 @@ The relay watches the stream from the assistant. It ends the turn with a `stream
 - no non-heartbeat event has arrived for `RELAY_NO_PROGRESS_SECONDS` (420 s), or
 - the turn has run for `RELAY_MAX_TURN_SECONDS` (1800 s).
 
-Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L494)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
+Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L498)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
 
 ## When the assistant is busy
 
@@ -398,11 +430,11 @@ summary plus everything since, so it subsumes it), which is exactly what makes
 rather than a slice of it. **FAC Chat Summary** rows are written by the relay
 as the compaction event arrives —
 `_persist_chat_summary()` calls `FACChatSummary.record()`
-([relay.py:120](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L120)
+([relay.py:124](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L124)
 → [fac_chat_summary.py:45](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/doctype/fac_chat_summary/fac_chat_summary.py#L45)),
 called from the shared event dispatcher's `context_summarized` branch
-([relay.py:120](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L120),
-branch at [relay.py:133](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L133))
+([relay.py:124](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L124),
+branch at [relay.py:137](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L137))
 — and `record()` supersedes every prior row for that session in the same call,
 so exactly one row is ever "live" per session even though older rows are kept
 (each one still anchors a divider in the transcript; see below). A failed
