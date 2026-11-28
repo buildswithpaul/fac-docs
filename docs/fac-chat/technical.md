@@ -115,7 +115,7 @@ result is shown.
 
 ## Auto-approve mode
 
-The message box in FAC Chat has an **Auto-approve** switch. With it on, the assistant creates
+The message box in FAC Chat and the Desk widget has an **Auto-approve** switch. With it on, the assistant creates
 and edits ordinary records without an approval card and ends its reply with a **Changes made**
 list. With it off, every change asks first.
 
@@ -125,7 +125,7 @@ list. With it off, every change asks first.
   first time, a notice above the message box says what the mode does, with **Got it** and
   **Turn off**. Until the user chooses **Got it** the switch shows as off and the mode is not
   sent to the runtime
-  ([`turn_approval_mode`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/approval_mode.py#L50)). The choice is stored per user in
+  ([`turn_approval_mode`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/approval_mode.py#L52)). The choice is stored per user in
   **FAC Chat User Preferences** and follows them to every browser.
 - **What still asks.** Submitting or cancelling a document, editing one that is already
   submitted or cancelled, deleting, sending a message, publishing, changing users, roles,
@@ -139,9 +139,25 @@ list. With it off, every change asks first.
 - **Changes made.** A record the assistant created has **Undo**, which deletes it. A record it
   updated is listed without Undo, because the earlier values are not kept, and
   [`undo_change`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/changes.py#L26) refuses an update row
-  ([`find_open_change`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/block_builder.py#L656)).
-- **FAC Chat only.** The Desk widget, the mobile app and Raven send no mode, so they ask as
+  ([`find_open_change`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/block_builder.py#L691)).
+- **FAC Chat and the Desk widget.** Both show the switch and send the mode. In the widget's narrow
+  message box the switch is an icon. The mobile app and Raven send no mode, so they ask as
   before.
+
+## Suggested replies
+
+When a reply ends with a question or an offer to go on ("Shall I submit it and move on to
+step 2?"), FAC Chat and the Desk widget show up to three short answers as buttons under it, such
+as **Yes, go on to step 2** and **Stop here**. Tapping one sends it as your message, the same as
+typing it.
+
+- **Where they come from.** FAC Cloud writes them with the reply and sends them as a
+  `suggested_replies` event. The relay keeps up to three single-line answers of at most 80
+  characters and stores them on the reply as a `suggested_replies` block, so a reload shows them
+  again.
+- **When they show.** Only under the latest reply, once it has finished. They disappear as soon as
+  anything newer arrives. A reply that asks nothing has none.
+- **Without FAC Cloud support** nothing changes: no event, no buttons.
 
 ## Rendering streamed responses (blocks)
 
@@ -194,7 +210,7 @@ SPA's own **New chat** uses, then reloads the session list so the welcome screen
 the conversation just left. The widget's watch on the current session writes the new id
 to `faco_widget_persistent_session`, so it survives a reload. The button is disabled
 while the chat is empty, while a reply streams, and while an approved card resumes
-([WidgetPanel.vue:276](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L276)).
+([WidgetPanel.vue:277](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/frontend/src/widget/panel/WidgetPanel.vue#L277)).
 
 Because all three surfaces share the same `session_id` namespace, messages and
 history stay consistent no matter where you continue the conversation.
@@ -247,7 +263,7 @@ The model a user picks is saved on the server, so it follows them to another bro
 
 ## Routing notice
 
-When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L383)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
+When the assistant changes the model it is using, the relay passes the notice on to the client as a `routing_notice` event. Besides the earlier fields it now carries `from`, `to` and `reason` ([`_dispatch_relay_event`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L385)). For a `task_model_changed` notice the client shows one line, chosen by `reason`:
 
 | `reason` | Line shown |
 |---|---|
@@ -265,7 +281,7 @@ The relay watches the stream from the assistant. It ends the turn with a `stream
 - no non-heartbeat event has arrived for `RELAY_NO_PROGRESS_SECONDS` (420 s), or
 - the turn has run for `RELAY_MAX_TURN_SECONDS` (1800 s).
 
-Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L498)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
+Heartbeats prove the connection is alive, not that the turn is moving, so they never reset the progress clock ([`_relay_deadline_tripped`](../../../apps/frappe_assistant_core/frappe_assistant_core/chat/api/chat/relay.py#L515)). The check runs only when a heartbeat arrives, so a real event is never replaced by the stall. The partial turn is saved as errored, and the user sees "The assistant stopped waiting for a reply". See [Troubleshooting](./index.md#the-assistant-stopped-waiting-for-a-reply).
 
 ## When the assistant is busy
 
